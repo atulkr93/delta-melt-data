@@ -1,4 +1,23 @@
-REQUIREMENTS
+# delta-melt-data
+
+Scripts and raw data to generate the figures used in the manuscript
+
+Measuring thermodynamic preferences to form non-native conformations in nucleic acids using UV melting
+Atul Rangadurai1#, Honglue Shi2#, Yu Xu2#, Bei Liu1, Hala Abou Assi1, John D. Boom2,3, Huiqing Zhou1,4, Isaac J. Kimsey1,5, and Hashim M. Al-Hashimi1,2*
+
+1. Department of Biochemistry, Duke University School of Medicine, Durham, NC, USA
+2. Department of Chemistry, Duke University, Durham, NC, USA
+3. Department of Biomedical Engineering, Duke University, Durham, NC, USA
+Present Address:
+4. Department of Chemistry, Boston College, Boston, MA, USA
+5. Nymirum, 4324 S. Alston Avenue, Durham, NC, USA
+#These authors contributed equally to this work
+
+*To whom correspondence should be addressed: 
+
+Email: hashim.al.hashimi@duke.edu
+
+Requirements to run these scripts
 - Python 2.7 with
   -- scipy
   -- numpy
@@ -6,6 +25,4 @@ REQUIREMENTS
   -- matplotlib
   -- uncertainties
   -- nmrglue
-
-NMRPipe for processing NMR data - https://www.ibbr.umd.edu/nmrpipe/install.html
-
+- NMRPipe for processing NMR data - https://www.ibbr.umd.edu/nmrpipe/install.html
