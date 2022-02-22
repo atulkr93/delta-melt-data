@@ -1,0 +1,16 @@
+
+Report of AU program poptau
+# Start time: 2015-08-01 11:42:50.947 -0400
+
+F1P=5.992ppm F2P=3.409ppm
+PH_mode=1  FT_mod=6
+
+
+PROCNO=999
+
+Linear optimization of P 11 in 4 steps, as Step: Group 0
+starting at 600.000000000 endval= 1200.000000000
+OPTIMUM= POSMAX
+VARMOD= LIN
+
+poptaustop was executed for P 11, step 2

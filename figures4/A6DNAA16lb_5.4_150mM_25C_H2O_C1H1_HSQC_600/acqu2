@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 3	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2020-07-02 20:07:06.054 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/hs_20200702_A6DNAA16lb_high_5.4_HSQC_25C/101/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$ACQT0= 0
+##$BF1= 150.784627
+##$FnMODE= 6
+##$NUC1= <13C>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 12816.693295
+##$SFO1= 150.797443693295
+##$SW= 11.6736734061121
+##$SW_h= 1760.3601081521
+##$TD= 120
+##END=

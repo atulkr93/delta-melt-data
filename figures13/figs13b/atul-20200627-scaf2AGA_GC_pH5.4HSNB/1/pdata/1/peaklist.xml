@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2020-06-27T16:34:58">
+  <PeakList1D>
+    <PeakList1DHeader creator="hashimi" date="2020-06-27T16:34:58" expNo="1" name="atul-20200627-scaf2AGA_GC_pH5.4HSNB" owner="" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails>F1=4.820ppm, F2=4.709ppm, MI=11.41cm, MAXI=16.26cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="4.7506" intensity="15.00" type="0"/>
+  </PeakList1D>
+</PeakList>

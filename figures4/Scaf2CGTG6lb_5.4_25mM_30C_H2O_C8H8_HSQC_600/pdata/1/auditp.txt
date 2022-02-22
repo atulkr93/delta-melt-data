@@ -1,0 +1,25 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.2
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ C:/Bruker/TopSpin3.2/hashimi/hs_20200707_scaf2-CGT_low_5.4_HSQC_30C/102/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2020-07-07 06:44:28.019 -0400>,<hashim>,<CZC3510JM8>,<go>,<TOPSPIN 3.2>,
+      <acquisition in progress>)
+(   2,<2020-07-07 06:59:15.099 -0400>,<hashim>,<CZC3510JM8>,<proc2d>,<TOPSPIN 3.2>,
+      <Start of raw data processing
+       xfb F2: SI = 4K BC_mod = 6 BCFW = 1 WDW = 2 GB = 0.2 LB = -1 FT_mod = 6 PKNL = 1 PHC0 = -32.27681 PHC1 = 55.1169 F1: SI = 1K ME_mod = 2 NCOEF = 32 WDW = 4 SSB = 2 FT_mod = 6 FCOR = 0.5 PHC0 = -31.26805 PHC1 = 68.6
+       data hash MD5: 4K * 1K
+       CE 7D E2 3B 9C 2B 98 72 07 81 77 E7 A0 F3 1C 11>)
+(   3,<2020-07-07 06:59:54.146 -0400>,<hashim>,<CZC3510JM8>,<proc2d>,<TOPSPIN 3.2>,
+      <pk2 fgphup F2: PHC0 = 3.2 PHC1 = 0
+       data hash MD5: 4K * 1K
+       3F CF 62 85 49 53 C3 5C 37 A1 07 47 05 4B 90 09>)
+(   4,<2020-07-07 07:00:07.765 -0400>,<hashim>,<CZC3510JM8>,<proc2d>,<TOPSPIN 3.2>,
+      <pk1 fgphup F1: PHC0 = 1.2 PHC1 = 0
+       data hash MD5: 4K * 1K
+       12 20 47 96 BF F4 F3 C9 74 54 52 FD B7 B7 0B 01>)
+##END=
+
+$$ hash MD5
+$$ 46 CE BF CB 18 1C 93 C0 6A 4E 6A DF D7 89 0D 89

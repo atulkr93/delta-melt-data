@@ -1,0 +1,48 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/atul-20200627-scaf2GGA_GC_pH5.4HSNB/1/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2020-06-28 12:48:55.205 -0400>,<hashimi>,<EP-10018760>,<go>,<TOPSPIN 3.1>,
+      <created by zg
+	started at 2020-06-28 12:48:47.030 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       E0 05 14 40 FE C0 7A 06 57 2F 1B E2 7A ED C4 FA
+       data hash MD5: 64K
+       67 6A 07 A3 35 90 B7 98 D2 FA AC F9 6E 60 2E 49>)
+(   2,<2020-06-28 12:48:56.281 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <Start of raw data processing
+       efp LB = 0.3 FT_mod = 6 PKNL = 1 PHC0 = 279.2384 PHC1 = -249.2763 SI = 64K 
+       data hash MD5: 64K
+       48 6E 2E 04 17 54 23 E8 67 3B B0 48 43 E1 4D 8D>)
+(   3,<2020-06-28 12:49:20.831 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <apk 
+       data hash MD5: 64K
+       20 4C E9 79 B6 B1 D6 F3 B5 C5 E6 BD 31 5D 23 FB>)
+(   4,<2020-06-28 12:54:39.881 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGA_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       20 4C E9 79 B6 B1 D6 F3 B5 C5 E6 BD 31 5D 23 FB>)
+(   5,<2020-06-28 12:54:40.049 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGA_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       20 4C E9 79 B6 B1 D6 F3 B5 C5 E6 BD 31 5D 23 FB>)
+(   6,<2020-06-28 12:54:40.239 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGA_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       20 4C E9 79 B6 B1 D6 F3 B5 C5 E6 BD 31 5D 23 FB>)
+##END=
+
+$$ hash MD5
+$$ 52 4A FA 7F 87 38 74 5E 3D 94 80 45 F4 24 09 4D

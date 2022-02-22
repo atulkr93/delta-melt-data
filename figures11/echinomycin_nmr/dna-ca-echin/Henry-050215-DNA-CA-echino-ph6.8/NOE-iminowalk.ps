@@ -1,0 +1,11630 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 0 0 612 792
+%
+% PostScript initialization file for Sparky, version 1.08 and above.
+%
+%%ColorUsage: Color
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       Start of user-definable section                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Flags that can be changed - use "true" or "false".
+%
+/bottomAxisScale?	true	def	% If the bottom axis is shown
+/topAxisScale?		true	def	% If the top axis is shown
+/leftAxisScale?		true	def	% If the left axis is shown
+/rightAxisScale?	true	def	% If the right axis is shown
+
+/leftAxisLabel?		true	def	% If the left axis label is shown
+/bottomAxisLabel?	true	def	% If the bottom axis label is shown
+
+/bottomTick?		true	def	% If the bottom ticks are shown
+/topTick?		true	def	% If the top ticks are shown
+/leftTick?		true	def	% If the left ticks are shown
+/rightTick?		true	def	% If the right ticks are shown
+
+/showBanner?		true	def	% If the banner is to be shown
+/shadowUnderBanner?	true	def	% Place shadow box under banner
+/planeBanner?		true	def	% In N-D spectra, shows current plane
+
+/useGray?		true	def	% On B/W printer use gray scale?
+
+
+%
+% Sizes that can be changed.
+%
+/MajorTickInset		0	def	% Amount major tick goes inside panel
+/MajorTickOutset	12	def	% Amount major tick goes outside panel
+/MajorTickThickness	4	def	% Thickness of major tick
+/MinorTickInset		0	def	% Amount minor tick goes inside panel
+/MinorTickOutset	8	def	% Amount minor tick goes outside panel
+/MinorTickThickness	1	def	% Thickness of minor tick
+/EdgeLineWidth		4	def	% Thickness of border around panels
+/LeftLabelPad		32	def	% Pad between left axis labels & label
+/BottomLabelPad		32	def	% Pad between bottom axis labels & label
+/AxisPad		8	def	% Pad between ticks and labels
+
+
+%
+% Fonts that can be changed
+%
+/AxisFont		/Helvetica	def	% Font used for X/Y axis
+/AxisFontSize		12		def	%   and its size
+/BannerFont		/Helvetica	def	% Font used for the banner
+/BannerFontSize		12 		def	%   and its size
+/LabelFont		/Courier	def	% Font used for peak labels
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       End of user-definable section                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Check whether color is available
+/has_color false def
+% the following is for Display PostScript and PostScript Level 2
+/deviceinfo where {
+	pop deviceinfo /Colors known {
+		deviceinfo /Colors get exec
+		1 ne {
+			/has_color true def
+		} if
+	} if
+} if
+% the following is for PostScript Level 1 printers
+statusdict /processcolors known {
+	statusdict /processcolors get exec
+	1 ne {
+		/has_color true def
+	} if
+} if
+
+
+%
+% Color printer check. If true, the /4color variable is set to be true.
+%
+has_color {
+	/4color true def
+	1.0 setlinewidth
+}{
+	/4color false def
+	0.25 setlinewidth
+} ifelse
+
+
+%
+% Small dictionary used by the axis label routines
+%
+/plot_dict 2 dict begin
+	/subdis 0.0 def
+	/len 0.0 def
+	currentdict
+end def
+
+%
+%
+%
+/SCALE	1 def
+/SC	{ SCALE div } def
+/EdgePad {
+	EdgeLineWidth MajorTickOutset add AxisPad add
+} def
+/setAxisFont {
+	AxisFont findfont AxisFontSize SC scalefont setfont
+} def
+/LeftMostAxisPos EdgePad neg def
+/BottomMostAxisPos EdgePad neg def
+
+
+%
+% Low level defines
+%
+/bdef { bind def } bind def
+/ldef { load def } bdef
+/xdef { exch def } bdef
+/x { 0 rlineto } bdef
+/y { 0 exch rlineto } bdef
+/I {72 mul} bdef
+/L /lineto ldef
+/r /rmoveto ldef
+/s /gsave ldef
+/T /grestore ldef
+/M /moveto ldef
+/L /lineto ldef
+/C /closepath ldef
+
+%
+% Return the min or max of two numbers
+%
+/max { 2 copy lt {exch} {} ifelse pop } def
+/min { 2 copy gt {exch} {} ifelse pop } def
+
+
+/WHITE	1 def
+/BLACK	0 def
+/CLEAR	-1 def
+/DASH	4   def
+/TF	{ 0 ne {true}{false} ifelse } def
+
+%
+% A case/switch statement.  Takes a key for the case and an array.
+% Generally the array is executable to avoid evaluating the array
+% each time case is called:
+%	obj {
+%	    key1	{proc1}
+%	    key2 key3	{proc2}
+%	    key4	{proc3}
+%	    /Default	{proc4}
+%	} case
+%
+/case where { pop } {
+  /case {			%  v { k {} k k {} .... /Default {} }  CASE  -
+    false exch {				% v bool k|{}
+	exch {					% v k|{}
+	    dup xcheck {exit} {pop true} ifelse	% v bool|{}
+	} {
+	    2 copy eq exch /Default eq or	% v bool
+	} ifelse
+    } forall					% v bool|{}
+    dup xcheck {exch pop exec} {pop pop} ifelse
+  } bind def
+} ifelse
+
+
+%
+% String justification routines
+%
+/rshow { dup stringwidth exch neg exch rmoveto show } def
+/cshow { dup stringwidth pop -.5 mul 0 rmoveto show } bdef
+/stringsize {
+	gsave
+	newpath
+	0 0 moveto				% str
+	false charpath pathbbox			% x1 y1 x2 y2
+	4 2 roll pop pop			% x2 y2
+	grestore
+} def
+/stringcenter {	% str -> cx cy
+	stringsize
+	.5 mul exch .5 mul exch			% cx cy
+} def
+/tickrshow {	% str x y -> -
+	moveto					% str
+	MajorTickOutset neg 0 rlineto s stroke T	% str
+	dup stringsize				% str w h
+	-.5 mul exch pop 0 exch			% str 0 dy
+	rmoveto rshow
+} def
+
+%
+% Set the dash pattern for either color or B&W printing
+%
+/set_dash {	% bwdash colordash
+	4color {
+		0 setdash pop
+	}{
+		pop 0 setdash
+	} ifelse
+} def
+
+
+%
+% Set the color for either color printing or black for B&W printing
+%
+/contour_color {	% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		dashpatterns level get aload pop set_dash
+		pop 0 setgray
+	} ifelse
+} def
+
+/set_stroke {
+	levelcolor contour_color
+} bdef
+
+%
+% Set the stroke color and perform the stroke
+%
+/S {set_stroke stroke} bdef
+
+%
+% Set the color from the color index, whether RBG or B&W
+%
+/setpixel {		% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		useGray? {
+			colors exch get aload pop
+			pop pop pop setgray
+		}{
+			WHITE eq { 1 } { 0 } ifelse setgray
+		} ifelse
+	} ifelse
+} bdef
+
+%
+% Add a rectangular path to the current path at the current point
+%
+/rect {			% w h => -
+    dup 0 exch rlineto 
+    exch 0 rlineto 
+    neg 0 exch rlineto 
+    closepath 
+} bdef
+
+%
+% Compute the rectangle that is inset by <delta> from the input
+% rectangle <x> <y> <w> <h>
+%
+/insetrect { 		% delta x y w h => x' y' w' h'
+    3 index 5 index add		% delta x y w h x'
+    3 index 6 index add		% delta x y w h x' y'
+    3 index 7 index 2 mul sub	% delta x y w h x' y' w'
+    3 index 8 index 2 mul sub	% delta x y w h x' y' w' h'
+    mark 10 5 roll cleartomark
+} bdef
+
+%
+% Add a rectangular path to the current path
+%
+/rectpath { 		% x y w h  =>  - 
+    4 2 roll moveto rect
+} def
+
+%
+% Given x y w h coordinates, create a shadow box offset down and right
+% of this box
+%
+/shadowbox {		% x y w h dx dy => -
+	%
+	% Draw dark box
+	%
+	gsave
+		neg translate
+		4 copy rectpath
+		0 setgray fill
+	grestore
+
+	%
+	% Fill white box then stroke dark border
+	%
+	rectpath
+	gsave
+		1 setgray fill
+	grestore
+	0 setgray stroke
+} def
+
+
+
+/Xshow /show ldef
+/Xs /show ldef
+
+%
+% Switch fonts
+%
+/XfR {
+	/Times-Roman findfont setfont
+} def
+/XfS {
+	/Symbol findfont setfont
+} def
+
+
+%
+% Attach a font to a variable name if the font exists. This should
+% check if the font exists before trying the bind, but the code
+% that has been "%%"ed out below fails on SPARCprinters!
+%
+/bindFont {	% variable fontname	=> -
+%%	dup FontDirectory exch known {			% var name t|f
+		[ exch findfont /setfont load ] cvx	% var proc
+		store					% -
+%%	}{
+%%		pop pop					% -
+%%	} ifelse
+} def
+
+%
+% For filled objects, if the fill is white or nil, and the border is
+% white or nil, replace the border with black
+%
+/FixFill {	% bo bg
+	0 index dup 0 lt exch		% bo bg bool bg
+	WHITE eq or {			% bo bg
+		1 index dup 0 lt exch	% bo bg bool bo
+		WHITE eq or {		% bo bg
+			exch pop
+			BLACK exch
+		} if
+	} if
+} def
+
+
+%
+% Draw the pointer in colors <bo> <bg> in the 3 point area <x1, y1>,
+% <x2, y2>, <x3, y3>
+%
+/PaintPointer {		% bo bg x1 y1 x2 y2 x3 y3 => -
+	moveto				% bo bg x1 y1 x2 y2
+	lineto				% bo bg x1 y1
+	lineto				% bo bg
+	closepath			% bo bg
+
+	FixFill				% bo' bg
+
+	%
+	% First the fill
+	%
+	dup 0 ge {
+		setpixel
+		gsave fill grestore
+	}{
+		pop
+	} ifelse
+
+	%
+	% Now stroke the edge, unless it is white or nil.
+	%
+	dup WHITE eq {
+		pop
+	}{
+		dup 0 ge {
+			setpixel
+			stroke
+		}{
+			pop
+		} ifelse
+	} ifelse
+} def
+
+%
+% Paint a grid line from <x,y> size <w,h> in color <bg>
+%
+/PG {		% bg x y w h => -
+	4 2 roll				% bg w h x y
+	moveto					% bg w h 
+	rlineto					% bg
+	stroke					% bg
+	pop					% -
+} def
+
+%
+% Place a border around the peak (this doesn't do much except handle
+% the above-plane, below-plane pointer for printing)
+%
+/BorderPeak {	% x y w h sel {-1 | 0 | 1 }  => x y w h
+	dup 0 ne {
+		6 copy exch pop			% x y w h {above|below}
+
+		0 ge {
+			4 2 roll moveto rmoveto	% x y w h sel {u/d}
+			2 index .5 mul dup .5 mul
+		}{
+			4 2 roll moveto exch pop 0 exch rmoveto
+			2 index .5 mul neg dup -.5 mul
+		} ifelse
+		2 copy rlineto
+		exch neg exch rlineto
+		closepath
+		BLACK setpixel stroke
+	} if
+	pop				% x y w h sel
+	pop				% x y w h
+} bdef
+
+%
+% Paint a Peak from <x,y> with size <w,h> in border color <bo> and
+% background color <bg>. If <bg> is -1, the peak is not printed at all.
+% For Peaks, the border color is currently ignored because the peak is
+% drawn as an "X".  The selected state <sel> is also ignored but show
+% a flag on the edge if the peak is above or below this plane.
+%
+/PP {		% bo bg x y w h sel { -1 | 0 | 1 } => -
+	BorderPeak 				% bo bg x y w h
+	5 -1 roll dup 0 lt {			% bo x y w h bg
+		pop pop pop pop pop		% bo
+	}{
+		dup WHITE eq {			% bo x y w h bg|WHITE
+			pop BLACK		% bo x y w h bg|BLACK
+		} if				% bo x y w h bg|BLACK
+		setpixel			% bo x y w h
+		4 2 roll moveto			% bo w h
+		2 copy rlineto			% bo w h
+		1 index neg 0 rmoveto		% bo w h
+		neg rlineto			% bo 
+		stroke				% bo
+	} ifelse
+} def
+
+/PaintBox {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	6 -2 roll			% x y w h bo bg
+	FixFill				% x y w h bo' bg
+	exch 6 1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+/PaintBox2 {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	5 -1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+
+%
+% Paint a crosspeak
+%
+/PX {	% bo bg x y w h => -
+	PaintBox			% x y w h
+	4 {pop} repeat			% -
+} def
+
+
+%
+% Resonance information
+%
+/PaintResBY {		% labelpos => matrix
+	15 SC exch moveto			% -
+	matrix currentmatrix			% CTM
+	resScale dup scale			% CTM
+} def
+/PaintResBX {		% labelpos => matrix
+	matrix currentmatrix exch		% CTM labelpos
+	15 SC					% CTM labelpos x
+	exch translate				% CTM
+	resScale dup scale			% CTM
+	0 0 moveto				% CTM
+} def
+
+/PaintResA {		% matrix shift ypos => -
+	3 -1 roll
+	setmatrix		% shift ypos
+	0 exch moveto		% shift
+	3 SC 0 rlineto
+	8 SC exch rlineto	% -
+	3 SC 0 rlineto
+	stroke
+} def
+/PaintResB null def
+
+%
+% Paint a resonance
+%
+/PaintRes {	% pos shift {labelproc} bot => -
+	PaintResB			% pos shift {labelproc} matrix
+	4 1 roll			% matrix pos shift {labelproc}
+	exec				% matrix pos shift
+	exch PaintResA			% -
+} def
+
+
+%
+% Produce a linepath with an arrow at the appropriate end.
+% Arrows are at 1 (x, facing left), 3 (y, facing down),
+% 2 (x + w, facing right), 4 (y + h, facing up).
+%
+%
+/LEX	{ LineEndSizeX } def
+/LEY	{ LineEndSizeY } def
+/ArrowX	{ h .3535 mul } def
+/ArrowY	{ w .3535 mul } def
+/w	0 def
+/h	0 def
+/LinePath {	% ends x y w h => - (builds path)
+	5 -1 roll {				% x y w h
+	    1 {	%  at left end
+		%
+		%   +- 7 ---------------+	+
+		%   | /| <LEY 			|
+		%    / 6----------------5	|
+		%   1                   |	h
+		%    \ 3----------------4	|
+		%   | \| <LEY			|
+		%   +--2 ---------------+	+
+		% x,y ^ArrowX
+		%
+		%   +----------w--------+
+
+		/h exch store			% x y w
+		/w exch store			% x y w
+
+		h .5 mul add moveto		% 1)
+		ArrowX h -.5 mul rlineto	% 2)
+		0 LEY rlineto			% 3)
+		w ArrowX sub dup 0 rlineto	% w' 4)
+		0 h LEY dup add sub rlineto	% w' 5)
+		neg 0 rlineto			% 6)
+		0 LEY rlineto			% 7)
+		closepath
+	    }
+
+	    2 {	% at right end
+		%
+		%   +----------------5--+	+
+		%        	LEY> |\ |	|
+		%   7----------------6 \	|
+		%   |                   4 	h
+		%   1----------------2 /	|
+		%        	LEY> |/ |	|
+		%   +----------------3--+	+
+		% x,y           ArrowX^
+		%
+		%   +---------w---------+
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		LEY add moveto			% 1)
+		w ArrowX sub dup 0 rlineto	% w' 2)
+		0 LEY neg rlineto		% w' 3)
+		ArrowX h .5 mul rlineto		% w' 4)
+		ArrowX neg h .5 mul rlineto	% w' 5)
+		0 LEY neg rlineto		% w' 6)
+		neg 0 rlineto			% 7)
+		closepath
+	    }
+
+	    4 {
+		%         
+		%   +--5-4--+  		+
+		%      | |		|
+		%  LEX^| |^LEX		|
+		%      | |  		|
+		%   7--6-3--2		h
+		%    \     /		|
+		%   | \   / | <ArrowY	|
+		%   |  \ /  |		|
+		%   +---1---+		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		exch w .5 mul add exch moveto	% 1)
+		w .5 mul ArrowY rlineto		% 2)
+		LEX neg 0 rlineto		% 3)
+		0 h ArrowY sub rlineto		% 4)
+		w LEX dup add sub neg 0 rlineto	% 5)
+		0 ArrowY h sub rlineto		% 6)
+		LEX neg 0 rlineto		% 7)
+		closepath
+	    }
+
+	    5 {	% at top
+		%         
+		%   +---7---+		+
+		%   |  / \  |		|
+		%   | /   \ | <ArrowY	|
+		%    /     \		|
+		%   1--2-5--6		h
+		%    ^ | | ^ 		|
+		%   LEX| |LEX		|
+		%      | |   		|
+		%   +--3-4--+  		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		h ArrowY sub add moveto		% 1)
+		LEX 0 rlineto			% 2)
+		0 ArrowY h sub rlineto		% 3)
+		w LEX dup add sub 0 rlineto	% 4)
+		0 h ArrowY sub rlineto		% 5)
+		LEX 0 rlineto			% 6)
+		w -.5 mul ArrowY rlineto	% 7)
+		closepath
+	    }
+	    /Default { rectpath }
+	} case
+} bdef
+
+%
+% Paint a line
+%
+/PL {	% ends bo bg x y w h => -
+
+	%
+	% CLEAR or WHITE border WHITE background becomes 
+	% CLEAR border BLACK background
+	%
+	7 -1 roll 5 1 roll		% bo bg ends x y w h
+	LinePath 			% bo bg
+	dup WHITE eq {
+		1 index 0 lt
+		2 index WHITE eq or {
+			pop pop
+			-1 BLACK	% x y w h CLEAR BLACK
+		} if
+	} if
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	dup 0 ge {			% bo bg
+		gsave			% bo bg
+		  setpixel		% bo
+		  fill			% bo
+		grestore		% bo
+	}{
+		pop			% bo
+	} ifelse			
+
+	%
+	% If the border color is positive, edge it.
+	%
+	dup 0 ge {			% bo
+		setpixel		% -
+		stroke			% -
+	}{
+		pop			% -
+	} ifelse
+} bdef
+
+/PA {	% {} {} bo bg x y w h => -
+	PaintBox2 			% {} {} x y w h
+	5 -1 roll exec			% {} x y w h
+	pop pop moveto
+	matrix currentmatrix		% {} CTM
+	exch				% CTM {}
+	exec				% CTM
+	setmatrix			% -
+} bdef
+
+
+% xlabel : labels the graph with ppm scale.
+% On stack: labels label_count ylength incr_distance
+/xlabel {
+  gsave plot_dict begin
+    /subdis exch store
+    /len exch store
+    {
+	gsave
+	    bottomAxisScale? {
+		gsave
+			0 1 index stringsize exch pop EdgePad add neg r
+
+			%
+			% Find the bottom-most axis label position, for
+			% positioning the horizontal axis label
+			%
+			currentpoint exch pop	% label y
+			dup BottomMostAxisPos lt {
+				/BottomMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+
+			dup cshow
+		grestore
+	    } if
+	    topAxisScale? {
+		0 len EdgePad add r dup cshow
+	    }if
+	    pop
+	grestore
+	subdis 0 r
+    } repeat
+  end grestore
+} bdef
+
+% ylabel : labels the graph with ppm scale.
+/ylabel {
+  s
+  plot_dict begin
+	/subdis exch store
+	/len exch store
+	{
+		dup stringsize			% str w h
+		-.5 mul exch neg exch		% str dx dy
+		s 2 copy r 2 index
+		leftAxisScale? {
+			EdgePad neg 0 r		% label
+
+			%
+			% Find the left-most axis label position, for
+			% positioning the vertical axis label
+			%
+			currentpoint pop	% label x
+			dup LeftMostAxisPos lt {
+				/LeftMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+			show			% -
+		}{
+			pop			% -
+		} ifelse T
+		s exch pop 0 exch r len 0 r
+		rightAxisScale? { EdgePad 0 r show } { pop } ifelse T
+		0 subdis r
+	} repeat
+  end T
+} bdef
+
+% grid : draws grid of dashed lines on plot.  The major increment has
+% a solid line rather than a dashed line.
+% On stack : incr_index num_incrs yheight incr end
+/grid
+{
+  s
+  [DASH] 0 setdash
+  0 6 1 roll 0
+  {
+    dup 2 index le		% while not at end of scale
+    {
+      6 index 6 index sub	% check if major increment
+      5 index mod 0 ne
+      {				% No so draw dashed line.
+      	dup 0 M
+      	3 index y stroke
+      }
+      {				% Yes so set to solid line
+      	[] 0 setdash
+      	dup -5 M
+      	3 index 10 add y stroke
+	[DASH] 0 setdash
+      } ifelse
+      2 index add		% increment position
+      7 -1 roll 1 add		% increment counter
+      7 1 roll
+    }
+    { exit } ifelse
+  } loop
+  7 { pop } repeat
+  T
+} bdef
+
+% tick : draws tick marks on axes.
+% On stack : [ yposition ... ] i longAt inc end
+% On stack : [ [ yposition direction ] ... ] i longAt inc end
+/tick
+{
+	s
+	10 dict begin
+	    /xend	exch def
+	    /xinc	exch def
+	    /longAtI	exch def
+	    /istart	exch def
+	    /heights	exch def
+
+	    /xpos	0 def
+	    /ipos	0 def
+	    /tickin	null def
+	    /tickout	null def
+	    /direction	1 def
+	    {
+		xpos xend ge { exit } if
+
+		ipos istart sub longAtI mod 0 eq {
+			MajorTickThickness setlinewidth
+			MajorTickInset MajorTickOutset	% long ticks
+		}{
+			MinorTickThickness setlinewidth
+			MinorTickInset MinorTickOutset	% short ticks
+		} ifelse
+		/tickout exch EdgeLineWidth add store
+		/tickin exch store
+
+		heights {
+			dup type /arraytype eq {
+				aload pop
+				/direction exch store
+			} if
+								% ypos
+			xpos exch M				% -
+			0 tickin direction mul r		% -
+			0 tickin tickout add neg direction mul y% -
+			stroke
+		} forall
+
+		/xpos xpos xinc add store	% increment position
+		/ipos ipos 1 add store		% increment counter
+	    } loop
+	end
+	T
+} bdef
+
+/xTick {		% [ yposition ... ] i longAt inc end
+	5 -1 roll
+	bottomTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	topTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/yTick {
+	5 -1 roll
+	leftTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	rightTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/getScale {	% sz, maxSz
+	dup 0 gt 2 index 2 index gt and {
+		div				% scale
+	}{
+		1				% scale==1
+	} ifelse
+} def
+
+/displayOneLine {	% proc []
+	aload length 1 add -1 roll load exec	% -
+} def
+
+/displayLines {		% [[(...) .. ] ... ] fontht proc => -
+    3 dict begin
+	/proc exch def
+	/height exch def
+	/y 0 def
+	{
+		newpath
+		0 y moveto			% x1  y1  x2  y2 []		
+		proc exch displayOneLine	% x y
+		/y y height sub 2 sub store
+	} forall
+   end
+} def
+
+%
+% Return the box that fits around all the input strings
+%
+/getBoundingBox {	% [[(...)] ...] fontht proc => x1 y1 x2 y2
+    9 dict begin
+	/bbox_x1 0 def
+	/bbox_y1 0 def
+	/bbox_x2 0 def
+	/bbox_y2 0 def
+
+	%
+	% Determine the largest limits of these positions and the positions
+	% stored in the dictionary elements (of getBoundingBox) of bbox_x1 ...
+	% bbox_y2.
+	%
+	/combineBBox {		% x1 y1 x2 y2 => -
+		bbox_y2 max /bbox_y2 exch store		% x1 y1 x2
+		bbox_x2 max /bbox_x2 exch store		% x1 y1
+		bbox_y1 min /bbox_y1 exch store		% x1
+		bbox_x1 min /bbox_x1 exch store		% -
+	} def
+
+
+	%
+	% Xshow produces a bounding box which is the union of the input
+	% bounding box and the bounding box of this <string>. We iterate
+	% through the <string> because of charpath limits imposed by
+	% some PostScript interpreters. Otherwise we could have used:
+	%	{ false charpath pathbbox combineBBox }
+	%
+	/Xshow {	% string => -
+	    3 dict begin
+		dup /str exch def
+		length 1 sub 0 1 3 -1 roll {
+			str exch 1 getinterval
+			false charpath
+			currentpoint /y exch def /x exch def
+			pathbbox combineBBox
+			newpath x y moveto
+		} for
+	    end
+	} def
+	/proc exch def
+	/height exch def
+	/y 0 def
+
+	%
+	% Iterate over the string arrays, computing the bounding box
+	%
+	gsave
+	    {
+		newpath
+		0 y moveto			% []		
+		proc exch displayOneLine	% -
+		pathbbox combineBBox		% -
+		/y y height sub 2 sub store	% -
+	    } forall
+	grestore
+
+	%
+	% And return the bounding box
+	%
+	bbox_x1 bbox_y1 bbox_x2 bbox_y2
+    end
+} def
+
+/CurrFontSize AxisFontSize def
+/FontSize { CurrFontSize SC } def
+
+/showOmega {
+	currentfont
+	/Symbol findfont CurrFontSize SC 1.25 mul scalefont setfont
+	(w) Xshow
+	setfont
+} def
+
+/showUnits {	% (units)
+	(  \() Xshow					% u
+	Xshow						% -
+	(\)) Xshow					% -
+} def
+
+/showAxisAtom {	% (atom) (axis) => -
+	showOmega
+	subscript Xshow unsubscript
+	( - ) Xshow					% u a
+	showAtom					% u
+} def
+
+/showAxis {	% (units) (atoms) (axis) => -
+	showAxisAtom
+	showUnits
+} def
+
+/doPlaneLine {		% (units) (atom) (axis) (offset)
+	3 1 roll
+	showAxisAtom
+	( :  ) Xshow
+	Xshow
+	showUnits
+} def
+
+/doBannerLine {
+	Xshow
+} def
+
+/setBannerFont { BannerFont findfont BannerFontSize scalefont setfont } def
+/planeBannerFont { BannerFont findfont BannerFontSize SC scalefont } def
+
+/banner {	% [() ...] => -
+  showBanner? {
+    gsave
+    7 dict begin
+	/oCurrFontSize CurrFontSize def
+	/CurrFontSize BannerFontSize store
+
+	setBannerFont
+	dup BannerFontSize /doBannerLine getBoundingBox	% [] x1 y1 x2 y2
+
+	%
+	%
+	/TRy exch BANNERWIDTHFUDGE add def
+	/TRx exch BANNERWIDTHFUDGE add def
+	/BLy exch BANNERWIDTHFUDGE sub def
+	/BLx exch BANNERWIDTHFUDGE sub def		% []
+	/xsize TRx BLx sub def
+	/ysize TRy BLy sub def
+
+
+	% Center the box
+	%
+	xsize -2 div 0 translate			% move to left edge
+
+	%
+	% Put down a shadow box
+	%
+	shadowUnderBanner? {
+		BLx BLy xsize ysize 2 2 shadowbox
+	} if
+
+	BannerFontSize /doBannerLine displayLines
+
+	/CurrFontSize oCurrFontSize store
+    end
+    grestore
+  }{
+	pop
+  } ifelse
+
+} bdef
+
+%
+% Place a small box that shows the plane of this view. Make sure the
+% box is completely visible, sizing it down for really skinny views.
+%
+%
+% The location of the box is within 5% of the left/top corner. The size
+% of the box is large enough to fit the text, but the box is never larger
+% than 90 of the width.
+%
+/BANNERWIDTHFUDGE	8 def
+/planebanner {		% [ [ (units) (atom) (axis) (offset) ] ... ] => -
+    planeBanner? not {
+	pop
+    }{
+	gsave
+	7 dict begin
+		%
+		% Set the "current font size" to the banner size. This
+		% is used globally by the routines that make the omegas
+		% and sub- and super-scripts.
+		%
+		/oCurrFontSize CurrFontSize def
+		/CurrFontSize BannerFontSize store
+
+		planeBannerFont setfont
+		dup BannerFontSize SC /doPlaneLine
+		getBoundingBox				 % [] x1 y1 x2 y2
+
+		/TRy exch BANNERWIDTHFUDGE add def
+		/TRx exch BANNERWIDTHFUDGE add def
+		/BLy exch BANNERWIDTHFUDGE sub def
+		/BLx exch BANNERWIDTHFUDGE sub def	% []
+		/xsize TRx BLx sub def
+		/ysize TRy BLy sub def
+
+
+		% Move to a few units from the top left corner
+		%
+		WIDTH .05 mul 30 min HEIGHT translate
+
+		% Limit the width/height to 90% of the view
+		%
+		xsize WIDTH  .90 mul div 1 max
+		ysize HEIGHT .90 mul div 1 max
+		max 1 exch div dup
+		scale
+
+		% Once scaled, move down to the bottom-left corner
+		%
+		0 ysize neg translate
+
+
+		% Put a box around the region
+		%
+		BLx BLy xsize ysize 2 SC 2 SC shadowbox		% []
+
+
+		% Display the lines from the bottom up.
+		%
+		0 0 moveto
+		BannerFontSize SC /doPlaneLine displayLines
+
+		%
+		% Restore the old "current font size"
+		%
+		/CurrFontSize oCurrFontSize store
+	end
+	grestore
+    } ifelse
+} bdef
+
+
+/subscript {
+	FontSize .05 mul FontSize -.3 mul r
+	.8 .8 scale
+} def
+
+/unsubscript {
+	1.25 1.25 scale
+	0 FontSize .3 mul r
+} def
+
+/superscript {
+	0 FontSize .4 mul r
+	.8 .8 scale
+} def
+
+/unsuperscript {
+	1.25 1.25 scale
+	0 FontSize -.4 mul r
+} def
+
+/isdigit {		% char => bool
+	dup 48 ge exch 57 le and
+} def
+
+%
+% Display the atom name with a superscripted atom weight
+%
+/showAtom {		% (atom) => -
+	%
+	% If (atom) starts with a digit, collect all digits and display them
+	% with a superscript, then display the rest of the thing normally.
+	%
+	dup length 0 gt {
+	    dup 0 get isdigit {
+		1				% (atom) digits
+		{
+			2 copy get		% (atom) digits dig
+			isdigit not {exit} if	% (atom) digits
+			1 add
+		} loop
+
+		% On stack are the string and the number of characters
+		% that are digits
+		%				% (atom) digits
+		1 index 0 2 index getinterval	% (atom) digits (substr)
+		superscript Xshow unsuperscript	% (atom) digits
+
+		% And get the remaining part of the string
+		%
+		1 index length			% (atom) digits length
+		1 index sub			% (atom) digits lengthLeft
+		getinterval			% (substr)
+	    } if
+	} if
+	Xshow
+} def
+
+%
+% Put the label (axis legend) along the X axis
+%
+/xaxislabel {		% (units) (atom) (axis) => -
+      bottomAxisLabel? {
+	xslice_pos M					% u a x
+	WIDTH 2 div					% u a x midx
+	BottomMostAxisPos BottomLabelPad sub r		% u a x
+
+	%
+	% Do the bounding box to find the true ascender (y2) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move down the amount of the ascender
+	%
+	0 exch neg r					% u a x x1 y1 x2
+	exch pop					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+      }{
+	pop pop pop
+      } ifelse
+
+} bdef
+
+%
+% Put the label (axis legend) along the X axis
+%
+/yaxislabel {		% (units) (atom) (axis) => -
+  leftAxisLabel? {
+    gsave
+	90 rotate
+	HEIGHT 2 div
+	LeftLabelPad LeftMostAxisPos sub M
+
+	%
+	% Do the bounding box to find the true descender (y1) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move up the amount of the descender
+	%
+	pop exch					% u a x x1 x2 y1
+	0 exch neg r					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+    grestore
+  }{
+    pop pop pop
+  } ifelse
+
+} bdef
+
+
+%
+% Stroke an "x y w h" box with linewidth "lw". The inside of the box is
+% exactly "x y w h" and the thick border falls along the outside edge.
+%
+/strokeThickBox {		% x y w h lw => -
+	6 dict begin
+		dup /lw exch def
+		2 div /lwBy2 exch def
+		/h exch def
+		/w exch def
+		/y exch def
+		/x exch def
+
+		currentlinewidth		% clw
+		lw setlinewidth
+
+		x lwBy2 sub			% x'
+		y lwBy2 sub			% x' y'
+		w lw add			% x' y' w'
+		h lw add			% x' y' w' h'
+		rectpath stroke
+
+		setlinewidth
+	end
+} def
+
+%
+% Draw an edge around the data area, the slice boxes and resonance boxes.
+%
+/edgeview {
+	newpath
+	0 setgray
+
+	%
+	% Edge the data area
+	%
+	0 0 WIDTH HEIGHT EdgeLineWidth strokeThickBox
+
+	%
+	% Edge the slice areas
+	%
+	userdict /SLICE known {
+		xslice_init
+		0 0 WIDTH SLICE EdgeLineWidth strokeThickBox
+		xslice_done
+
+		yslice_init
+		0 0 HEIGHT SLICE EdgeLineWidth strokeThickBox
+		yslice_done
+	} if
+
+	%
+	% Edge the resonance areas
+	%
+	userdict /RESONANCE known {
+		xres_init
+		0 0 RESONANCE WIDTH EdgeLineWidth strokeThickBox
+		xres_done
+
+		yres_init
+		0 0 RESONANCE HEIGHT EdgeLineWidth strokeThickBox
+		yres_done
+	} if
+} bdef
+
+%
+% Print a set of full width half max between the
+%
+/showhalfmax {		% [ [str xmin xmax yp] ... ] width => -
+	/wid exch def
+	/toright true def
+	/limit 0 def
+	{
+		aload pop				% str xmin xmax yp
+		dup 3 1 roll				% str xmin yp xmax yp
+
+		%
+		% See if can still be on the right
+		%
+		toright {
+			1 index limit max 15 add	% starting pos
+			5 index stringwidth pop add	% ending pos
+			wid ge {			% too big?
+				/toright false store	% do on left
+				/limit wid store
+			} if
+		} if
+
+		%
+		% str xmin yp xmax yp
+		%
+		toright {
+			4 2 roll
+			moveto 2 copy lineto		% str x yp
+
+			pop limit max			% str x'
+			SLICE .15 mul 2 copy lineto	% str x' y
+			exch 10 add exch		% str x' y
+			2 copy lineto stroke		% str x' y
+			exch 5 add exch
+			2 copy moveto
+			pop 1 index stringwidth pop add	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			show
+		}{
+			moveto 2 copy lineto		% str tox yp
+
+			pop limit min			% str x'
+			SLICE .30 mul 2 copy lineto	% str x' y
+			exch 10 sub exch
+			2 copy lineto stroke		% str x' y'
+			exch 5 sub exch
+			2 copy moveto
+			pop 1 index stringwidth pop sub	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			rshow
+		} ifelse
+	} forall
+} bdef
+
+/slice_pad { 24 } def
+
+/xres_pos {
+	0 0
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add sub
+	} if
+} def
+/xslice_pos {
+	xres_pos
+	userdict /SLICE known {
+		SLICE slice_pad add sub
+	} if
+} def
+/xslice_y {
+	xslice_pos exch pop
+} def
+
+/xslice_init {
+	gsave
+	xslice_pos translate
+} def
+/xslice_done {
+	grestore
+} def
+/xres_init {
+	/PaintResB { PaintResBX } store
+	gsave
+	xres_pos translate
+	-90 rotate
+	RESONANCE neg 0 translate
+} def
+/xres_done {
+	grestore
+} def
+
+/yres_pos {
+	WIDTH
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add add
+	} if
+	0
+} def
+/yslice_pos {
+	yres_pos
+	userdict /SLICE known {
+		exch SLICE slice_pad add add exch
+	} if
+} def
+/yslice_x {
+	yslice_pos pop
+} def
+/yslice_init {
+	gsave
+	yslice_pos translate
+	90 rotate
+} def
+/yslice_done {
+	grestore
+} def
+/yres_init {
+	/PaintResB { PaintResBY } store
+	gsave
+	yres_pos translate
+	RESONANCE neg 0 translate
+} def
+/yres_done {
+	grestore
+} def
+/SparkyMajorVersion 3 def
+/SparkyMinorVersion 115 def
+/SCALE 0.240000 def
+/PEAKLINEWIDTH 5 def
+/colors [
+[0.00 0.00 0.00 0.00]
+[1.00 1.00 1.00 1.00]
+[0.75 0.75 0.75 0.75]
+[0.30 1.00 0.00 0.00]
+[0.58 0.00 1.00 0.00]
+[0.11 0.00 0.00 1.00]
+[0.89 1.00 1.00 0.00]
+[0.42 1.00 0.00 1.00]
+[0.70 0.00 1.00 1.00]
+[0.80 0.68 0.85 0.90]
+[0.78 0.56 0.93 0.56]
+[0.99 1.00 1.00 0.88]
+[0.79 1.00 0.84 0.00]
+[0.68 1.00 0.65 0.00]
+[0.83 1.00 0.75 0.80]
+[0.95 0.96 0.96 0.86]
+[0.68 0.25 0.88 0.82]
+[0.63 1.00 0.50 0.31]
+[0.36 0.69 0.19 0.38]
+[0.37 0.63 0.13 0.94]
+[0.56 1.00 0.39 0.28]
+[0.62 1.00 0.55 0.00]
+[0.73 0.50 1.00 0.00]
+[0.64 0.00 1.00 0.50]
+[0.55 0.00 0.75 1.00]
+] def
+/PositiveLevels 40 def
+/NegativeLevels 30 def
+/strokecolors [
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+] def
+/fillcolors [
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+] def
+/dashpatterns [
+[[] []]
+[[DASH] []]
+] def
+%%EndProlog
+
+%%Page: 1 1
+/WIDTH 1950 def
+/HEIGHT 1875 def
+gsave
+1.00 I 1.50 I translate
+SCALE dup scale
+setAxisFont 0 setgray
+gsave
+74.221453 xslice_y translate 0 0 moveto
+(11.0)
+(11.5)
+(12.0)
+(12.5)
+(13.0)
+(13.5)
+6 HEIGHT xslice_y sub 337.370242 xlabel
+grestore
+(ppm) (1H) (2) xaxislabel
+gsave
+6.747405 0 translate
+[[xslice_y 1] [0 1] [HEIGHT -1]] 1 5 67.474048 WIDTH 6.747405 sub xTick
+grestore
+gsave
+0 114.705707
+ translate 0 0 moveto
+(11.0)
+(11.5)
+(12.0)
+(12.5)
+(13.0)
+(13.5)
+6 yslice_x 337.369726 ylabel
+grestore
+(ppm) (1H) (1) yaxislabel
+gsave
+-90 rotate -1 1 scale 47.231762 0 translate
+[[0 1] [WIDTH -1] [yslice_x -1]] 1 5 67.473945 HEIGHT 47.231762 sub yTick
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+/level 0 def
+/levelcolor 3 def
+330 371 M
+328 372 L
+326 373 L
+324 375 L
+322 377 L
+321 378 L
+320 380 L
+318 386 L
+318 387 L
+316 394 L
+316 394 L
+314 397 L
+312 399 L
+310 400 L
+308 401 L
+308 402 L
+306 405 L
+305 410 L
+306 411 L
+308 412 L
+310 414 L
+312 415 L
+314 416 L
+316 417 L
+317 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 377 M
+328 378 L
+328 378 L
+326 379 L
+324 381 L
+322 385 L
+322 386 L
+321 394 L
+320 395 L
+318 398 L
+316 401 L
+316 402 L
+316 410 L
+316 410 L
+318 412 L
+320 416 L
+322 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 383 M
+328 385 L
+327 386 L
+326 393 L
+326 394 L
+324 400 L
+323 402 L
+322 405 L
+322 410 L
+322 411 L
+324 414 L
+326 416 L
+328 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 393 M
+330 394 L
+329 402 L
+328 405 L
+326 410 L
+328 412 L
+330 415 L
+S
+/level 0 def
+/levelcolor 3 def
+330 429 M
+328 427 L
+327 426 L
+326 425 L
+324 424 L
+322 424 L
+320 422 L
+318 420 L
+317 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 425 M
+328 422 L
+326 421 L
+324 420 L
+322 418 L
+322 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 421 M
+328 418 L
+328 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 371 M
+332 370 L
+332 370 L
+334 369 L
+336 368 L
+338 368 L
+340 367 L
+342 367 L
+344 366 L
+346 363 L
+346 362 L
+348 360 L
+350 355 L
+350 354 L
+352 347 L
+352 346 L
+353 339 L
+354 337 L
+356 334 L
+358 333 L
+360 333 L
+362 335 L
+364 338 L
+364 339 L
+364 346 L
+366 348 L
+368 349 L
+370 350 L
+372 351 L
+374 352 L
+375 353 L
+377 354 L
+379 354 L
+379 354 L
+381 355 L
+383 356 L
+385 358 L
+387 361 L
+388 362 L
+389 364 L
+391 367 L
+393 370 L
+393 370 L
+S
+/level 0 def
+/levelcolor 3 def
+330 377 M
+332 375 L
+334 373 L
+336 372 L
+338 371 L
+340 371 L
+342 370 L
+342 370 L
+344 370 L
+346 367 L
+348 364 L
+349 362 L
+350 361 L
+352 358 L
+354 355 L
+354 354 L
+356 349 L
+358 348 L
+360 349 L
+362 349 L
+364 350 L
+366 351 L
+368 352 L
+370 353 L
+371 354 L
+372 355 L
+374 356 L
+375 357 L
+377 358 L
+379 359 L
+381 360 L
+383 362 L
+384 362 L
+385 364 L
+387 367 L
+389 369 L
+390 370 L
+391 371 L
+393 373 L
+S
+/level 0 def
+/levelcolor 3 def
+393 377 M
+391 375 L
+389 373 L
+387 371 L
+386 370 L
+385 370 L
+383 367 L
+381 365 L
+379 363 L
+378 362 L
+377 362 L
+375 360 L
+374 359 L
+372 358 L
+370 356 L
+368 356 L
+366 355 L
+364 355 L
+362 355 L
+360 355 L
+358 357 L
+356 359 L
+354 362 L
+353 362 L
+352 364 L
+350 366 L
+348 369 L
+347 370 L
+346 371 L
+344 372 L
+342 373 L
+340 374 L
+338 375 L
+336 376 L
+334 378 L
+334 379 L
+332 381 L
+330 383 L
+S
+/level 0 def
+/levelcolor 3 def
+393 380 M
+391 379 L
+391 378 L
+389 377 L
+387 375 L
+385 373 L
+383 372 L
+382 370 L
+381 370 L
+379 368 L
+377 366 L
+375 364 L
+374 363 L
+373 362 L
+372 361 L
+370 360 L
+368 359 L
+366 359 L
+364 359 L
+362 359 L
+360 361 L
+358 362 L
+358 363 L
+356 365 L
+354 366 L
+352 368 L
+350 370 L
+350 371 L
+348 373 L
+346 374 L
+344 375 L
+342 376 L
+340 377 L
+339 378 L
+338 379 L
+336 382 L
+334 385 L
+333 386 L
+332 388 L
+330 393 L
+S
+330 415 M
+331 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 383 M
+391 381 L
+389 380 L
+387 379 L
+387 378 L
+385 377 L
+383 375 L
+381 373 L
+379 372 L
+377 370 L
+377 370 L
+375 369 L
+374 367 L
+372 366 L
+370 364 L
+368 363 L
+366 363 L
+364 364 L
+362 366 L
+360 368 L
+358 369 L
+356 370 L
+355 370 L
+354 371 L
+352 372 L
+350 375 L
+348 377 L
+346 378 L
+346 378 L
+344 379 L
+342 380 L
+340 382 L
+338 385 L
+337 386 L
+336 388 L
+334 392 L
+333 394 L
+332 399 L
+332 402 L
+331 410 L
+332 413 L
+334 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 387 M
+393 386 L
+391 385 L
+389 383 L
+387 381 L
+385 380 L
+383 379 L
+383 378 L
+381 377 L
+379 375 L
+377 374 L
+375 372 L
+374 371 L
+372 371 L
+370 370 L
+368 370 L
+366 371 L
+364 371 L
+362 372 L
+360 372 L
+358 373 L
+356 374 L
+354 375 L
+352 377 L
+351 378 L
+350 379 L
+348 380 L
+346 382 L
+344 383 L
+342 385 L
+341 386 L
+340 388 L
+338 391 L
+336 394 L
+336 395 L
+334 402 L
+334 408 L
+334 410 L
+334 410 L
+336 417 L
+336 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 390 M
+391 388 L
+389 386 L
+389 386 L
+387 385 L
+385 383 L
+383 381 L
+381 380 L
+379 379 L
+379 378 L
+377 377 L
+375 376 L
+374 375 L
+372 374 L
+370 374 L
+368 373 L
+366 374 L
+364 374 L
+362 375 L
+360 376 L
+358 377 L
+356 378 L
+356 378 L
+354 379 L
+352 381 L
+350 382 L
+348 384 L
+346 386 L
+346 386 L
+344 388 L
+342 391 L
+340 394 L
+340 394 L
+338 398 L
+337 402 L
+337 410 L
+338 414 L
+339 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 393 M
+391 391 L
+389 389 L
+387 388 L
+385 386 L
+385 386 L
+383 385 L
+381 383 L
+379 381 L
+377 380 L
+375 379 L
+374 379 L
+372 378 L
+372 378 L
+370 377 L
+368 377 L
+366 378 L
+364 378 L
+364 378 L
+362 379 L
+360 379 L
+358 380 L
+356 381 L
+354 383 L
+352 385 L
+350 386 L
+350 386 L
+348 388 L
+346 391 L
+344 394 L
+344 394 L
+342 397 L
+340 401 L
+340 402 L
+340 410 L
+340 411 L
+342 416 L
+343 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 397 M
+391 395 L
+390 394 L
+389 393 L
+387 391 L
+385 389 L
+383 388 L
+381 386 L
+381 386 L
+379 385 L
+377 383 L
+375 382 L
+374 381 L
+372 380 L
+370 380 L
+368 380 L
+366 380 L
+364 381 L
+362 381 L
+360 382 L
+358 383 L
+356 385 L
+354 386 L
+354 387 L
+352 388 L
+350 390 L
+348 393 L
+347 394 L
+346 396 L
+344 400 L
+343 402 L
+343 410 L
+344 413 L
+346 417 L
+346 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 401 M
+391 399 L
+389 396 L
+387 395 L
+387 394 L
+385 393 L
+383 391 L
+381 389 L
+379 388 L
+377 387 L
+376 386 L
+375 385 L
+374 384 L
+372 383 L
+370 383 L
+368 383 L
+366 383 L
+364 383 L
+362 384 L
+360 385 L
+359 386 L
+358 387 L
+356 388 L
+354 390 L
+352 392 L
+350 394 L
+350 395 L
+348 399 L
+346 402 L
+346 406 L
+346 410 L
+346 410 L
+348 415 L
+349 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 407 M
+391 403 L
+390 402 L
+389 400 L
+387 398 L
+385 396 L
+383 394 L
+383 394 L
+381 393 L
+379 391 L
+377 389 L
+375 388 L
+374 387 L
+372 387 L
+370 386 L
+368 386 L
+366 386 L
+364 387 L
+362 387 L
+360 388 L
+358 390 L
+356 392 L
+354 394 L
+354 394 L
+352 397 L
+350 401 L
+349 402 L
+349 410 L
+350 412 L
+352 417 L
+352 418 L
+S
+/level 0 def
+/levelcolor 3 def
+355 418 M
+354 415 L
+352 410 L
+352 402 L
+354 399 L
+356 396 L
+357 394 L
+358 394 L
+360 392 L
+362 391 L
+364 390 L
+366 389 L
+368 389 L
+370 389 L
+372 390 L
+374 390 L
+375 391 L
+377 393 L
+379 394 L
+379 394 L
+381 396 L
+383 398 L
+385 400 L
+387 402 L
+387 402 L
+389 406 L
+391 410 L
+391 418 L
+S
+/level 0 def
+/levelcolor 3 def
+358 418 M
+358 418 L
+356 412 L
+355 410 L
+356 402 L
+356 402 L
+358 399 L
+360 397 L
+362 395 L
+363 394 L
+364 394 L
+366 393 L
+368 393 L
+370 393 L
+372 393 L
+374 394 L
+374 394 L
+375 395 L
+377 396 L
+379 398 L
+381 400 L
+383 402 L
+383 402 L
+385 405 L
+387 409 L
+388 410 L
+388 418 L
+S
+/level 0 def
+/levelcolor 3 def
+361 418 M
+360 414 L
+358 410 L
+360 403 L
+360 402 L
+362 400 L
+364 399 L
+366 398 L
+368 397 L
+370 397 L
+372 397 L
+374 398 L
+375 399 L
+377 400 L
+379 402 L
+379 402 L
+381 405 L
+383 408 L
+384 410 L
+384 418 L
+S
+/level 0 def
+/levelcolor 3 def
+367 418 M
+366 416 L
+364 412 L
+363 410 L
+364 407 L
+366 404 L
+368 402 L
+369 402 L
+370 402 L
+372 402 L
+372 402 L
+374 402 L
+375 404 L
+377 406 L
+379 408 L
+380 410 L
+379 416 L
+379 418 L
+S
+/level 0 def
+/levelcolor 3 def
+330 429 M
+332 432 L
+333 434 L
+334 435 L
+336 437 L
+338 439 L
+340 441 L
+341 441 L
+342 446 L
+343 449 L
+344 457 L
+344 457 L
+346 465 L
+346 465 L
+348 467 L
+350 468 L
+352 470 L
+354 472 L
+356 472 L
+358 473 L
+360 473 L
+360 473 L
+362 481 L
+364 480 L
+366 479 L
+368 479 L
+370 478 L
+372 477 L
+374 476 L
+375 475 L
+377 474 L
+379 474 L
+381 473 L
+383 473 L
+383 473 L
+385 472 L
+387 471 L
+389 469 L
+391 468 L
+393 468 L
+S
+362 481 M
+364 483 L
+365 489 L
+364 493 L
+362 492 L
+360 489 L
+362 481 L
+S
+/level 0 def
+/levelcolor 3 def
+330 425 M
+331 426 L
+332 428 L
+334 431 L
+336 434 L
+336 434 L
+338 436 L
+340 438 L
+342 440 L
+344 441 L
+344 443 L
+346 447 L
+347 449 L
+348 452 L
+349 457 L
+350 459 L
+352 463 L
+354 465 L
+354 465 L
+356 466 L
+358 467 L
+360 467 L
+362 468 L
+364 469 L
+366 471 L
+368 472 L
+370 473 L
+372 473 L
+374 472 L
+375 472 L
+377 471 L
+379 470 L
+381 469 L
+383 468 L
+385 467 L
+387 466 L
+388 465 L
+389 463 L
+391 457 L
+391 457 L
+393 455 L
+S
+/level 0 def
+/levelcolor 3 def
+330 421 M
+332 424 L
+333 426 L
+334 428 L
+336 431 L
+338 433 L
+339 434 L
+340 435 L
+342 437 L
+344 439 L
+346 440 L
+347 441 L
+348 443 L
+350 447 L
+351 449 L
+352 451 L
+354 455 L
+355 457 L
+356 458 L
+358 459 L
+360 461 L
+362 462 L
+364 463 L
+366 465 L
+366 465 L
+368 467 L
+370 468 L
+372 469 L
+374 469 L
+375 468 L
+377 467 L
+379 466 L
+380 465 L
+381 464 L
+383 462 L
+385 457 L
+385 457 L
+387 453 L
+389 449 L
+389 449 L
+391 448 L
+393 448 L
+S
+/level 0 def
+/levelcolor 3 def
+393 445 M
+391 446 L
+389 447 L
+387 448 L
+386 449 L
+385 451 L
+383 455 L
+382 457 L
+381 458 L
+379 461 L
+377 463 L
+375 464 L
+374 465 L
+372 465 L
+370 464 L
+368 462 L
+366 460 L
+364 457 L
+364 457 L
+362 456 L
+360 454 L
+358 452 L
+356 449 L
+356 449 L
+354 446 L
+352 442 L
+351 441 L
+350 440 L
+348 439 L
+346 437 L
+344 435 L
+343 434 L
+342 433 L
+340 432 L
+338 430 L
+336 427 L
+335 426 L
+334 423 L
+332 419 L
+331 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 441 M
+393 441 L
+391 443 L
+389 444 L
+387 446 L
+385 447 L
+383 449 L
+383 449 L
+381 454 L
+379 456 L
+378 457 L
+377 458 L
+375 460 L
+374 460 L
+372 460 L
+370 458 L
+369 457 L
+368 457 L
+366 455 L
+364 453 L
+362 451 L
+361 449 L
+360 448 L
+358 446 L
+356 443 L
+355 441 L
+354 440 L
+352 438 L
+350 436 L
+348 434 L
+347 434 L
+346 433 L
+344 431 L
+342 430 L
+340 428 L
+338 426 L
+338 426 L
+336 423 L
+334 418 L
+334 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 439 M
+391 440 L
+389 441 L
+389 441 L
+387 443 L
+385 444 L
+383 447 L
+381 449 L
+381 449 L
+379 452 L
+377 454 L
+375 455 L
+374 456 L
+372 455 L
+370 454 L
+368 453 L
+366 451 L
+365 449 L
+364 449 L
+362 447 L
+360 444 L
+358 441 L
+358 441 L
+356 439 L
+354 437 L
+352 435 L
+351 434 L
+350 433 L
+348 431 L
+346 430 L
+344 428 L
+342 426 L
+341 426 L
+340 424 L
+338 421 L
+336 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 436 M
+391 437 L
+389 439 L
+387 440 L
+385 441 L
+385 441 L
+383 443 L
+381 446 L
+379 448 L
+377 449 L
+377 449 L
+375 451 L
+374 451 L
+372 451 L
+370 450 L
+369 449 L
+368 449 L
+366 447 L
+364 445 L
+362 443 L
+361 441 L
+360 440 L
+358 438 L
+356 436 L
+354 434 L
+354 433 L
+352 432 L
+350 430 L
+348 428 L
+346 426 L
+346 426 L
+344 424 L
+342 422 L
+340 419 L
+339 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 432 M
+392 434 L
+391 434 L
+389 436 L
+387 437 L
+385 439 L
+383 440 L
+381 441 L
+381 442 L
+379 444 L
+377 446 L
+375 447 L
+374 447 L
+372 447 L
+370 446 L
+368 445 L
+366 443 L
+364 441 L
+364 441 L
+362 439 L
+360 437 L
+358 434 L
+357 434 L
+356 432 L
+354 431 L
+352 428 L
+350 426 L
+350 426 L
+348 424 L
+346 422 L
+344 419 L
+343 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 429 M
+391 431 L
+389 432 L
+388 434 L
+387 434 L
+385 436 L
+383 437 L
+381 439 L
+379 440 L
+377 441 L
+377 441 L
+375 442 L
+374 443 L
+372 443 L
+370 442 L
+369 441 L
+368 441 L
+366 440 L
+364 438 L
+362 436 L
+360 434 L
+360 433 L
+358 432 L
+356 430 L
+354 427 L
+352 426 L
+352 425 L
+350 423 L
+348 420 L
+346 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 425 M
+393 426 L
+391 427 L
+389 429 L
+387 431 L
+385 433 L
+384 434 L
+383 434 L
+381 435 L
+379 437 L
+377 438 L
+375 439 L
+374 439 L
+372 439 L
+370 439 L
+368 437 L
+366 436 L
+364 434 L
+363 434 L
+362 432 L
+360 431 L
+358 429 L
+356 426 L
+355 426 L
+354 424 L
+352 421 L
+350 419 L
+349 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 419 M
+391 422 L
+389 425 L
+389 426 L
+387 428 L
+385 429 L
+383 431 L
+381 432 L
+379 433 L
+378 434 L
+377 434 L
+375 435 L
+374 435 L
+372 435 L
+370 435 L
+368 434 L
+368 433 L
+366 432 L
+364 431 L
+362 429 L
+360 427 L
+358 426 L
+358 425 L
+356 423 L
+354 420 L
+352 418 L
+S
+/level 0 def
+/levelcolor 3 def
+355 418 M
+356 419 L
+358 422 L
+360 424 L
+361 426 L
+362 426 L
+364 428 L
+366 429 L
+368 430 L
+370 431 L
+372 432 L
+374 432 L
+375 432 L
+377 431 L
+379 430 L
+381 429 L
+383 428 L
+385 426 L
+386 426 L
+387 423 L
+389 420 L
+391 418 L
+S
+/level 0 def
+/levelcolor 3 def
+358 418 M
+360 420 L
+362 422 L
+364 424 L
+366 426 L
+366 426 L
+368 427 L
+370 428 L
+372 428 L
+374 428 L
+375 428 L
+377 427 L
+379 426 L
+381 426 L
+381 425 L
+383 424 L
+385 421 L
+387 418 L
+388 418 L
+S
+/level 0 def
+/levelcolor 3 def
+361 418 M
+362 418 L
+364 420 L
+366 422 L
+368 423 L
+370 424 L
+372 424 L
+374 424 L
+375 424 L
+377 423 L
+379 422 L
+381 421 L
+383 419 L
+384 418 L
+S
+/level 0 def
+/levelcolor 3 def
+367 418 M
+368 418 L
+370 419 L
+372 420 L
+374 420 L
+375 420 L
+377 419 L
+379 418 L
+S
+/level 0 def
+/levelcolor 3 def
+364 924 M
+365 916 L
+366 915 L
+368 914 L
+370 915 L
+371 916 L
+372 917 L
+374 917 L
+375 917 L
+377 916 L
+377 916 L
+379 915 L
+381 914 L
+383 916 L
+381 920 L
+381 924 L
+S
+360 869 M
+360 869 L
+360 870 L
+359 869 L
+360 869 L
+S
+374 875 M
+375 874 L
+377 876 L
+378 877 L
+377 877 L
+375 879 L
+374 879 L
+372 877 L
+374 875 L
+S
+/level 0 def
+/levelcolor 3 def
+368 924 M
+370 923 L
+372 922 L
+374 923 L
+375 924 L
+376 924 L
+S
+/level 0 def
+/levelcolor 3 def
+364 924 M
+366 927 L
+368 929 L
+370 931 L
+371 932 L
+372 933 L
+374 933 L
+375 933 L
+377 933 L
+379 933 L
+380 932 L
+381 924 L
+S
+350 980 M
+350 980 L
+350 982 L
+349 980 L
+350 980 L
+S
+354 993 M
+356 991 L
+358 990 L
+360 989 L
+362 988 L
+362 988 L
+364 987 L
+366 987 L
+368 987 L
+368 988 L
+370 990 L
+372 992 L
+373 996 L
+374 999 L
+375 1004 L
+375 1004 L
+377 1004 L
+379 1005 L
+381 1006 L
+383 1008 L
+385 1011 L
+385 1019 L
+383 1022 L
+381 1024 L
+379 1024 L
+377 1020 L
+377 1019 L
+375 1015 L
+374 1013 L
+373 1011 L
+372 1004 L
+372 1003 L
+370 1002 L
+368 1002 L
+366 1002 L
+364 1002 L
+362 1001 L
+360 1001 L
+358 1000 L
+356 999 L
+354 996 L
+353 996 L
+354 993 L
+S
+360 1010 M
+362 1010 L
+363 1011 L
+362 1013 L
+360 1014 L
+359 1011 L
+360 1010 L
+S
+370 971 M
+370 972 L
+370 973 L
+369 972 L
+370 971 L
+S
+375 985 M
+377 983 L
+379 982 L
+381 985 L
+382 988 L
+381 988 L
+379 991 L
+377 992 L
+375 991 L
+375 988 L
+375 985 L
+S
+/level 0 def
+/levelcolor 3 def
+368 924 M
+370 926 L
+372 927 L
+374 927 L
+375 926 L
+376 924 L
+S
+/level 0 def
+/levelcolor 3 def
+368 1236 M
+370 1235 L
+372 1235 L
+374 1236 L
+375 1237 L
+377 1240 L
+378 1241 L
+378 1249 L
+377 1250 L
+375 1253 L
+374 1253 L
+372 1252 L
+370 1251 L
+368 1249 L
+367 1249 L
+366 1241 L
+368 1236 L
+S
+/level 0 def
+/levelcolor 3 def
+372 1247 M
+374 1248 L
+374 1249 L
+374 1249 L
+372 1249 L
+371 1249 L
+372 1247 L
+S
+/level 0 def
+/levelcolor 3 def
+393 370 M
+395 373 L
+397 375 L
+399 377 L
+401 378 L
+401 378 L
+403 379 L
+405 380 L
+407 381 L
+409 384 L
+411 386 L
+411 386 L
+413 388 L
+415 389 L
+417 389 L
+419 389 L
+421 390 L
+423 391 L
+425 393 L
+426 394 L
+427 396 L
+429 398 L
+431 399 L
+433 399 L
+435 398 L
+437 399 L
+439 400 L
+441 402 L
+441 402 L
+443 403 L
+445 405 L
+447 405 L
+449 405 L
+450 404 L
+452 407 L
+453 410 L
+452 410 L
+450 412 L
+449 413 L
+447 414 L
+445 416 L
+444 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 373 M
+395 376 L
+397 378 L
+397 378 L
+399 380 L
+401 381 L
+403 382 L
+405 384 L
+407 386 L
+407 386 L
+409 388 L
+411 390 L
+413 392 L
+415 392 L
+417 392 L
+419 393 L
+421 393 L
+422 394 L
+423 395 L
+425 398 L
+427 401 L
+428 402 L
+429 403 L
+431 404 L
+433 404 L
+435 405 L
+437 405 L
+439 406 L
+441 408 L
+442 410 L
+441 413 L
+439 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 377 M
+394 378 L
+395 379 L
+397 381 L
+399 383 L
+401 384 L
+403 386 L
+403 386 L
+405 388 L
+407 390 L
+409 392 L
+410 394 L
+411 394 L
+413 395 L
+415 396 L
+417 396 L
+419 396 L
+421 397 L
+423 400 L
+424 402 L
+425 403 L
+427 405 L
+429 407 L
+431 408 L
+433 409 L
+435 410 L
+435 410 L
+435 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 380 M
+395 382 L
+397 384 L
+399 386 L
+399 386 L
+401 387 L
+403 389 L
+405 391 L
+407 394 L
+407 394 L
+409 396 L
+411 398 L
+413 399 L
+415 399 L
+417 400 L
+419 401 L
+421 402 L
+421 402 L
+423 405 L
+425 407 L
+427 410 L
+427 410 L
+427 418 L
+427 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 383 M
+395 385 L
+396 386 L
+397 387 L
+399 389 L
+401 391 L
+403 393 L
+404 394 L
+405 395 L
+407 398 L
+409 400 L
+411 402 L
+411 402 L
+413 403 L
+415 403 L
+417 404 L
+419 406 L
+421 408 L
+422 410 L
+422 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 387 M
+395 388 L
+397 390 L
+399 393 L
+400 394 L
+401 395 L
+403 397 L
+405 399 L
+407 402 L
+407 402 L
+409 404 L
+411 406 L
+413 407 L
+415 408 L
+417 409 L
+417 410 L
+417 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 390 M
+395 392 L
+397 394 L
+397 394 L
+399 396 L
+401 399 L
+403 401 L
+404 402 L
+405 404 L
+407 406 L
+409 408 L
+411 410 L
+410 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 393 M
+394 394 L
+395 396 L
+397 398 L
+399 401 L
+400 402 L
+401 403 L
+403 406 L
+405 409 L
+406 410 L
+405 415 L
+405 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 397 M
+395 400 L
+397 402 L
+397 403 L
+399 406 L
+401 409 L
+402 410 L
+401 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 401 M
+394 402 L
+395 405 L
+397 409 L
+398 410 L
+398 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 407 M
+394 410 L
+394 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 468 M
+395 467 L
+397 468 L
+399 468 L
+401 468 L
+403 467 L
+405 466 L
+405 465 L
+407 462 L
+409 460 L
+411 460 L
+413 461 L
+415 464 L
+415 465 L
+417 466 L
+419 467 L
+421 466 L
+422 465 L
+421 457 L
+421 457 L
+419 454 L
+417 452 L
+415 451 L
+413 450 L
+411 450 L
+411 449 L
+411 449 L
+413 447 L
+415 441 L
+415 441 L
+417 440 L
+419 439 L
+421 437 L
+423 436 L
+425 435 L
+427 434 L
+427 433 L
+429 432 L
+431 430 L
+433 429 L
+435 428 L
+437 426 L
+437 426 L
+439 424 L
+441 422 L
+443 419 L
+444 418 L
+S
+431 479 M
+432 473 L
+433 472 L
+435 468 L
+437 467 L
+439 467 L
+441 467 L
+443 468 L
+445 469 L
+447 470 L
+449 473 L
+449 473 L
+450 475 L
+452 477 L
+454 481 L
+455 481 L
+454 482 L
+454 489 L
+452 491 L
+450 494 L
+449 496 L
+447 497 L
+445 497 L
+443 496 L
+441 496 L
+439 495 L
+437 494 L
+435 492 L
+433 490 L
+432 489 L
+431 483 L
+430 481 L
+431 479 L
+S
+/level 0 def
+/levelcolor 3 def
+393 455 M
+395 454 L
+397 451 L
+398 449 L
+399 449 L
+401 448 L
+403 447 L
+405 445 L
+407 443 L
+408 441 L
+409 440 L
+411 439 L
+413 437 L
+415 435 L
+417 434 L
+418 434 L
+419 433 L
+421 432 L
+423 431 L
+425 430 L
+427 428 L
+429 427 L
+431 426 L
+432 426 L
+433 425 L
+435 424 L
+437 421 L
+439 419 L
+439 418 L
+S
+433 476 M
+434 473 L
+435 471 L
+437 469 L
+439 468 L
+441 468 L
+443 469 L
+445 470 L
+447 472 L
+447 473 L
+449 474 L
+450 477 L
+452 480 L
+453 481 L
+452 487 L
+452 489 L
+450 492 L
+449 494 L
+447 495 L
+445 496 L
+443 495 L
+441 495 L
+439 494 L
+437 492 L
+435 490 L
+434 489 L
+433 486 L
+431 481 L
+433 476 L
+S
+/level 0 def
+/levelcolor 3 def
+393 448 M
+395 447 L
+397 446 L
+399 445 L
+401 443 L
+403 441 L
+403 441 L
+405 440 L
+407 438 L
+409 436 L
+411 434 L
+411 433 L
+413 432 L
+415 431 L
+417 431 L
+419 429 L
+421 428 L
+423 426 L
+423 426 L
+425 424 L
+427 423 L
+429 422 L
+431 421 L
+433 420 L
+435 418 L
+435 418 L
+S
+433 481 M
+435 474 L
+435 473 L
+437 471 L
+439 470 L
+441 470 L
+443 471 L
+445 472 L
+445 473 L
+447 474 L
+449 476 L
+450 479 L
+452 481 L
+451 489 L
+450 490 L
+449 492 L
+447 494 L
+445 494 L
+443 494 L
+441 493 L
+439 492 L
+437 490 L
+435 489 L
+435 487 L
+433 481 L
+433 481 L
+433 481 L
+S
+/level 0 def
+/levelcolor 3 def
+393 445 M
+395 444 L
+397 442 L
+398 441 L
+399 441 L
+401 440 L
+403 438 L
+405 436 L
+407 434 L
+407 433 L
+409 431 L
+411 430 L
+413 429 L
+415 428 L
+417 427 L
+418 426 L
+419 425 L
+421 423 L
+423 421 L
+425 419 L
+427 418 L
+S
+435 478 M
+437 474 L
+438 473 L
+439 473 L
+441 472 L
+442 473 L
+443 473 L
+445 474 L
+447 476 L
+449 478 L
+450 481 L
+449 489 L
+449 490 L
+447 492 L
+445 492 L
+443 492 L
+441 492 L
+439 490 L
+437 489 L
+437 488 L
+435 484 L
+434 481 L
+435 478 L
+S
+/level 0 def
+/levelcolor 3 def
+393 441 M
+395 440 L
+397 439 L
+399 438 L
+401 437 L
+403 435 L
+404 434 L
+405 432 L
+407 429 L
+409 427 L
+410 426 L
+411 425 L
+413 425 L
+415 424 L
+417 423 L
+419 421 L
+421 419 L
+422 418 L
+S
+437 478 M
+439 475 L
+441 475 L
+443 475 L
+445 476 L
+447 478 L
+449 481 L
+449 481 L
+449 482 L
+447 489 L
+447 489 L
+445 490 L
+443 490 L
+441 490 L
+440 489 L
+439 488 L
+437 484 L
+435 481 L
+437 478 L
+S
+/level 0 def
+/levelcolor 3 def
+393 439 M
+395 437 L
+397 436 L
+399 435 L
+400 434 L
+401 433 L
+403 431 L
+405 428 L
+406 426 L
+407 425 L
+409 423 L
+411 422 L
+413 421 L
+415 420 L
+417 418 L
+417 418 L
+S
+439 479 M
+441 477 L
+443 478 L
+445 479 L
+447 481 L
+447 481 L
+447 482 L
+445 487 L
+443 487 L
+441 486 L
+439 484 L
+437 481 L
+439 479 L
+S
+/level 0 def
+/levelcolor 3 def
+393 436 M
+395 434 L
+396 434 L
+397 433 L
+399 431 L
+401 429 L
+403 426 L
+403 426 L
+405 423 L
+407 420 L
+409 418 L
+410 418 L
+S
+441 481 M
+443 480 L
+444 481 L
+443 482 L
+441 482 L
+440 481 L
+441 481 L
+S
+/level 0 def
+/levelcolor 3 def
+393 432 M
+395 431 L
+397 429 L
+399 427 L
+400 426 L
+401 424 L
+403 421 L
+405 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 429 M
+395 427 L
+396 426 L
+397 425 L
+399 422 L
+401 418 L
+401 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 425 M
+395 422 L
+397 419 L
+398 418 L
+S
+/level 0 def
+/levelcolor 3 def
+393 419 M
+394 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 390 M
+960 389 L
+958 389 L
+956 390 L
+954 394 L
+954 394 L
+952 399 L
+951 402 L
+950 409 L
+950 410 L
+950 410 L
+952 415 L
+953 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 393 M
+960 393 L
+958 393 L
+957 394 L
+956 396 L
+954 399 L
+953 402 L
+952 410 L
+952 410 L
+952 410 L
+954 414 L
+956 416 L
+957 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 399 M
+960 398 L
+958 399 L
+956 401 L
+955 402 L
+955 410 L
+956 410 L
+958 412 L
+960 414 L
+962 417 L
+S
+/level 0 def
+/levelcolor 3 def
+962 426 M
+960 425 L
+958 423 L
+956 422 L
+954 419 L
+953 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 422 M
+960 421 L
+958 419 L
+957 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 390 M
+964 391 L
+966 392 L
+968 393 L
+968 394 L
+970 395 L
+971 396 L
+973 398 L
+975 400 L
+976 402 L
+977 404 L
+979 409 L
+980 410 L
+981 417 L
+982 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 393 M
+963 394 L
+964 394 L
+966 396 L
+968 397 L
+970 398 L
+971 399 L
+973 401 L
+974 402 L
+975 404 L
+977 408 L
+978 410 L
+979 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 399 M
+964 400 L
+966 401 L
+968 401 L
+969 402 L
+970 402 L
+971 404 L
+973 406 L
+975 409 L
+976 410 L
+976 418 L
+S
+962 417 M
+962 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 426 M
+962 426 L
+964 426 L
+966 427 L
+968 427 L
+970 428 L
+971 428 L
+973 428 L
+975 428 L
+977 426 L
+978 426 L
+979 423 L
+981 419 L
+982 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 422 M
+964 423 L
+966 423 L
+968 424 L
+970 424 L
+971 425 L
+973 424 L
+975 423 L
+977 421 L
+979 418 L
+S
+/level 0 def
+/levelcolor 3 def
+962 418 M
+964 418 L
+966 419 L
+968 420 L
+970 420 L
+971 420 L
+973 420 L
+975 418 L
+976 418 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1107 M
+1086 1106 L
+1086 1106 L
+1084 1104 L
+1082 1103 L
+1080 1101 L
+1078 1099 L
+1078 1099 L
+1076 1095 L
+1074 1093 L
+1072 1092 L
+1070 1092 L
+1068 1092 L
+1066 1092 L
+1065 1091 L
+1064 1090 L
+1062 1086 L
+1061 1083 L
+1060 1082 L
+1058 1080 L
+1056 1080 L
+1054 1079 L
+1052 1079 L
+1050 1080 L
+1048 1081 L
+1046 1081 L
+1044 1082 L
+1043 1083 L
+1043 1091 L
+1044 1093 L
+1046 1096 L
+1047 1099 L
+1048 1101 L
+1050 1105 L
+1051 1106 L
+1052 1109 L
+1054 1111 L
+1056 1113 L
+1058 1114 L
+1058 1115 L
+1060 1117 L
+1062 1120 L
+1063 1122 L
+1064 1125 L
+1066 1128 L
+1068 1130 L
+1069 1130 L
+1070 1131 L
+1072 1133 L
+1074 1135 L
+1076 1137 L
+1077 1138 L
+1078 1140 L
+1080 1144 L
+1082 1145 L
+1083 1146 L
+1084 1147 L
+1086 1148 L
+1088 1149 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1109 M
+1086 1108 L
+1084 1107 L
+1084 1106 L
+1082 1105 L
+1080 1103 L
+1078 1101 L
+1076 1100 L
+1075 1099 L
+1074 1097 L
+1072 1096 L
+1070 1095 L
+1068 1094 L
+1066 1093 L
+1064 1092 L
+1062 1091 L
+1062 1090 L
+1060 1086 L
+1058 1083 L
+1058 1083 L
+1056 1082 L
+1054 1082 L
+1052 1082 L
+1050 1083 L
+1050 1083 L
+1048 1085 L
+1047 1091 L
+1048 1095 L
+1050 1099 L
+1050 1100 L
+1052 1104 L
+1054 1106 L
+1054 1108 L
+1056 1111 L
+1058 1113 L
+1060 1114 L
+1060 1115 L
+1062 1118 L
+1064 1121 L
+1065 1122 L
+1066 1125 L
+1068 1128 L
+1070 1129 L
+1072 1130 L
+1072 1130 L
+1074 1132 L
+1076 1135 L
+1078 1137 L
+1079 1138 L
+1080 1140 L
+1082 1143 L
+1084 1144 L
+1086 1145 L
+1088 1146 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1110 M
+1086 1109 L
+1084 1108 L
+1082 1107 L
+1081 1106 L
+1080 1106 L
+1078 1104 L
+1076 1102 L
+1074 1101 L
+1072 1099 L
+1071 1099 L
+1070 1098 L
+1068 1097 L
+1066 1096 L
+1064 1095 L
+1062 1093 L
+1060 1091 L
+1060 1091 L
+1058 1087 L
+1056 1086 L
+1054 1085 L
+1052 1086 L
+1050 1088 L
+1049 1091 L
+1050 1093 L
+1052 1099 L
+1052 1099 L
+1054 1103 L
+1056 1106 L
+1056 1107 L
+1058 1110 L
+1060 1112 L
+1062 1114 L
+1062 1115 L
+1064 1118 L
+1066 1122 L
+1067 1122 L
+1068 1125 L
+1070 1127 L
+1072 1128 L
+1074 1130 L
+1075 1130 L
+1076 1132 L
+1078 1135 L
+1080 1137 L
+1081 1138 L
+1082 1140 L
+1084 1142 L
+1086 1143 L
+1088 1144 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1112 M
+1086 1111 L
+1084 1110 L
+1082 1109 L
+1080 1108 L
+1078 1107 L
+1077 1106 L
+1076 1106 L
+1074 1104 L
+1072 1102 L
+1070 1101 L
+1068 1100 L
+1066 1099 L
+1066 1098 L
+1064 1098 L
+1062 1097 L
+1060 1096 L
+1058 1094 L
+1056 1091 L
+1056 1091 L
+1054 1090 L
+1054 1091 L
+1054 1092 L
+1056 1099 L
+1056 1100 L
+1058 1106 L
+1058 1107 L
+1060 1109 L
+1062 1112 L
+1064 1114 L
+1064 1115 L
+1066 1118 L
+1068 1122 L
+1069 1122 L
+1070 1124 L
+1072 1126 L
+1074 1127 L
+1076 1130 L
+1076 1130 L
+1078 1133 L
+1080 1135 L
+1082 1137 L
+1083 1138 L
+1084 1139 L
+1086 1141 L
+1088 1142 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1115 M
+1088 1114 L
+1086 1113 L
+1084 1112 L
+1082 1111 L
+1080 1110 L
+1078 1110 L
+1076 1109 L
+1074 1108 L
+1073 1106 L
+1072 1106 L
+1070 1105 L
+1068 1103 L
+1066 1103 L
+1064 1102 L
+1062 1103 L
+1061 1106 L
+1062 1108 L
+1064 1110 L
+1066 1114 L
+1066 1115 L
+1068 1118 L
+1070 1120 L
+1072 1122 L
+1072 1123 L
+1074 1125 L
+1076 1127 L
+1078 1130 L
+1078 1130 L
+1080 1133 L
+1082 1135 L
+1084 1137 L
+1086 1138 L
+1086 1138 L
+1088 1140 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1117 M
+1086 1116 L
+1084 1114 L
+1084 1114 L
+1082 1113 L
+1080 1113 L
+1078 1112 L
+1076 1112 L
+1074 1112 L
+1072 1111 L
+1070 1112 L
+1069 1114 L
+1070 1115 L
+1072 1117 L
+1074 1120 L
+1075 1122 L
+1076 1124 L
+1078 1126 L
+1080 1130 L
+1080 1130 L
+1082 1132 L
+1084 1134 L
+1086 1136 L
+1088 1137 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1120 M
+1086 1119 L
+1084 1118 L
+1082 1118 L
+1080 1118 L
+1078 1122 L
+1080 1125 L
+1082 1129 L
+1083 1130 L
+1084 1131 L
+1086 1132 L
+1088 1133 L
+S
+/level 0 def
+/levelcolor 3 def
+1084 1122 M
+1084 1122 L
+1084 1122 L
+1084 1122 L
+1084 1122 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1107 M
+1090 1108 L
+1092 1109 L
+1094 1111 L
+1096 1114 L
+1096 1114 L
+1098 1116 L
+1100 1118 L
+1102 1120 L
+1104 1122 L
+1104 1122 L
+1106 1123 L
+1108 1124 L
+1110 1126 L
+1112 1128 L
+1113 1130 L
+1113 1138 L
+1114 1142 L
+1114 1146 L
+1116 1148 L
+1118 1149 L
+1119 1149 L
+1121 1149 L
+1123 1150 L
+1125 1153 L
+1126 1154 L
+1127 1157 L
+1129 1158 L
+1131 1158 L
+1133 1157 L
+1135 1156 L
+1137 1155 L
+1139 1156 L
+1141 1159 L
+1142 1162 L
+1143 1163 L
+1145 1164 L
+1147 1166 L
+1149 1167 L
+1151 1168 L
+S
+1088 1149 M
+1090 1149 L
+1092 1149 L
+1094 1150 L
+1096 1150 L
+1098 1151 L
+1100 1152 L
+1102 1154 L
+1102 1154 L
+1104 1157 L
+1106 1158 L
+1108 1159 L
+1110 1160 L
+1112 1161 L
+1112 1162 L
+1114 1164 L
+1116 1167 L
+1118 1170 L
+1118 1170 L
+1119 1172 L
+1121 1173 L
+1123 1175 L
+1125 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1109 M
+1090 1110 L
+1092 1111 L
+1094 1114 L
+1094 1114 L
+1096 1116 L
+1098 1119 L
+1100 1121 L
+1101 1122 L
+1102 1123 L
+1104 1124 L
+1106 1125 L
+1108 1127 L
+1110 1129 L
+1110 1130 L
+1112 1138 L
+1112 1140 L
+1112 1146 L
+1114 1151 L
+1116 1152 L
+1118 1152 L
+1119 1152 L
+1121 1153 L
+1122 1154 L
+1123 1156 L
+1125 1160 L
+1127 1162 L
+1127 1162 L
+1129 1162 L
+1131 1162 L
+1131 1162 L
+1133 1161 L
+1135 1160 L
+1137 1160 L
+1139 1162 L
+1139 1162 L
+1141 1164 L
+1143 1165 L
+1145 1167 L
+1147 1169 L
+1148 1170 L
+1149 1170 L
+1151 1171 L
+S
+1088 1146 M
+1088 1146 L
+1090 1147 L
+1092 1147 L
+1094 1148 L
+1096 1149 L
+1098 1149 L
+1100 1150 L
+1102 1152 L
+1104 1153 L
+1105 1154 L
+1106 1155 L
+1108 1156 L
+1110 1156 L
+1112 1157 L
+1114 1158 L
+1115 1162 L
+1116 1163 L
+1118 1165 L
+1119 1167 L
+1121 1168 L
+1123 1170 L
+1123 1170 L
+1125 1173 L
+1127 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1110 M
+1090 1112 L
+1092 1114 L
+1092 1114 L
+1094 1116 L
+1096 1119 L
+1098 1122 L
+1098 1122 L
+1100 1123 L
+1102 1125 L
+1104 1126 L
+1106 1128 L
+1108 1130 L
+1108 1130 L
+1110 1137 L
+1110 1138 L
+1110 1141 L
+1109 1146 L
+1108 1150 L
+1106 1150 L
+1104 1150 L
+1102 1149 L
+1100 1148 L
+1098 1147 L
+1096 1147 L
+1094 1146 L
+1094 1146 L
+1092 1146 L
+1090 1145 L
+1088 1144 L
+S
+1151 1174 M
+1149 1173 L
+1147 1171 L
+1145 1170 L
+1144 1170 L
+1143 1169 L
+1141 1167 L
+1139 1165 L
+1137 1164 L
+1135 1163 L
+1133 1164 L
+1131 1165 L
+1129 1166 L
+1127 1169 L
+1127 1170 L
+1127 1171 L
+1129 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1112 M
+1090 1114 L
+1090 1114 L
+1092 1116 L
+1094 1119 L
+1096 1122 L
+1096 1122 L
+1098 1124 L
+1100 1126 L
+1102 1127 L
+1104 1129 L
+1105 1130 L
+1106 1132 L
+1108 1138 L
+1106 1145 L
+1104 1146 L
+1102 1146 L
+1100 1146 L
+1098 1145 L
+1096 1145 L
+1094 1145 L
+1092 1144 L
+1090 1143 L
+1088 1142 L
+S
+1151 1178 M
+1149 1176 L
+1147 1174 L
+1145 1173 L
+1143 1172 L
+1141 1170 L
+1141 1170 L
+1139 1168 L
+1137 1167 L
+1135 1166 L
+1133 1167 L
+1131 1168 L
+1130 1170 L
+1131 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1115 M
+1090 1117 L
+1092 1119 L
+1094 1122 L
+1094 1122 L
+1096 1124 L
+1098 1126 L
+1100 1128 L
+1102 1130 L
+1102 1130 L
+1104 1134 L
+1105 1138 L
+1104 1141 L
+1102 1142 L
+1100 1143 L
+1098 1143 L
+1096 1143 L
+1094 1143 L
+1092 1142 L
+1090 1141 L
+1088 1140 L
+S
+1133 1178 M
+1133 1176 L
+1135 1170 L
+1137 1171 L
+1139 1172 L
+1141 1174 L
+1143 1175 L
+1145 1176 L
+1147 1177 L
+1148 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1117 M
+1090 1119 L
+1092 1122 L
+1092 1122 L
+1094 1125 L
+1096 1127 L
+1098 1129 L
+1099 1130 L
+1100 1133 L
+1102 1138 L
+1102 1138 L
+1102 1138 L
+1100 1140 L
+1098 1141 L
+1096 1141 L
+1094 1140 L
+1092 1140 L
+1090 1139 L
+1089 1138 L
+1088 1137 L
+S
+1139 1178 M
+1139 1178 L
+1141 1178 L
+1141 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1088 1120 M
+1090 1122 L
+1090 1123 L
+1092 1127 L
+1094 1129 L
+1095 1130 L
+1094 1134 L
+1092 1135 L
+1090 1134 L
+1088 1133 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1260 M
+1149 1258 L
+1148 1257 L
+1147 1256 L
+1145 1254 L
+1143 1252 L
+1141 1249 L
+1141 1249 L
+1139 1247 L
+1137 1246 L
+1135 1245 L
+1133 1246 L
+1132 1249 L
+1131 1250 L
+1129 1251 L
+1127 1251 L
+1125 1250 L
+1125 1249 L
+1124 1241 L
+1125 1237 L
+1126 1233 L
+1125 1232 L
+1124 1225 L
+1124 1217 L
+1124 1209 L
+1124 1201 L
+1125 1198 L
+1127 1197 L
+1129 1197 L
+1131 1197 L
+1133 1197 L
+1135 1194 L
+1135 1194 L
+1135 1193 L
+1133 1190 L
+1131 1186 L
+1131 1186 L
+1129 1184 L
+1127 1182 L
+1125 1179 L
+1125 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1257 M
+1149 1255 L
+1147 1253 L
+1145 1251 L
+1144 1249 L
+1143 1248 L
+1141 1243 L
+1139 1241 L
+1139 1241 L
+1137 1240 L
+1135 1240 L
+1133 1239 L
+1131 1238 L
+1129 1234 L
+1129 1233 L
+1127 1229 L
+1126 1225 L
+1126 1217 L
+1126 1209 L
+1127 1201 L
+1127 1201 L
+1129 1201 L
+1131 1201 L
+1133 1201 L
+1135 1201 L
+1135 1202 L
+1135 1201 L
+1137 1195 L
+1137 1194 L
+1137 1193 L
+1135 1190 L
+1133 1186 L
+1133 1185 L
+1131 1184 L
+1129 1182 L
+1127 1179 L
+1127 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1254 M
+1149 1252 L
+1147 1250 L
+1146 1249 L
+1145 1243 L
+1145 1241 L
+1143 1239 L
+1141 1237 L
+1139 1236 L
+1137 1235 L
+1135 1235 L
+1133 1234 L
+1133 1233 L
+1131 1230 L
+1129 1227 L
+1129 1225 L
+1129 1219 L
+1130 1217 L
+1131 1215 L
+1133 1215 L
+1135 1215 L
+1137 1213 L
+1139 1209 L
+1139 1209 L
+1140 1201 L
+1139 1198 L
+1139 1194 L
+1137 1190 L
+1135 1186 L
+1135 1186 L
+1133 1183 L
+1131 1181 L
+1129 1179 L
+1129 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1250 M
+1150 1249 L
+1149 1245 L
+1148 1241 L
+1147 1237 L
+1145 1233 L
+1145 1233 L
+1143 1230 L
+1141 1228 L
+1139 1225 L
+1139 1225 L
+1139 1225 L
+1141 1221 L
+1142 1217 L
+1143 1213 L
+1144 1209 L
+1143 1207 L
+1142 1201 L
+1141 1198 L
+1140 1194 L
+1139 1191 L
+1137 1186 L
+1137 1186 L
+1135 1183 L
+1133 1181 L
+1131 1179 L
+1131 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1180 M
+1149 1179 L
+1148 1178 L
+S
+1151 1238 M
+1150 1233 L
+1149 1231 L
+1147 1225 L
+1148 1217 L
+1147 1210 L
+1147 1209 L
+1145 1203 L
+1145 1201 L
+1143 1198 L
+1142 1194 L
+1141 1192 L
+1139 1186 L
+1139 1186 L
+1137 1182 L
+1135 1180 L
+1133 1178 L
+1133 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1182 M
+1149 1181 L
+1147 1180 L
+1145 1179 L
+1143 1179 L
+1141 1178 L
+S
+1151 1215 M
+1150 1209 L
+1149 1207 L
+1147 1201 L
+1147 1201 L
+1145 1198 L
+1143 1194 L
+1143 1193 L
+1141 1186 L
+1141 1186 L
+1139 1178 L
+1139 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1185 M
+1149 1184 L
+1147 1183 L
+1145 1184 L
+1144 1186 L
+1145 1192 L
+1145 1194 L
+1147 1197 L
+1149 1200 L
+1150 1201 L
+1151 1205 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1191 M
+1149 1192 L
+1149 1194 L
+1149 1194 L
+1151 1197 L
+S
+/level 0 def
+/levelcolor 3 def
+1181 418 M
+1183 416 L
+1185 415 L
+1186 410 L
+1187 410 L
+1189 408 L
+1191 406 L
+1193 406 L
+1194 408 L
+1195 410 L
+1194 411 L
+1193 414 L
+1191 416 L
+1189 418 L
+S
+/level 0 def
+/levelcolor 3 def
+1181 418 M
+1183 421 L
+1185 421 L
+1187 419 L
+1189 418 L
+1189 418 L
+S
+/level 0 def
+/levelcolor 3 def
+1194 817 M
+1196 816 L
+1198 817 L
+1200 819 L
+1202 821 L
+1200 824 L
+1198 824 L
+1196 824 L
+1194 823 L
+1193 821 L
+1194 817 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1168 M
+1153 1169 L
+1155 1170 L
+1155 1170 L
+1157 1170 L
+1159 1171 L
+1161 1171 L
+1163 1172 L
+1165 1173 L
+1167 1173 L
+1169 1172 L
+1171 1170 L
+1171 1170 L
+1173 1166 L
+1175 1164 L
+1177 1163 L
+1179 1162 L
+1181 1162 L
+1183 1163 L
+1185 1164 L
+1187 1165 L
+1189 1164 L
+1190 1162 L
+1189 1161 L
+1187 1159 L
+1185 1157 L
+1184 1154 L
+1183 1146 L
+1185 1142 L
+1187 1141 L
+1189 1141 L
+1191 1143 L
+1193 1144 L
+1194 1146 L
+1194 1147 L
+1196 1154 L
+1196 1154 L
+1198 1155 L
+1200 1154 L
+1202 1154 L
+1204 1155 L
+1206 1157 L
+1208 1161 L
+1209 1162 L
+1210 1165 L
+1212 1168 L
+1213 1170 L
+1214 1172 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1171 M
+1153 1172 L
+1155 1173 L
+1157 1174 L
+1159 1174 L
+1161 1175 L
+1163 1175 L
+1165 1176 L
+1167 1177 L
+1169 1177 L
+1171 1175 L
+1173 1172 L
+1174 1170 L
+1175 1168 L
+1177 1167 L
+1179 1167 L
+1181 1168 L
+1182 1170 L
+1183 1170 L
+1185 1171 L
+1187 1172 L
+1189 1172 L
+1191 1171 L
+1192 1170 L
+1193 1170 L
+1194 1166 L
+1196 1164 L
+1198 1162 L
+1199 1162 L
+1200 1161 L
+1202 1160 L
+1204 1161 L
+1205 1162 L
+1206 1164 L
+1208 1167 L
+1210 1170 L
+1210 1171 L
+1212 1174 L
+1214 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1174 M
+1153 1176 L
+1155 1177 L
+1156 1178 L
+S
+1174 1178 M
+1175 1176 L
+1177 1173 L
+1179 1172 L
+1181 1173 L
+1183 1174 L
+1185 1175 L
+1187 1176 L
+1189 1177 L
+1191 1176 L
+1193 1176 L
+1194 1174 L
+1196 1173 L
+1198 1172 L
+1200 1171 L
+1202 1172 L
+1204 1173 L
+1206 1175 L
+1208 1176 L
+1210 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1178 M
+1151 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1260 M
+1153 1261 L
+1155 1263 L
+1157 1265 L
+1157 1265 L
+1159 1267 L
+1161 1268 L
+1163 1269 L
+1165 1270 L
+1167 1272 L
+1168 1273 L
+1169 1275 L
+1171 1278 L
+1173 1281 L
+1173 1281 L
+1175 1285 L
+1177 1288 L
+1177 1289 L
+1179 1294 L
+1179 1296 L
+1181 1299 L
+1182 1304 L
+1183 1312 L
+1181 1320 L
+1181 1321 L
+1180 1328 L
+1181 1330 L
+1183 1333 L
+1184 1336 L
+1185 1336 L
+1187 1340 L
+1189 1343 L
+1189 1344 L
+1191 1346 L
+1193 1347 L
+1194 1348 L
+1196 1349 L
+1198 1350 L
+1200 1352 L
+1201 1352 L
+1202 1355 L
+1204 1357 L
+1206 1357 L
+1208 1357 L
+1210 1357 L
+1212 1357 L
+1214 1357 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1178 M
+1214 1178 L
+S
+1151 1257 M
+1151 1257 L
+1153 1258 L
+1155 1260 L
+1157 1261 L
+1159 1263 L
+1160 1265 L
+1161 1265 L
+1163 1267 L
+1165 1268 L
+1167 1270 L
+1169 1272 L
+1170 1273 L
+1171 1274 L
+1173 1277 L
+1175 1280 L
+1175 1281 L
+1177 1284 L
+1179 1288 L
+1179 1289 L
+1181 1293 L
+1182 1296 L
+1183 1300 L
+1183 1304 L
+1183 1312 L
+1183 1316 L
+1182 1320 L
+1181 1328 L
+1183 1331 L
+1185 1334 L
+1186 1336 L
+1187 1338 L
+1189 1341 L
+1191 1344 L
+1191 1344 L
+1193 1345 L
+1194 1346 L
+1196 1347 L
+1198 1349 L
+1200 1350 L
+1202 1351 L
+1203 1352 L
+1204 1353 L
+1206 1354 L
+1208 1355 L
+1210 1354 L
+1212 1354 L
+1214 1353 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1184 M
+1212 1181 L
+1210 1178 L
+1210 1178 L
+S
+1151 1254 M
+1153 1255 L
+1155 1256 L
+1157 1257 L
+1157 1257 L
+1159 1259 L
+1161 1262 L
+1163 1264 L
+1163 1265 L
+1165 1266 L
+1167 1268 L
+1169 1270 L
+1171 1271 L
+1173 1273 L
+1173 1273 L
+1175 1276 L
+1177 1279 L
+1178 1281 L
+1179 1282 L
+1181 1286 L
+1182 1289 L
+1183 1292 L
+1184 1296 L
+1185 1300 L
+1185 1304 L
+1185 1310 L
+1184 1312 L
+1183 1320 L
+1183 1322 L
+1182 1328 L
+1183 1328 L
+1185 1332 L
+1187 1335 L
+1187 1336 L
+1189 1339 L
+1191 1341 L
+1193 1343 L
+1194 1344 L
+1194 1344 L
+1196 1345 L
+1198 1346 L
+1200 1348 L
+1202 1349 L
+1204 1350 L
+1206 1351 L
+1208 1352 L
+1210 1351 L
+1212 1351 L
+1214 1350 L
+S
+1156 1178 M
+1157 1178 L
+1159 1178 L
+1161 1178 L
+1163 1179 L
+1165 1179 L
+1167 1180 L
+1169 1181 L
+1171 1180 L
+1173 1179 L
+1174 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1190 M
+1212 1188 L
+1211 1186 L
+1210 1185 L
+1208 1183 L
+1206 1182 L
+1204 1181 L
+1202 1181 L
+1200 1180 L
+1198 1180 L
+1196 1180 L
+1194 1181 L
+1193 1182 L
+1191 1182 L
+1189 1182 L
+1187 1181 L
+1185 1180 L
+1183 1179 L
+1181 1179 L
+1179 1179 L
+1177 1181 L
+1175 1184 L
+1173 1186 L
+1173 1186 L
+1171 1186 L
+1171 1186 L
+1169 1185 L
+1167 1184 L
+1165 1183 L
+1163 1182 L
+1161 1181 L
+1159 1180 L
+1157 1180 L
+1155 1179 L
+1153 1179 L
+1151 1178 L
+S
+1151 1250 M
+1153 1251 L
+1155 1251 L
+1157 1252 L
+1159 1254 L
+1161 1257 L
+1161 1257 L
+1163 1261 L
+1165 1263 L
+1166 1265 L
+1167 1265 L
+1169 1267 L
+1171 1269 L
+1173 1270 L
+1175 1272 L
+1176 1273 L
+1177 1274 L
+1179 1277 L
+1181 1281 L
+1181 1281 L
+1183 1285 L
+1184 1289 L
+1185 1290 L
+1186 1296 L
+1187 1304 L
+1186 1312 L
+1185 1316 L
+1184 1320 L
+1184 1328 L
+1185 1329 L
+1187 1333 L
+1189 1336 L
+1189 1336 L
+1191 1339 L
+1193 1341 L
+1194 1342 L
+1196 1343 L
+1198 1344 L
+1199 1344 L
+1200 1345 L
+1202 1346 L
+1204 1347 L
+1206 1348 L
+1208 1349 L
+1210 1348 L
+1212 1348 L
+1214 1347 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1180 M
+1153 1181 L
+1155 1182 L
+1157 1182 L
+1159 1183 L
+1161 1184 L
+1163 1185 L
+1164 1186 L
+1165 1186 L
+1167 1187 L
+1169 1188 L
+1171 1188 L
+1173 1189 L
+1175 1188 L
+1177 1187 L
+1179 1186 L
+1179 1186 L
+1181 1185 L
+1183 1184 L
+1185 1185 L
+1186 1186 L
+1187 1186 L
+1189 1187 L
+1191 1187 L
+1193 1187 L
+1194 1186 L
+1196 1186 L
+1197 1186 L
+1198 1185 L
+1200 1185 L
+1202 1185 L
+1204 1186 L
+1204 1186 L
+1206 1187 L
+1208 1189 L
+1210 1192 L
+1211 1194 L
+1212 1194 L
+1214 1196 L
+S
+1151 1238 M
+1152 1241 L
+1153 1243 L
+1155 1246 L
+1157 1247 L
+1159 1248 L
+1160 1249 L
+1161 1251 L
+1163 1256 L
+1163 1257 L
+1165 1260 L
+1167 1263 L
+1169 1264 L
+1170 1265 L
+1171 1266 L
+1173 1267 L
+1175 1269 L
+1177 1270 L
+1179 1272 L
+1180 1273 L
+1181 1275 L
+1183 1279 L
+1183 1281 L
+1185 1283 L
+1187 1288 L
+1187 1289 L
+1188 1296 L
+1188 1304 L
+1187 1312 L
+1187 1313 L
+1185 1320 L
+1186 1328 L
+1187 1330 L
+1189 1333 L
+1191 1336 L
+1191 1336 L
+1193 1338 L
+1194 1340 L
+1196 1341 L
+1198 1342 L
+1200 1343 L
+1202 1343 L
+1204 1344 L
+1204 1344 L
+1206 1345 L
+1208 1345 L
+1210 1345 L
+1212 1344 L
+1213 1344 L
+1214 1344 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1182 M
+1153 1183 L
+1155 1184 L
+1157 1185 L
+1157 1186 L
+1159 1186 L
+1161 1187 L
+1163 1188 L
+1165 1189 L
+1167 1190 L
+1169 1191 L
+1171 1192 L
+1173 1192 L
+1175 1192 L
+1177 1191 L
+1179 1190 L
+1181 1189 L
+1183 1189 L
+1185 1189 L
+1187 1190 L
+1189 1191 L
+1191 1191 L
+1193 1191 L
+1194 1190 L
+1196 1189 L
+1198 1188 L
+1200 1188 L
+1202 1189 L
+1204 1190 L
+1206 1193 L
+1207 1194 L
+1208 1195 L
+1210 1197 L
+1212 1199 L
+1214 1201 L
+S
+1151 1215 M
+1152 1217 L
+1152 1225 L
+1153 1232 L
+1153 1233 L
+1155 1238 L
+1156 1241 L
+1157 1242 L
+1159 1244 L
+1161 1246 L
+1163 1249 L
+1163 1249 L
+1165 1256 L
+1165 1257 L
+1167 1259 L
+1169 1261 L
+1171 1263 L
+1173 1264 L
+1174 1265 L
+1175 1265 L
+1177 1267 L
+1179 1269 L
+1181 1271 L
+1182 1273 L
+1183 1273 L
+1185 1278 L
+1186 1281 L
+1187 1282 L
+1189 1286 L
+1189 1289 L
+1190 1296 L
+1190 1304 L
+1189 1310 L
+1188 1312 L
+1187 1319 L
+1186 1320 L
+1187 1322 L
+1187 1328 L
+1189 1330 L
+1191 1333 L
+1193 1336 L
+1193 1336 L
+1194 1338 L
+1196 1339 L
+1198 1340 L
+1200 1341 L
+1202 1342 L
+1204 1342 L
+1206 1343 L
+1208 1343 L
+1210 1343 L
+1212 1343 L
+1214 1342 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1185 M
+1152 1186 L
+1153 1186 L
+1155 1187 L
+1157 1188 L
+1159 1189 L
+1161 1190 L
+1163 1190 L
+1165 1192 L
+1167 1193 L
+1167 1194 L
+1169 1194 L
+1171 1195 L
+1173 1195 L
+1175 1195 L
+1177 1194 L
+1179 1194 L
+1180 1194 L
+1181 1193 L
+1183 1193 L
+1183 1194 L
+1185 1194 L
+1187 1194 L
+1189 1195 L
+1191 1195 L
+1193 1194 L
+1194 1194 L
+1195 1194 L
+1196 1193 L
+1198 1192 L
+1200 1192 L
+1202 1193 L
+1202 1194 L
+1204 1195 L
+1206 1198 L
+1208 1200 L
+1209 1201 L
+1210 1202 L
+1212 1203 L
+1214 1205 L
+S
+1151 1205 M
+1153 1209 L
+1153 1210 L
+1155 1217 L
+1155 1220 L
+1155 1225 L
+1157 1233 L
+1157 1234 L
+1159 1238 L
+1161 1241 L
+1161 1241 L
+1163 1244 L
+1165 1249 L
+1165 1249 L
+1167 1255 L
+1168 1257 L
+1169 1258 L
+1171 1260 L
+1173 1261 L
+1175 1262 L
+1177 1263 L
+1179 1265 L
+1179 1265 L
+1181 1267 L
+1183 1270 L
+1185 1272 L
+1185 1273 L
+1187 1276 L
+1189 1280 L
+1189 1281 L
+1191 1285 L
+1192 1289 L
+1192 1296 L
+1192 1304 L
+1191 1309 L
+1190 1312 L
+1189 1317 L
+1188 1320 L
+1189 1325 L
+1189 1328 L
+1191 1330 L
+1193 1333 L
+1194 1335 L
+1196 1336 L
+1196 1336 L
+1198 1338 L
+1200 1339 L
+1202 1340 L
+1204 1340 L
+1206 1341 L
+1208 1341 L
+1210 1341 L
+1212 1341 L
+1214 1341 L
+S
+/level 0 def
+/levelcolor 3 def
+1151 1191 M
+1153 1191 L
+1155 1191 L
+1157 1192 L
+1159 1192 L
+1161 1193 L
+1162 1194 L
+1163 1194 L
+1165 1195 L
+1167 1196 L
+1169 1197 L
+1171 1197 L
+1173 1197 L
+1175 1197 L
+1177 1197 L
+1179 1197 L
+1181 1196 L
+1183 1196 L
+1185 1197 L
+1187 1197 L
+1189 1198 L
+1191 1198 L
+1193 1198 L
+1194 1197 L
+1196 1197 L
+1198 1197 L
+1200 1197 L
+1202 1199 L
+1204 1201 L
+1205 1201 L
+1206 1203 L
+1208 1204 L
+1210 1205 L
+1212 1207 L
+1214 1209 L
+S
+1151 1197 M
+1153 1201 L
+1153 1202 L
+1155 1207 L
+1156 1209 L
+1157 1213 L
+1158 1217 L
+1159 1223 L
+1159 1225 L
+1160 1233 L
+1161 1234 L
+1163 1239 L
+1164 1241 L
+1165 1243 L
+1167 1248 L
+1167 1249 L
+1169 1253 L
+1171 1256 L
+1172 1257 L
+1173 1258 L
+1175 1259 L
+1177 1260 L
+1179 1262 L
+1181 1263 L
+1182 1265 L
+1183 1266 L
+1185 1269 L
+1187 1271 L
+1188 1273 L
+1189 1275 L
+1191 1278 L
+1192 1281 L
+1193 1283 L
+1194 1289 L
+1194 1289 L
+1195 1296 L
+1195 1304 L
+1194 1305 L
+1193 1310 L
+1192 1312 L
+1191 1316 L
+1190 1320 L
+1191 1325 L
+1191 1328 L
+1193 1330 L
+1194 1332 L
+1196 1334 L
+1198 1335 L
+1200 1336 L
+1200 1336 L
+1202 1337 L
+1204 1338 L
+1206 1338 L
+1208 1339 L
+1210 1339 L
+1212 1339 L
+1214 1338 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1213 M
+1212 1211 L
+1210 1209 L
+1210 1209 L
+1208 1208 L
+1206 1206 L
+1204 1205 L
+1202 1204 L
+1200 1203 L
+1198 1202 L
+1196 1202 L
+1196 1201 L
+1194 1201 L
+1193 1201 L
+1191 1201 L
+1189 1201 L
+1187 1201 L
+1185 1200 L
+1183 1200 L
+1181 1200 L
+1179 1200 L
+1177 1200 L
+1175 1200 L
+1173 1200 L
+1171 1200 L
+1169 1199 L
+1167 1199 L
+1165 1199 L
+1163 1198 L
+1161 1198 L
+1159 1198 L
+1157 1201 L
+1157 1201 L
+1157 1202 L
+1159 1207 L
+1159 1209 L
+1161 1214 L
+1162 1217 L
+1163 1225 L
+1163 1227 L
+1164 1233 L
+1165 1236 L
+1167 1241 L
+1167 1242 L
+1169 1247 L
+1170 1249 L
+1171 1251 L
+1173 1253 L
+1175 1255 L
+1177 1256 L
+1177 1257 L
+1179 1258 L
+1181 1260 L
+1183 1262 L
+1185 1265 L
+1185 1265 L
+1187 1268 L
+1189 1270 L
+1191 1273 L
+1191 1273 L
+1193 1276 L
+1194 1280 L
+1195 1281 L
+1196 1285 L
+1197 1289 L
+1198 1294 L
+1199 1296 L
+1200 1304 L
+1198 1306 L
+1196 1309 L
+1195 1312 L
+1194 1313 L
+1193 1317 L
+1192 1320 L
+1193 1324 L
+1194 1328 L
+1194 1329 L
+1196 1331 L
+1198 1333 L
+1200 1334 L
+1202 1335 L
+1204 1335 L
+1206 1336 L
+1208 1336 L
+1209 1336 L
+1210 1336 L
+1212 1336 L
+1212 1336 L
+1214 1336 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1217 M
+1212 1215 L
+1210 1213 L
+1208 1211 L
+1206 1210 L
+1205 1209 L
+1204 1209 L
+1202 1208 L
+1200 1206 L
+1198 1205 L
+1196 1205 L
+1194 1204 L
+1193 1204 L
+1191 1204 L
+1189 1204 L
+1187 1203 L
+1185 1203 L
+1183 1203 L
+1181 1203 L
+1179 1203 L
+1177 1203 L
+1175 1203 L
+1173 1203 L
+1171 1203 L
+1169 1203 L
+1167 1203 L
+1165 1205 L
+1163 1209 L
+1165 1216 L
+1165 1217 L
+1166 1225 L
+1167 1233 L
+1167 1234 L
+1169 1240 L
+1169 1241 L
+1171 1245 L
+1173 1248 L
+1173 1249 L
+1175 1251 L
+1177 1253 L
+1179 1255 L
+1181 1256 L
+1181 1257 L
+1183 1258 L
+1185 1261 L
+1187 1263 L
+1188 1265 L
+1189 1266 L
+1191 1268 L
+1193 1270 L
+1194 1272 L
+1195 1273 L
+1196 1276 L
+1198 1280 L
+1199 1281 L
+1200 1286 L
+1201 1289 L
+1202 1291 L
+1204 1295 L
+1205 1296 L
+1206 1304 L
+1206 1304 L
+1206 1304 L
+1204 1306 L
+1202 1308 L
+1200 1311 L
+1199 1312 L
+1198 1313 L
+1196 1316 L
+1194 1319 L
+1194 1320 L
+1194 1322 L
+1196 1328 L
+1196 1328 L
+1198 1330 L
+1200 1331 L
+1202 1332 L
+1204 1333 L
+1206 1334 L
+1208 1334 L
+1210 1334 L
+1212 1334 L
+1214 1334 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1220 M
+1212 1218 L
+1211 1217 L
+1210 1217 L
+1208 1215 L
+1206 1213 L
+1204 1212 L
+1202 1211 L
+1200 1210 L
+1198 1210 L
+1198 1209 L
+1196 1209 L
+1194 1208 L
+1193 1207 L
+1191 1207 L
+1189 1206 L
+1187 1206 L
+1185 1206 L
+1183 1206 L
+1181 1205 L
+1179 1205 L
+1177 1205 L
+1175 1206 L
+1173 1206 L
+1171 1207 L
+1169 1208 L
+1167 1209 L
+1167 1217 L
+1168 1225 L
+1169 1230 L
+1169 1233 L
+1171 1238 L
+1172 1241 L
+1173 1243 L
+1175 1246 L
+1177 1249 L
+1177 1249 L
+1179 1251 L
+1181 1253 L
+1183 1255 L
+1185 1257 L
+1185 1257 L
+1187 1260 L
+1189 1262 L
+1191 1264 L
+1192 1265 L
+1193 1266 L
+1194 1268 L
+1196 1270 L
+1198 1272 L
+1199 1273 L
+1200 1275 L
+1202 1279 L
+1204 1281 L
+1204 1283 L
+1206 1289 L
+1206 1289 L
+1208 1293 L
+1210 1296 L
+1210 1299 L
+1212 1304 L
+1210 1306 L
+1208 1308 L
+1206 1310 L
+1205 1312 L
+1204 1312 L
+1202 1314 L
+1200 1316 L
+1198 1319 L
+1197 1320 L
+1198 1323 L
+1200 1328 L
+1200 1328 L
+1202 1330 L
+1204 1331 L
+1206 1331 L
+1208 1332 L
+1210 1332 L
+1212 1332 L
+1214 1331 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1224 M
+1212 1222 L
+1210 1220 L
+1208 1218 L
+1207 1217 L
+1206 1217 L
+1204 1215 L
+1202 1214 L
+1200 1213 L
+1198 1212 L
+1196 1211 L
+1194 1211 L
+1193 1210 L
+1191 1210 L
+1189 1210 L
+1187 1209 L
+1187 1209 L
+1185 1209 L
+1183 1209 L
+1181 1209 L
+1179 1208 L
+1177 1209 L
+1175 1209 L
+1173 1209 L
+1173 1210 L
+1171 1213 L
+1170 1217 L
+1170 1225 L
+1171 1227 L
+1172 1233 L
+1173 1236 L
+1175 1241 L
+1175 1241 L
+1177 1244 L
+1179 1247 L
+1181 1249 L
+1181 1249 L
+1183 1252 L
+1185 1254 L
+1187 1256 L
+1188 1257 L
+1189 1258 L
+1191 1260 L
+1193 1262 L
+1194 1264 L
+1196 1265 L
+1196 1265 L
+1198 1267 L
+1200 1269 L
+1202 1271 L
+1204 1273 L
+1204 1274 L
+1206 1278 L
+1208 1281 L
+1208 1282 L
+1210 1288 L
+1210 1289 L
+1212 1293 L
+1214 1296 L
+1214 1298 L
+S
+1214 1310 M
+1212 1312 L
+1212 1312 L
+1210 1313 L
+1208 1314 L
+1206 1316 L
+1204 1317 L
+1202 1319 L
+1202 1320 L
+1202 1322 L
+1204 1326 L
+1206 1328 L
+1206 1328 L
+1208 1329 L
+1210 1329 L
+1212 1329 L
+1214 1328 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1227 M
+1212 1225 L
+1212 1225 L
+1210 1223 L
+1208 1221 L
+1206 1220 L
+1204 1218 L
+1202 1217 L
+1202 1217 L
+1200 1216 L
+1198 1215 L
+1196 1214 L
+1194 1213 L
+1193 1212 L
+1191 1212 L
+1189 1212 L
+1187 1211 L
+1185 1211 L
+1183 1211 L
+1181 1211 L
+1179 1211 L
+1177 1212 L
+1175 1213 L
+1173 1217 L
+1173 1217 L
+1173 1225 L
+1173 1225 L
+1175 1233 L
+1175 1234 L
+1177 1239 L
+1178 1241 L
+1179 1243 L
+1181 1246 L
+1183 1248 L
+1184 1249 L
+1185 1250 L
+1187 1253 L
+1189 1255 L
+1191 1256 L
+1191 1257 L
+1193 1258 L
+1194 1260 L
+1196 1262 L
+1198 1263 L
+1200 1265 L
+1201 1265 L
+1202 1267 L
+1204 1269 L
+1206 1271 L
+1208 1273 L
+1208 1274 L
+1210 1279 L
+1211 1281 L
+1212 1284 L
+1214 1289 L
+1214 1290 L
+S
+1210 1320 M
+1212 1320 L
+1214 1320 L
+1212 1321 L
+1210 1321 L
+1209 1320 L
+1210 1320 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1231 M
+1212 1228 L
+1210 1227 L
+1209 1225 L
+1208 1225 L
+1206 1223 L
+1204 1221 L
+1202 1220 L
+1200 1219 L
+1198 1218 L
+1198 1217 L
+1196 1217 L
+1194 1216 L
+1193 1215 L
+1191 1214 L
+1189 1214 L
+1187 1214 L
+1185 1214 L
+1183 1214 L
+1181 1214 L
+1179 1215 L
+1177 1216 L
+1176 1217 L
+1175 1225 L
+1177 1232 L
+1177 1233 L
+1179 1238 L
+1180 1241 L
+1181 1242 L
+1183 1245 L
+1185 1247 L
+1187 1249 L
+1187 1249 L
+1189 1251 L
+1191 1254 L
+1193 1255 L
+1194 1257 L
+1195 1257 L
+1196 1258 L
+1198 1260 L
+1200 1262 L
+1202 1263 L
+1204 1265 L
+1205 1265 L
+1206 1267 L
+1208 1270 L
+1210 1272 L
+1211 1273 L
+1212 1276 L
+1214 1281 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1234 M
+1213 1233 L
+1212 1232 L
+1210 1230 L
+1208 1228 L
+1206 1226 L
+1205 1225 L
+1204 1224 L
+1202 1222 L
+1200 1221 L
+1198 1220 L
+1196 1219 L
+1194 1218 L
+1193 1218 L
+1191 1217 L
+1190 1217 L
+1189 1217 L
+1187 1217 L
+1185 1216 L
+1183 1217 L
+1181 1217 L
+1181 1217 L
+1179 1220 L
+1177 1225 L
+1179 1231 L
+1179 1233 L
+1181 1237 L
+1183 1241 L
+1183 1241 L
+1185 1244 L
+1187 1246 L
+1189 1248 L
+1190 1249 L
+1191 1250 L
+1193 1252 L
+1194 1254 L
+1196 1255 L
+1198 1257 L
+1199 1257 L
+1200 1258 L
+1202 1260 L
+1204 1262 L
+1206 1263 L
+1208 1265 L
+1208 1266 L
+1210 1269 L
+1212 1271 L
+1213 1273 L
+1214 1275 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1238 M
+1212 1236 L
+1210 1234 L
+1210 1233 L
+1208 1231 L
+1206 1229 L
+1204 1227 L
+1202 1226 L
+1202 1225 L
+1200 1224 L
+1198 1223 L
+1196 1222 L
+1194 1221 L
+1193 1220 L
+1191 1220 L
+1189 1220 L
+1187 1220 L
+1185 1220 L
+1183 1221 L
+1181 1224 L
+1180 1225 L
+1181 1228 L
+1181 1233 L
+1183 1236 L
+1185 1239 L
+1185 1241 L
+1187 1243 L
+1189 1245 L
+1191 1247 L
+1193 1249 L
+1193 1249 L
+1194 1251 L
+1196 1252 L
+1198 1254 L
+1200 1255 L
+1202 1256 L
+1203 1257 L
+1204 1258 L
+1206 1260 L
+1208 1262 L
+1210 1265 L
+1210 1265 L
+1212 1268 L
+1214 1271 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1243 M
+1213 1241 L
+1212 1240 L
+1210 1238 L
+1208 1235 L
+1207 1233 L
+1206 1233 L
+1204 1231 L
+1202 1229 L
+1200 1227 L
+1198 1226 L
+1197 1225 L
+1196 1225 L
+1194 1224 L
+1193 1223 L
+1191 1223 L
+1189 1223 L
+1187 1223 L
+1185 1224 L
+1184 1225 L
+1184 1233 L
+1185 1234 L
+1187 1238 L
+1188 1241 L
+1189 1242 L
+1191 1244 L
+1193 1246 L
+1194 1248 L
+1196 1249 L
+1196 1249 L
+1198 1251 L
+1200 1252 L
+1202 1253 L
+1204 1255 L
+1206 1257 L
+1207 1257 L
+1208 1259 L
+1210 1261 L
+1212 1264 L
+1213 1265 L
+1214 1267 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1247 M
+1212 1246 L
+1210 1243 L
+1209 1241 L
+1208 1240 L
+1206 1238 L
+1204 1235 L
+1203 1233 L
+1202 1232 L
+1200 1231 L
+1198 1229 L
+1196 1228 L
+1194 1227 L
+1193 1227 L
+1191 1227 L
+1189 1229 L
+1187 1233 L
+1189 1236 L
+1191 1239 L
+1191 1241 L
+1193 1242 L
+1194 1244 L
+1196 1246 L
+1198 1247 L
+1200 1248 L
+1201 1249 L
+1202 1250 L
+1204 1251 L
+1206 1252 L
+1208 1254 L
+1210 1257 L
+1210 1257 L
+1212 1259 L
+1214 1262 L
+S
+/level 0 def
+/levelcolor 3 def
+1193 1233 M
+1194 1232 L
+1196 1232 L
+1198 1233 L
+1198 1235 L
+1200 1238 L
+1202 1240 L
+1203 1241 L
+1202 1242 L
+1200 1242 L
+1198 1242 L
+1196 1241 L
+1196 1241 L
+1194 1237 L
+1193 1234 L
+1192 1233 L
+1193 1233 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1172 M
+1216 1177 L
+1216 1178 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1211 M
+1275 1211 L
+1273 1211 L
+1271 1211 L
+1269 1211 L
+1267 1211 L
+1266 1211 L
+1264 1210 L
+1262 1210 L
+1260 1210 L
+1259 1209 L
+1258 1208 L
+1256 1206 L
+1254 1205 L
+1252 1204 L
+1250 1203 L
+1248 1202 L
+1246 1201 L
+1246 1201 L
+1244 1200 L
+1242 1199 L
+1240 1198 L
+1238 1198 L
+1236 1199 L
+1234 1199 L
+1232 1199 L
+1230 1197 L
+1228 1194 L
+1228 1193 L
+1226 1190 L
+1224 1187 L
+1222 1186 L
+1222 1186 L
+1220 1184 L
+1218 1181 L
+1216 1178 L
+S
+1214 1357 M
+1216 1358 L
+1218 1359 L
+1219 1360 L
+1220 1360 L
+1222 1361 L
+1224 1362 L
+1226 1363 L
+1228 1365 L
+1230 1366 L
+1232 1368 L
+1232 1368 L
+1234 1369 L
+1236 1371 L
+1238 1372 L
+1240 1374 L
+1241 1376 L
+1242 1379 L
+1244 1383 L
+1244 1384 L
+1246 1386 L
+1248 1389 L
+1249 1391 L
+1250 1393 L
+1252 1397 L
+1254 1399 L
+1254 1399 L
+1256 1402 L
+1258 1403 L
+1260 1405 L
+1262 1407 L
+1262 1407 L
+1264 1410 L
+1266 1415 L
+1266 1415 L
+1267 1417 L
+1269 1418 L
+1271 1419 L
+1273 1418 L
+1275 1418 L
+1277 1418 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1178 M
+1216 1182 L
+1218 1185 L
+1219 1186 L
+1220 1187 L
+1222 1189 L
+1224 1191 L
+1226 1194 L
+1226 1195 L
+1228 1199 L
+1229 1201 L
+1230 1202 L
+1232 1203 L
+1234 1204 L
+1236 1203 L
+1238 1203 L
+1240 1202 L
+1242 1202 L
+1244 1203 L
+1246 1204 L
+1248 1205 L
+1250 1206 L
+1252 1207 L
+1254 1208 L
+1255 1209 L
+1256 1210 L
+1258 1212 L
+1260 1213 L
+1262 1213 L
+1264 1213 L
+1266 1213 L
+1267 1213 L
+1269 1212 L
+1271 1212 L
+1273 1212 L
+1275 1212 L
+1277 1212 L
+S
+1214 1353 M
+1216 1353 L
+1218 1353 L
+1220 1354 L
+1222 1356 L
+1224 1358 L
+1226 1360 L
+1226 1360 L
+1228 1362 L
+1230 1364 L
+1232 1365 L
+1234 1367 L
+1236 1368 L
+1236 1368 L
+1238 1369 L
+1240 1371 L
+1242 1374 L
+1243 1376 L
+1244 1378 L
+1246 1382 L
+1246 1384 L
+1248 1386 L
+1250 1389 L
+1251 1391 L
+1252 1392 L
+1254 1396 L
+1256 1398 L
+1257 1399 L
+1258 1400 L
+1260 1402 L
+1262 1404 L
+1264 1406 L
+1265 1407 L
+1266 1408 L
+1267 1411 L
+1269 1414 L
+1271 1415 L
+1273 1415 L
+1275 1415 L
+1277 1414 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1184 M
+1215 1186 L
+1216 1187 L
+1218 1189 L
+1220 1191 L
+1222 1193 L
+1223 1194 L
+1224 1196 L
+1226 1201 L
+1226 1202 L
+1228 1204 L
+1230 1205 L
+1232 1207 L
+1234 1207 L
+1236 1208 L
+1238 1207 L
+1240 1207 L
+1242 1206 L
+1244 1206 L
+1246 1207 L
+1248 1207 L
+1250 1208 L
+1251 1209 L
+1252 1210 L
+1254 1211 L
+1256 1213 L
+1258 1215 L
+1260 1216 L
+1262 1216 L
+1264 1216 L
+1266 1216 L
+1267 1215 L
+1269 1214 L
+1271 1214 L
+1273 1214 L
+1275 1213 L
+1277 1213 L
+S
+1214 1350 M
+1216 1350 L
+1218 1350 L
+1220 1350 L
+1222 1351 L
+1223 1352 L
+1224 1353 L
+1226 1355 L
+1228 1358 L
+1229 1360 L
+1230 1361 L
+1232 1363 L
+1234 1364 L
+1236 1365 L
+1238 1367 L
+1240 1368 L
+1240 1368 L
+1242 1371 L
+1244 1374 L
+1245 1376 L
+1246 1377 L
+1248 1381 L
+1249 1384 L
+1250 1385 L
+1252 1389 L
+1254 1391 L
+1254 1391 L
+1256 1394 L
+1258 1397 L
+1260 1398 L
+1261 1399 L
+1262 1400 L
+1264 1402 L
+1266 1404 L
+1267 1405 L
+1269 1406 L
+1271 1407 L
+1272 1407 L
+1273 1409 L
+1275 1411 L
+1277 1411 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1190 M
+1216 1192 L
+1218 1193 L
+1218 1194 L
+1220 1195 L
+1222 1199 L
+1223 1201 L
+1224 1203 L
+1226 1205 L
+1228 1207 L
+1230 1209 L
+1230 1209 L
+1232 1210 L
+1234 1211 L
+1236 1211 L
+1238 1211 L
+1240 1211 L
+1242 1210 L
+1244 1210 L
+1246 1210 L
+1248 1211 L
+1250 1212 L
+1252 1213 L
+1254 1215 L
+1256 1217 L
+1256 1217 L
+1258 1218 L
+1260 1218 L
+1262 1218 L
+1264 1218 L
+1266 1218 L
+1267 1217 L
+1268 1217 L
+1269 1217 L
+1271 1216 L
+1273 1215 L
+1275 1215 L
+1277 1215 L
+S
+1214 1347 M
+1216 1347 L
+1218 1346 L
+1220 1347 L
+1222 1348 L
+1224 1349 L
+1226 1351 L
+1227 1352 L
+1228 1353 L
+1230 1356 L
+1232 1359 L
+1232 1360 L
+1234 1361 L
+1236 1363 L
+1238 1364 L
+1240 1366 L
+1242 1367 L
+1242 1368 L
+1244 1370 L
+1246 1373 L
+1248 1376 L
+1248 1376 L
+1250 1380 L
+1251 1384 L
+1252 1384 L
+1254 1387 L
+1256 1390 L
+1257 1391 L
+1258 1393 L
+1260 1395 L
+1262 1396 L
+1264 1398 L
+1266 1399 L
+1266 1399 L
+1267 1401 L
+1269 1402 L
+1271 1404 L
+1273 1405 L
+1275 1406 L
+1277 1407 L
+1277 1408 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1196 M
+1216 1197 L
+1218 1199 L
+1220 1201 L
+1220 1202 L
+1222 1204 L
+1224 1207 L
+1226 1209 L
+1226 1209 L
+1228 1211 L
+1230 1212 L
+1232 1213 L
+1234 1214 L
+1236 1214 L
+1238 1214 L
+1240 1214 L
+1242 1214 L
+1244 1214 L
+1246 1214 L
+1248 1214 L
+1250 1215 L
+1252 1217 L
+1252 1217 L
+1254 1218 L
+1256 1219 L
+1258 1220 L
+1260 1220 L
+1262 1220 L
+1264 1220 L
+1266 1219 L
+1267 1219 L
+1269 1218 L
+1271 1218 L
+1273 1217 L
+1275 1217 L
+1275 1217 L
+1277 1217 L
+S
+1214 1344 M
+1216 1344 L
+1218 1344 L
+1220 1344 L
+1222 1344 L
+1223 1344 L
+1224 1345 L
+1226 1347 L
+1228 1349 L
+1230 1351 L
+1231 1352 L
+1232 1354 L
+1234 1357 L
+1236 1360 L
+1236 1360 L
+1238 1362 L
+1240 1363 L
+1242 1365 L
+1244 1367 L
+1245 1368 L
+1246 1369 L
+1248 1372 L
+1250 1375 L
+1250 1376 L
+1252 1379 L
+1254 1382 L
+1254 1384 L
+1256 1385 L
+1258 1388 L
+1260 1390 L
+1261 1391 L
+1262 1392 L
+1264 1394 L
+1266 1396 L
+1267 1397 L
+1269 1398 L
+1271 1399 L
+1271 1399 L
+1273 1401 L
+1275 1403 L
+1277 1404 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1201 M
+1215 1201 L
+1216 1202 L
+1218 1204 L
+1220 1206 L
+1222 1209 L
+1222 1209 L
+1224 1211 L
+1226 1212 L
+1228 1213 L
+1230 1215 L
+1232 1216 L
+1234 1217 L
+1235 1217 L
+1236 1218 L
+1238 1218 L
+1240 1218 L
+1242 1218 L
+1244 1218 L
+1246 1218 L
+1248 1218 L
+1250 1219 L
+1252 1220 L
+1254 1221 L
+1256 1221 L
+1258 1222 L
+1260 1222 L
+1262 1222 L
+1264 1222 L
+1266 1221 L
+1267 1221 L
+1269 1220 L
+1271 1220 L
+1273 1219 L
+1275 1219 L
+1277 1219 L
+S
+1214 1342 M
+1216 1342 L
+1218 1342 L
+1220 1342 L
+1222 1342 L
+1224 1343 L
+1226 1343 L
+1228 1344 L
+1228 1344 L
+1230 1347 L
+1232 1349 L
+1234 1352 L
+1234 1352 L
+1236 1355 L
+1238 1358 L
+1240 1360 L
+1240 1360 L
+1242 1362 L
+1244 1364 L
+1246 1366 L
+1247 1368 L
+1248 1368 L
+1250 1371 L
+1252 1374 L
+1253 1376 L
+1254 1376 L
+1256 1380 L
+1258 1383 L
+1259 1384 L
+1260 1385 L
+1262 1387 L
+1264 1389 L
+1266 1391 L
+1266 1391 L
+1267 1394 L
+1269 1395 L
+1271 1397 L
+1273 1398 L
+1275 1399 L
+1276 1399 L
+1277 1400 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1205 M
+1216 1207 L
+1218 1209 L
+1218 1209 L
+1220 1211 L
+1222 1212 L
+1224 1214 L
+1226 1215 L
+1228 1217 L
+1229 1217 L
+1230 1218 L
+1232 1219 L
+1234 1220 L
+1236 1221 L
+1238 1221 L
+1240 1221 L
+1242 1221 L
+1244 1221 L
+1246 1221 L
+1248 1221 L
+1250 1222 L
+1252 1223 L
+1254 1223 L
+1256 1224 L
+1258 1224 L
+1260 1224 L
+1262 1224 L
+1264 1224 L
+1266 1224 L
+1267 1223 L
+1269 1222 L
+1271 1222 L
+1273 1221 L
+1275 1221 L
+1277 1220 L
+S
+1214 1341 M
+1216 1340 L
+1218 1340 L
+1220 1340 L
+1222 1340 L
+1224 1340 L
+1226 1341 L
+1228 1342 L
+1230 1343 L
+1231 1344 L
+1232 1345 L
+1234 1348 L
+1236 1351 L
+1237 1352 L
+1238 1354 L
+1240 1357 L
+1242 1359 L
+1243 1360 L
+1244 1361 L
+1246 1363 L
+1248 1365 L
+1250 1367 L
+1250 1368 L
+1252 1369 L
+1254 1372 L
+1256 1375 L
+1257 1376 L
+1258 1377 L
+1260 1380 L
+1262 1382 L
+1263 1384 L
+1264 1384 L
+1266 1387 L
+1267 1389 L
+1269 1391 L
+1269 1392 L
+1271 1393 L
+1273 1395 L
+1275 1396 L
+1277 1397 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1209 M
+1215 1209 L
+1216 1211 L
+1218 1213 L
+1220 1214 L
+1222 1216 L
+1224 1217 L
+1224 1217 L
+1226 1218 L
+1228 1220 L
+1230 1221 L
+1232 1223 L
+1234 1224 L
+1236 1225 L
+1238 1225 L
+1238 1225 L
+1240 1225 L
+1241 1225 L
+1242 1225 L
+1244 1225 L
+1246 1225 L
+1248 1225 L
+1248 1225 L
+1250 1226 L
+1252 1226 L
+1254 1227 L
+1256 1227 L
+1258 1227 L
+1260 1227 L
+1262 1227 L
+1264 1226 L
+1266 1226 L
+1267 1226 L
+1269 1225 L
+1269 1225 L
+1271 1224 L
+1273 1224 L
+1275 1223 L
+1277 1223 L
+S
+1214 1338 M
+1216 1338 L
+1218 1338 L
+1220 1337 L
+1222 1337 L
+1224 1338 L
+1226 1339 L
+1228 1340 L
+1230 1341 L
+1232 1343 L
+1234 1344 L
+1234 1344 L
+1236 1347 L
+1238 1350 L
+1240 1352 L
+1240 1352 L
+1242 1355 L
+1244 1358 L
+1246 1359 L
+1246 1360 L
+1248 1361 L
+1250 1364 L
+1252 1366 L
+1254 1367 L
+1254 1368 L
+1256 1370 L
+1258 1373 L
+1260 1375 L
+1260 1376 L
+1262 1378 L
+1264 1380 L
+1266 1382 L
+1267 1384 L
+1267 1385 L
+1269 1388 L
+1271 1390 L
+1273 1391 L
+1274 1391 L
+1275 1393 L
+1277 1393 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1213 M
+1216 1215 L
+1218 1217 L
+1219 1217 L
+1220 1218 L
+1222 1219 L
+1224 1220 L
+1226 1222 L
+1228 1223 L
+1230 1225 L
+1230 1225 L
+1232 1227 L
+1234 1228 L
+1236 1229 L
+1238 1229 L
+1240 1229 L
+1242 1229 L
+1244 1229 L
+1246 1229 L
+1248 1229 L
+1250 1229 L
+1252 1230 L
+1254 1230 L
+1256 1231 L
+1258 1230 L
+1260 1230 L
+1262 1230 L
+1264 1229 L
+1266 1229 L
+1267 1228 L
+1269 1228 L
+1271 1227 L
+1273 1226 L
+1275 1226 L
+1277 1225 L
+1277 1225 L
+S
+1214 1336 M
+1216 1336 L
+1218 1335 L
+1220 1335 L
+1222 1335 L
+1224 1335 L
+1226 1336 L
+1226 1336 L
+1228 1337 L
+1230 1339 L
+1232 1340 L
+1234 1342 L
+1236 1344 L
+1236 1344 L
+1238 1347 L
+1240 1350 L
+1242 1352 L
+1242 1352 L
+1244 1354 L
+1246 1356 L
+1248 1358 L
+1250 1360 L
+1250 1360 L
+1252 1362 L
+1254 1364 L
+1256 1366 L
+1257 1368 L
+1258 1368 L
+1260 1371 L
+1262 1373 L
+1264 1375 L
+1264 1376 L
+1266 1378 L
+1267 1381 L
+1269 1383 L
+1270 1384 L
+1271 1385 L
+1273 1387 L
+1275 1389 L
+1277 1390 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1217 M
+1215 1217 L
+1216 1219 L
+1218 1220 L
+1220 1221 L
+1222 1223 L
+1224 1224 L
+1225 1225 L
+1226 1226 L
+1228 1227 L
+1230 1229 L
+1232 1231 L
+1234 1233 L
+1234 1233 L
+1236 1234 L
+1238 1234 L
+1240 1234 L
+1242 1233 L
+1243 1233 L
+1244 1233 L
+1246 1233 L
+1248 1233 L
+1248 1233 L
+1250 1234 L
+1252 1234 L
+1254 1235 L
+1256 1235 L
+1258 1235 L
+1260 1234 L
+1261 1233 L
+1262 1233 L
+1264 1233 L
+1266 1232 L
+1267 1232 L
+1269 1231 L
+1271 1230 L
+1273 1229 L
+1275 1229 L
+1277 1228 L
+S
+1214 1334 M
+1216 1333 L
+1218 1333 L
+1220 1333 L
+1222 1333 L
+1224 1333 L
+1226 1334 L
+1228 1335 L
+1230 1336 L
+1230 1336 L
+1232 1338 L
+1234 1340 L
+1236 1342 L
+1238 1344 L
+1238 1344 L
+1240 1346 L
+1242 1349 L
+1244 1351 L
+1245 1352 L
+1246 1353 L
+1248 1355 L
+1250 1357 L
+1252 1359 L
+1253 1360 L
+1254 1360 L
+1256 1363 L
+1258 1365 L
+1260 1367 L
+1261 1368 L
+1262 1369 L
+1264 1372 L
+1266 1374 L
+1267 1376 L
+1267 1376 L
+1269 1379 L
+1271 1381 L
+1273 1383 L
+1275 1384 L
+1275 1384 L
+1277 1385 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1220 M
+1216 1222 L
+1218 1224 L
+1220 1225 L
+1220 1225 L
+1222 1227 L
+1224 1228 L
+1226 1230 L
+1228 1232 L
+1229 1233 L
+1230 1234 L
+1232 1236 L
+1234 1237 L
+1236 1238 L
+1238 1238 L
+1240 1238 L
+1242 1238 L
+1244 1238 L
+1246 1237 L
+1248 1238 L
+1250 1239 L
+1252 1239 L
+1254 1240 L
+1256 1240 L
+1258 1240 L
+1260 1239 L
+1262 1238 L
+1264 1238 L
+1266 1237 L
+1267 1236 L
+1269 1236 L
+1271 1234 L
+1273 1233 L
+1274 1233 L
+1275 1232 L
+1277 1231 L
+S
+1214 1331 M
+1216 1331 L
+1218 1330 L
+1220 1330 L
+1222 1330 L
+1224 1331 L
+1226 1332 L
+1228 1333 L
+1230 1334 L
+1232 1335 L
+1233 1336 L
+1234 1337 L
+1236 1340 L
+1238 1342 L
+1240 1343 L
+1241 1344 L
+1242 1346 L
+1244 1348 L
+1246 1350 L
+1248 1352 L
+1248 1352 L
+1250 1354 L
+1252 1356 L
+1254 1357 L
+1256 1359 L
+1257 1360 L
+1258 1361 L
+1260 1363 L
+1262 1366 L
+1264 1367 L
+1264 1368 L
+1266 1370 L
+1267 1373 L
+1269 1375 L
+1271 1376 L
+1271 1377 L
+1273 1379 L
+1275 1380 L
+1277 1381 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1224 M
+1216 1225 L
+1216 1226 L
+1218 1227 L
+1220 1229 L
+1222 1231 L
+1224 1233 L
+1224 1233 L
+1226 1235 L
+1228 1237 L
+1230 1239 L
+1232 1241 L
+1233 1241 L
+1234 1242 L
+1236 1242 L
+1238 1243 L
+1240 1243 L
+1242 1242 L
+1244 1242 L
+1246 1242 L
+1248 1243 L
+1250 1243 L
+1252 1244 L
+1254 1245 L
+1256 1245 L
+1258 1245 L
+1260 1245 L
+1262 1245 L
+1264 1244 L
+1266 1243 L
+1267 1242 L
+1269 1241 L
+1270 1241 L
+1271 1240 L
+1273 1238 L
+1275 1236 L
+1277 1235 L
+S
+1214 1298 M
+1216 1304 L
+1214 1310 L
+S
+1214 1328 M
+1215 1328 L
+1216 1327 L
+1218 1326 L
+1220 1326 L
+1222 1327 L
+1224 1328 L
+1225 1328 L
+1226 1329 L
+1228 1330 L
+1230 1332 L
+1232 1334 L
+1234 1335 L
+1235 1336 L
+1236 1337 L
+1238 1340 L
+1240 1342 L
+1242 1343 L
+1243 1344 L
+1244 1345 L
+1246 1348 L
+1248 1349 L
+1250 1351 L
+1251 1352 L
+1252 1352 L
+1254 1354 L
+1256 1356 L
+1258 1358 L
+1260 1360 L
+1260 1360 L
+1262 1362 L
+1264 1364 L
+1266 1366 L
+1267 1368 L
+1267 1368 L
+1269 1371 L
+1271 1373 L
+1273 1374 L
+1275 1375 L
+1276 1376 L
+1277 1376 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1227 M
+1216 1229 L
+1218 1231 L
+1220 1233 L
+1220 1233 L
+1222 1235 L
+1224 1237 L
+1226 1240 L
+1227 1241 L
+1228 1242 L
+1230 1243 L
+1232 1244 L
+1234 1245 L
+1236 1246 L
+1238 1247 L
+1240 1247 L
+1242 1247 L
+1244 1246 L
+1246 1247 L
+1248 1247 L
+1250 1248 L
+1252 1249 L
+1253 1249 L
+1254 1249 L
+1256 1250 L
+1258 1250 L
+1260 1251 L
+1262 1251 L
+1264 1251 L
+1266 1250 L
+1267 1250 L
+1269 1249 L
+1269 1249 L
+1271 1247 L
+1273 1244 L
+1275 1242 L
+1276 1241 L
+1277 1240 L
+S
+1214 1290 M
+1216 1294 L
+1217 1296 L
+1218 1300 L
+1220 1304 L
+1220 1312 L
+1219 1320 L
+1220 1321 L
+1222 1322 L
+1224 1323 L
+1226 1325 L
+1228 1327 L
+1229 1328 L
+1230 1329 L
+1232 1331 L
+1234 1333 L
+1236 1335 L
+1237 1336 L
+1238 1337 L
+1240 1340 L
+1242 1342 L
+1244 1343 L
+1245 1344 L
+1246 1345 L
+1248 1347 L
+1250 1348 L
+1252 1350 L
+1254 1351 L
+1255 1352 L
+1256 1353 L
+1258 1355 L
+1260 1357 L
+1262 1359 L
+1263 1360 L
+1264 1361 L
+1266 1363 L
+1267 1365 L
+1269 1367 L
+1271 1368 L
+1271 1368 L
+1273 1370 L
+1275 1371 L
+1277 1372 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1231 M
+1216 1233 L
+1216 1233 L
+1218 1235 L
+1220 1237 L
+1222 1240 L
+1223 1241 L
+1224 1242 L
+1226 1243 L
+1228 1245 L
+1230 1247 L
+1232 1248 L
+1233 1249 L
+1234 1249 L
+1236 1250 L
+1238 1250 L
+1240 1250 L
+1242 1250 L
+1244 1250 L
+1246 1250 L
+1248 1251 L
+1250 1251 L
+1252 1252 L
+1254 1253 L
+1256 1254 L
+1258 1255 L
+1260 1256 L
+1262 1256 L
+1264 1256 L
+1266 1256 L
+1267 1256 L
+1269 1255 L
+1271 1254 L
+1273 1253 L
+1275 1250 L
+1276 1249 L
+1277 1248 L
+S
+1214 1281 M
+1214 1281 L
+1216 1287 L
+1217 1289 L
+1218 1292 L
+1220 1296 L
+1220 1296 L
+1222 1302 L
+1223 1304 L
+1224 1311 L
+1224 1312 L
+1226 1320 L
+1226 1320 L
+1228 1323 L
+1230 1326 L
+1232 1328 L
+1232 1329 L
+1234 1331 L
+1236 1333 L
+1238 1335 L
+1239 1336 L
+1240 1337 L
+1242 1340 L
+1244 1341 L
+1246 1343 L
+1248 1344 L
+1248 1344 L
+1250 1346 L
+1252 1347 L
+1254 1349 L
+1256 1351 L
+1258 1352 L
+1258 1352 L
+1260 1354 L
+1262 1356 L
+1264 1358 L
+1266 1359 L
+1266 1360 L
+1267 1361 L
+1269 1363 L
+1271 1365 L
+1273 1366 L
+1275 1367 L
+1277 1368 L
+1277 1368 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1234 M
+1216 1237 L
+1218 1239 L
+1219 1241 L
+1220 1242 L
+1222 1243 L
+1224 1245 L
+1226 1247 L
+1228 1249 L
+1228 1249 L
+1230 1250 L
+1232 1251 L
+1234 1251 L
+1236 1252 L
+1238 1253 L
+1240 1253 L
+1242 1253 L
+1244 1253 L
+1246 1254 L
+1248 1254 L
+1250 1255 L
+1252 1256 L
+1253 1257 L
+1254 1257 L
+1256 1258 L
+1258 1259 L
+1260 1259 L
+1262 1260 L
+1264 1260 L
+1266 1260 L
+1267 1260 L
+1269 1260 L
+1271 1260 L
+1273 1260 L
+1275 1260 L
+1277 1259 L
+S
+1214 1275 M
+1216 1279 L
+1217 1281 L
+1218 1285 L
+1219 1289 L
+1220 1290 L
+1222 1295 L
+1223 1296 L
+1224 1300 L
+1226 1304 L
+1226 1305 L
+1228 1312 L
+1228 1313 L
+1230 1320 L
+1230 1321 L
+1232 1325 L
+1234 1328 L
+1234 1328 L
+1236 1331 L
+1238 1333 L
+1240 1335 L
+1241 1336 L
+1242 1337 L
+1244 1339 L
+1246 1341 L
+1248 1342 L
+1250 1343 L
+1251 1344 L
+1252 1344 L
+1254 1346 L
+1256 1348 L
+1258 1350 L
+1260 1351 L
+1261 1352 L
+1262 1353 L
+1264 1355 L
+1266 1357 L
+1267 1358 L
+1269 1360 L
+1270 1360 L
+1271 1361 L
+1273 1363 L
+1275 1364 L
+1277 1365 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1238 M
+1216 1241 L
+1216 1241 L
+1218 1243 L
+1220 1245 L
+1222 1247 L
+1224 1249 L
+1224 1249 L
+1226 1250 L
+1228 1251 L
+1230 1252 L
+1232 1253 L
+1234 1254 L
+1236 1255 L
+1238 1256 L
+1240 1257 L
+1241 1257 L
+1242 1257 L
+1244 1257 L
+1246 1257 L
+1248 1258 L
+1250 1258 L
+1252 1259 L
+1254 1260 L
+1256 1261 L
+1258 1262 L
+1260 1263 L
+1262 1263 L
+1264 1264 L
+1266 1264 L
+1267 1265 L
+1268 1265 L
+1269 1265 L
+1271 1265 L
+1273 1265 L
+1275 1265 L
+1277 1266 L
+S
+1214 1271 M
+1215 1273 L
+1216 1275 L
+1218 1279 L
+1219 1281 L
+1220 1284 L
+1222 1289 L
+1222 1289 L
+1224 1294 L
+1225 1296 L
+1226 1298 L
+1228 1303 L
+1229 1304 L
+1230 1310 L
+1231 1312 L
+1232 1319 L
+1232 1320 L
+1234 1324 L
+1236 1328 L
+1236 1328 L
+1238 1331 L
+1240 1333 L
+1242 1335 L
+1243 1336 L
+1244 1337 L
+1246 1339 L
+1248 1340 L
+1250 1341 L
+1252 1343 L
+1254 1344 L
+1254 1344 L
+1256 1345 L
+1258 1347 L
+1260 1349 L
+1262 1350 L
+1264 1352 L
+1264 1352 L
+1266 1354 L
+1267 1356 L
+1269 1357 L
+1271 1358 L
+1273 1359 L
+1275 1360 L
+1275 1360 L
+1277 1362 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1243 M
+1216 1245 L
+1218 1247 L
+1220 1249 L
+1220 1249 L
+1222 1250 L
+1224 1251 L
+1226 1252 L
+1228 1253 L
+1230 1254 L
+1232 1256 L
+1234 1257 L
+1234 1257 L
+1236 1258 L
+1238 1258 L
+1240 1259 L
+1242 1259 L
+1244 1259 L
+1246 1260 L
+1248 1260 L
+1250 1261 L
+1252 1262 L
+1254 1263 L
+1256 1264 L
+1256 1265 L
+1258 1265 L
+1260 1266 L
+1262 1266 L
+1264 1266 L
+1266 1267 L
+1267 1267 L
+1269 1267 L
+1271 1268 L
+1273 1268 L
+1275 1268 L
+1277 1269 L
+S
+1214 1267 M
+1216 1271 L
+1217 1273 L
+1218 1274 L
+1220 1279 L
+1221 1281 L
+1222 1283 L
+1224 1288 L
+1224 1289 L
+1226 1293 L
+1228 1296 L
+1228 1297 L
+1230 1302 L
+1231 1304 L
+1232 1309 L
+1233 1312 L
+1234 1318 L
+1234 1320 L
+1236 1324 L
+1238 1328 L
+1238 1328 L
+1240 1331 L
+1242 1333 L
+1244 1335 L
+1246 1336 L
+1246 1336 L
+1248 1338 L
+1250 1339 L
+1252 1341 L
+1254 1342 L
+1256 1343 L
+1257 1344 L
+1258 1344 L
+1260 1347 L
+1262 1348 L
+1264 1350 L
+1266 1351 L
+1267 1352 L
+1267 1352 L
+1269 1354 L
+1271 1356 L
+1273 1357 L
+1275 1358 L
+1277 1359 L
+S
+/level 0 def
+/levelcolor 3 def
+1214 1247 M
+1216 1249 L
+1216 1249 L
+1218 1251 L
+1220 1252 L
+1222 1253 L
+1224 1254 L
+1226 1255 L
+1228 1256 L
+1230 1257 L
+1230 1257 L
+1232 1258 L
+1234 1259 L
+1236 1260 L
+1238 1260 L
+1240 1261 L
+1242 1261 L
+1244 1262 L
+1246 1262 L
+1248 1263 L
+1250 1264 L
+1251 1265 L
+1252 1265 L
+1254 1266 L
+1256 1266 L
+1258 1267 L
+1260 1268 L
+1262 1268 L
+1264 1269 L
+1266 1269 L
+1267 1270 L
+1269 1270 L
+1271 1271 L
+1273 1271 L
+1275 1272 L
+1277 1272 L
+S
+1214 1262 M
+1215 1265 L
+1216 1267 L
+1218 1270 L
+1219 1273 L
+1220 1274 L
+1222 1278 L
+1223 1281 L
+1224 1283 L
+1226 1288 L
+1226 1289 L
+1228 1293 L
+1230 1296 L
+1230 1297 L
+1232 1302 L
+1233 1304 L
+1234 1308 L
+1235 1312 L
+1236 1318 L
+1236 1320 L
+1238 1324 L
+1240 1328 L
+1240 1328 L
+1242 1331 L
+1244 1333 L
+1246 1334 L
+1248 1335 L
+1249 1336 L
+1250 1337 L
+1252 1338 L
+1254 1340 L
+1256 1341 L
+1258 1343 L
+1260 1344 L
+1260 1344 L
+1262 1346 L
+1264 1347 L
+1266 1349 L
+1267 1350 L
+1269 1351 L
+1271 1352 L
+1271 1353 L
+1273 1354 L
+1275 1355 L
+1277 1356 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1274 M
+1275 1274 L
+1273 1274 L
+1271 1274 L
+1269 1273 L
+1267 1273 L
+1266 1273 L
+1266 1272 L
+1264 1272 L
+1262 1271 L
+1260 1270 L
+1258 1269 L
+1256 1268 L
+1254 1267 L
+1252 1266 L
+1250 1266 L
+1248 1265 L
+1246 1265 L
+1244 1265 L
+1244 1265 L
+1242 1264 L
+1240 1263 L
+1238 1263 L
+1236 1262 L
+1234 1261 L
+1232 1260 L
+1230 1259 L
+1228 1258 L
+1226 1258 L
+1224 1257 L
+1224 1257 L
+1222 1256 L
+1220 1256 L
+1218 1256 L
+1216 1256 L
+1216 1257 L
+1216 1258 L
+1218 1265 L
+1218 1266 L
+1220 1270 L
+1221 1273 L
+1222 1274 L
+1224 1278 L
+1225 1281 L
+1226 1283 L
+1228 1288 L
+1228 1289 L
+1230 1293 L
+1232 1296 L
+1232 1298 L
+1234 1303 L
+1235 1304 L
+1236 1309 L
+1237 1312 L
+1238 1318 L
+1238 1320 L
+1240 1324 L
+1242 1328 L
+1242 1328 L
+1244 1330 L
+1246 1332 L
+1248 1334 L
+1250 1335 L
+1252 1336 L
+1252 1336 L
+1254 1338 L
+1256 1339 L
+1258 1341 L
+1260 1342 L
+1262 1343 L
+1263 1344 L
+1264 1345 L
+1266 1346 L
+1267 1348 L
+1269 1349 L
+1271 1350 L
+1273 1351 L
+1275 1352 L
+1275 1352 L
+1277 1353 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1276 M
+1275 1276 L
+1273 1276 L
+1271 1275 L
+1269 1275 L
+1267 1275 L
+1266 1274 L
+1264 1274 L
+1262 1273 L
+1260 1273 L
+1260 1273 L
+1258 1272 L
+1256 1270 L
+1254 1269 L
+1252 1268 L
+1250 1267 L
+1248 1267 L
+1246 1266 L
+1244 1266 L
+1242 1266 L
+1240 1266 L
+1238 1265 L
+1236 1265 L
+1236 1265 L
+1234 1263 L
+1232 1262 L
+1230 1262 L
+1228 1261 L
+1226 1261 L
+1224 1261 L
+1222 1262 L
+1221 1265 L
+1222 1268 L
+1224 1273 L
+1224 1274 L
+1226 1278 L
+1227 1281 L
+1228 1283 L
+1230 1289 L
+1230 1289 L
+1232 1294 L
+1233 1296 L
+1234 1299 L
+1236 1303 L
+1237 1304 L
+1238 1310 L
+1239 1312 L
+1240 1318 L
+1240 1320 L
+1242 1324 L
+1244 1327 L
+1244 1328 L
+1246 1330 L
+1248 1331 L
+1250 1333 L
+1252 1334 L
+1254 1335 L
+1255 1336 L
+1256 1337 L
+1258 1339 L
+1260 1340 L
+1262 1342 L
+1264 1343 L
+1266 1344 L
+1266 1344 L
+1267 1345 L
+1269 1347 L
+1271 1348 L
+1273 1349 L
+1275 1350 L
+1277 1351 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1279 M
+1275 1279 L
+1273 1278 L
+1271 1278 L
+1269 1277 L
+1267 1277 L
+1266 1276 L
+1264 1275 L
+1262 1275 L
+1260 1274 L
+1258 1273 L
+1256 1273 L
+1255 1273 L
+1254 1272 L
+1252 1270 L
+1250 1269 L
+1248 1268 L
+1246 1268 L
+1244 1268 L
+1242 1267 L
+1240 1267 L
+1238 1267 L
+1236 1267 L
+1234 1266 L
+1232 1266 L
+1230 1265 L
+1230 1265 L
+1228 1264 L
+1226 1264 L
+1225 1265 L
+1226 1271 L
+1226 1273 L
+1228 1277 L
+1229 1281 L
+1230 1283 L
+1231 1289 L
+1232 1290 L
+1234 1295 L
+1235 1296 L
+1236 1300 L
+1238 1304 L
+1238 1304 L
+1240 1310 L
+1241 1312 L
+1242 1318 L
+1242 1320 L
+1244 1323 L
+1246 1326 L
+1247 1328 L
+1248 1329 L
+1250 1330 L
+1252 1332 L
+1254 1333 L
+1256 1335 L
+1258 1336 L
+1258 1336 L
+1260 1338 L
+1262 1340 L
+1264 1341 L
+1266 1342 L
+1267 1343 L
+1269 1344 L
+1269 1344 L
+1271 1346 L
+1273 1347 L
+1275 1348 L
+1277 1349 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1282 M
+1275 1281 L
+1273 1281 L
+1272 1281 L
+1271 1281 L
+1269 1280 L
+1267 1279 L
+1266 1278 L
+1264 1277 L
+1262 1276 L
+1260 1276 L
+1258 1275 L
+1256 1274 L
+1254 1273 L
+1252 1273 L
+1252 1273 L
+1250 1271 L
+1248 1270 L
+1246 1270 L
+1244 1270 L
+1242 1269 L
+1240 1269 L
+1238 1270 L
+1236 1270 L
+1234 1270 L
+1232 1270 L
+1230 1272 L
+1230 1273 L
+1230 1273 L
+1231 1281 L
+1232 1284 L
+1233 1289 L
+1234 1291 L
+1236 1296 L
+1236 1296 L
+1238 1301 L
+1240 1304 L
+1240 1304 L
+1242 1310 L
+1243 1312 L
+1244 1317 L
+1245 1320 L
+1246 1322 L
+1248 1325 L
+1250 1327 L
+1250 1328 L
+1252 1329 L
+1254 1331 L
+1256 1333 L
+1258 1334 L
+1260 1336 L
+1260 1336 L
+1262 1337 L
+1264 1339 L
+1266 1341 L
+1267 1342 L
+1269 1343 L
+1271 1344 L
+1273 1344 L
+1273 1345 L
+1275 1346 L
+1277 1347 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1284 M
+1275 1283 L
+1273 1283 L
+1271 1282 L
+1269 1282 L
+1267 1281 L
+1266 1281 L
+1266 1281 L
+1264 1280 L
+1262 1278 L
+1260 1277 L
+1258 1276 L
+1256 1275 L
+1254 1274 L
+1252 1274 L
+1250 1273 L
+1248 1273 L
+1247 1273 L
+1246 1272 L
+1244 1272 L
+1242 1272 L
+1240 1272 L
+1238 1272 L
+1237 1273 L
+1236 1273 L
+1234 1276 L
+1233 1281 L
+1234 1285 L
+1234 1289 L
+1236 1293 L
+1237 1296 L
+1238 1298 L
+1240 1302 L
+1242 1304 L
+1242 1305 L
+1244 1310 L
+1245 1312 L
+1246 1316 L
+1247 1320 L
+1248 1321 L
+1250 1324 L
+1252 1326 L
+1253 1328 L
+1254 1328 L
+1256 1331 L
+1258 1332 L
+1260 1334 L
+1262 1335 L
+1263 1336 L
+1264 1337 L
+1266 1338 L
+1267 1340 L
+1269 1341 L
+1271 1342 L
+1273 1343 L
+1275 1344 L
+1277 1344 L
+1277 1344 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1287 M
+1275 1286 L
+1273 1285 L
+1271 1284 L
+1269 1284 L
+1267 1283 L
+1266 1282 L
+1264 1281 L
+1262 1281 L
+1261 1281 L
+1260 1280 L
+1258 1278 L
+1256 1277 L
+1254 1276 L
+1252 1275 L
+1250 1274 L
+1248 1274 L
+1246 1274 L
+1244 1274 L
+1242 1274 L
+1240 1274 L
+1238 1275 L
+1236 1278 L
+1235 1281 L
+1236 1289 L
+1236 1289 L
+1238 1294 L
+1239 1296 L
+1240 1299 L
+1242 1302 L
+1243 1304 L
+1244 1306 L
+1246 1310 L
+1247 1312 L
+1248 1315 L
+1250 1319 L
+1250 1320 L
+1252 1323 L
+1254 1325 L
+1256 1328 L
+1256 1328 L
+1258 1330 L
+1260 1332 L
+1262 1334 L
+1264 1335 L
+1266 1336 L
+1266 1336 L
+1267 1338 L
+1269 1339 L
+1271 1340 L
+1273 1341 L
+1275 1342 L
+1277 1343 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1289 M
+1275 1289 L
+1275 1289 L
+1273 1288 L
+1271 1287 L
+1269 1286 L
+1267 1285 L
+1266 1284 L
+1264 1283 L
+1262 1282 L
+1260 1281 L
+1258 1281 L
+1258 1281 L
+1256 1279 L
+1254 1278 L
+1252 1277 L
+1250 1276 L
+1248 1275 L
+1246 1275 L
+1244 1275 L
+1242 1275 L
+1240 1276 L
+1238 1279 L
+1237 1281 L
+1237 1289 L
+1238 1291 L
+1240 1295 L
+1240 1296 L
+1242 1300 L
+1244 1303 L
+1245 1304 L
+1246 1306 L
+1248 1310 L
+1249 1312 L
+1250 1314 L
+1252 1319 L
+1253 1320 L
+1254 1322 L
+1256 1325 L
+1258 1327 L
+1258 1328 L
+1260 1330 L
+1262 1332 L
+1264 1333 L
+1266 1335 L
+1267 1336 L
+1269 1336 L
+1269 1337 L
+1271 1338 L
+1273 1340 L
+1275 1341 L
+1277 1342 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1291 M
+1275 1290 L
+1273 1290 L
+1271 1289 L
+1269 1289 L
+1269 1289 L
+1267 1287 L
+1266 1286 L
+1264 1285 L
+1262 1284 L
+1260 1283 L
+1258 1282 L
+1256 1281 L
+1255 1281 L
+1254 1280 L
+1252 1278 L
+1250 1277 L
+1248 1277 L
+1246 1277 L
+1244 1277 L
+1242 1278 L
+1240 1279 L
+1239 1281 L
+1238 1289 L
+1240 1292 L
+1242 1296 L
+1242 1296 L
+1244 1300 L
+1246 1303 L
+1247 1304 L
+1248 1306 L
+1250 1310 L
+1251 1312 L
+1252 1314 L
+1254 1318 L
+1255 1320 L
+1256 1322 L
+1258 1325 L
+1260 1327 L
+1261 1328 L
+1262 1329 L
+1264 1331 L
+1266 1333 L
+1267 1334 L
+1269 1335 L
+1271 1336 L
+1272 1336 L
+1273 1338 L
+1275 1339 L
+1277 1340 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1293 M
+1275 1292 L
+1273 1292 L
+1271 1291 L
+1269 1290 L
+1267 1289 L
+1266 1289 L
+1265 1289 L
+1264 1287 L
+1262 1286 L
+1260 1285 L
+1258 1284 L
+1256 1283 L
+1254 1282 L
+1252 1281 L
+1252 1281 L
+1250 1279 L
+1248 1279 L
+1246 1279 L
+1244 1279 L
+1242 1280 L
+1241 1281 L
+1240 1289 L
+1242 1293 L
+1244 1296 L
+1244 1296 L
+1246 1300 L
+1248 1302 L
+1249 1304 L
+1250 1306 L
+1252 1310 L
+1253 1312 L
+1254 1314 L
+1256 1318 L
+1257 1320 L
+1258 1321 L
+1260 1324 L
+1262 1327 L
+1263 1328 L
+1264 1329 L
+1266 1331 L
+1267 1332 L
+1269 1334 L
+1271 1335 L
+1273 1336 L
+1275 1336 L
+1275 1337 L
+1277 1338 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1296 M
+1275 1295 L
+1273 1294 L
+1271 1293 L
+1269 1292 L
+1267 1291 L
+1266 1290 L
+1264 1290 L
+1262 1289 L
+1261 1289 L
+1260 1288 L
+1258 1287 L
+1256 1285 L
+1254 1284 L
+1252 1283 L
+1250 1282 L
+1248 1281 L
+1246 1281 L
+1244 1282 L
+1242 1288 L
+1242 1289 L
+1242 1289 L
+1244 1293 L
+1246 1296 L
+1246 1296 L
+1248 1299 L
+1250 1302 L
+1251 1304 L
+1252 1306 L
+1254 1310 L
+1255 1312 L
+1256 1314 L
+1258 1318 L
+1259 1320 L
+1260 1321 L
+1262 1324 L
+1264 1327 L
+1266 1328 L
+1266 1328 L
+1267 1330 L
+1269 1332 L
+1271 1333 L
+1273 1334 L
+1275 1335 L
+1277 1336 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1298 M
+1275 1297 L
+1274 1296 L
+1273 1296 L
+1271 1295 L
+1269 1294 L
+1267 1293 L
+1266 1292 L
+1264 1291 L
+1262 1291 L
+1260 1290 L
+1258 1289 L
+1256 1289 L
+1256 1288 L
+1254 1287 L
+1252 1286 L
+1250 1285 L
+1248 1285 L
+1246 1286 L
+1244 1289 L
+1246 1291 L
+1248 1294 L
+1249 1296 L
+1250 1298 L
+1252 1301 L
+1253 1304 L
+1254 1306 L
+1256 1310 L
+1257 1312 L
+1258 1314 L
+1260 1318 L
+1261 1320 L
+1262 1321 L
+1264 1324 L
+1266 1326 L
+1267 1328 L
+1268 1328 L
+1269 1329 L
+1271 1331 L
+1273 1332 L
+1275 1333 L
+1277 1334 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1300 M
+1275 1299 L
+1273 1298 L
+1271 1297 L
+1269 1296 L
+1269 1296 L
+1267 1295 L
+1266 1294 L
+1264 1294 L
+1262 1293 L
+1260 1293 L
+1258 1293 L
+1256 1293 L
+1254 1294 L
+1252 1296 L
+1254 1299 L
+1255 1304 L
+1256 1306 L
+1258 1310 L
+1258 1312 L
+1260 1315 L
+1262 1318 L
+1263 1320 L
+1264 1321 L
+1266 1324 L
+1267 1326 L
+1269 1327 L
+1271 1328 L
+1271 1329 L
+1273 1330 L
+1275 1332 L
+1277 1333 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1302 M
+1275 1301 L
+1273 1300 L
+1271 1299 L
+1269 1298 L
+1267 1298 L
+1266 1297 L
+1264 1297 L
+1263 1296 L
+1262 1296 L
+1260 1296 L
+1258 1296 L
+1258 1298 L
+1257 1304 L
+1258 1305 L
+1260 1310 L
+1260 1312 L
+1262 1315 L
+1264 1318 L
+1265 1320 L
+1266 1321 L
+1267 1323 L
+1269 1325 L
+1271 1327 L
+1273 1328 L
+1274 1328 L
+1275 1329 L
+1277 1331 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1305 M
+1277 1304 L
+1275 1303 L
+1273 1302 L
+1271 1301 L
+1269 1300 L
+1267 1300 L
+1266 1300 L
+1264 1300 L
+1262 1301 L
+1260 1304 L
+1262 1309 L
+1262 1312 L
+1264 1315 L
+1266 1318 L
+1267 1320 L
+1267 1321 L
+1269 1323 L
+1271 1324 L
+1273 1326 L
+1275 1327 L
+1277 1328 L
+1277 1328 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1308 M
+1275 1306 L
+1273 1305 L
+1273 1304 L
+1271 1304 L
+1269 1303 L
+1267 1303 L
+1266 1303 L
+1264 1304 L
+1264 1312 L
+1266 1314 L
+1267 1317 L
+1269 1320 L
+1270 1320 L
+1271 1322 L
+1273 1323 L
+1275 1324 L
+1277 1325 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1311 M
+1275 1310 L
+1273 1309 L
+1271 1308 L
+1269 1309 L
+1267 1312 L
+1267 1312 L
+1267 1313 L
+1269 1315 L
+1271 1317 L
+1273 1319 L
+1274 1320 L
+1275 1321 L
+1277 1322 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1211 M
+1279 1210 L
+1281 1210 L
+1283 1210 L
+1285 1210 L
+1287 1210 L
+1289 1210 L
+1291 1211 L
+1293 1212 L
+1295 1214 L
+1297 1217 L
+1297 1217 L
+1299 1220 L
+1301 1222 L
+1303 1224 L
+1305 1225 L
+1305 1225 L
+1307 1226 L
+1309 1226 L
+1311 1227 L
+1313 1228 L
+1315 1230 L
+1317 1232 L
+1318 1233 L
+1319 1234 L
+1321 1236 L
+1323 1236 L
+1325 1236 L
+1327 1236 L
+1327 1241 L
+1328 1249 L
+1329 1249 L
+1331 1251 L
+1333 1252 L
+1335 1254 L
+1336 1257 L
+1337 1257 L
+1339 1260 L
+1341 1264 L
+S
+1341 1398 M
+1339 1397 L
+1337 1397 L
+1335 1396 L
+1333 1394 L
+1331 1391 L
+1331 1391 L
+1329 1390 L
+1327 1390 L
+1325 1389 L
+1323 1389 L
+1321 1389 L
+1319 1388 L
+1317 1388 L
+1315 1388 L
+1313 1390 L
+1312 1391 L
+1313 1395 L
+1315 1399 L
+1315 1404 L
+1315 1407 L
+1315 1407 L
+1313 1408 L
+1312 1407 L
+1311 1405 L
+1309 1402 L
+1307 1401 L
+1305 1401 L
+1303 1402 L
+1301 1406 L
+1301 1407 L
+1299 1413 L
+1299 1415 L
+1297 1418 L
+1295 1420 L
+1293 1421 L
+1291 1420 L
+1289 1420 L
+1287 1419 L
+1285 1418 L
+1283 1418 L
+1281 1417 L
+1279 1417 L
+1277 1418 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1212 M
+1279 1212 L
+1281 1211 L
+1283 1211 L
+1285 1211 L
+1287 1211 L
+1289 1212 L
+1291 1213 L
+1293 1214 L
+1295 1217 L
+1295 1217 L
+1297 1219 L
+1299 1222 L
+1301 1224 L
+1302 1225 L
+1303 1226 L
+1305 1227 L
+1307 1228 L
+1309 1229 L
+1311 1230 L
+1313 1231 L
+1314 1233 L
+1315 1234 L
+1317 1237 L
+1319 1240 L
+1319 1241 L
+1321 1243 L
+1323 1245 L
+1324 1249 L
+1325 1252 L
+1327 1255 L
+1329 1255 L
+1331 1256 L
+1333 1257 L
+1333 1257 L
+1335 1259 L
+1337 1261 L
+1339 1264 L
+1339 1265 L
+1341 1267 L
+S
+1341 1396 M
+1339 1395 L
+1337 1394 L
+1335 1392 L
+1334 1391 L
+1333 1391 L
+1331 1389 L
+1329 1388 L
+1327 1387 L
+1325 1387 L
+1323 1386 L
+1321 1385 L
+1319 1384 L
+1317 1384 L
+1317 1383 L
+1315 1383 L
+1313 1383 L
+1312 1384 L
+1311 1385 L
+1309 1389 L
+1308 1391 L
+1307 1394 L
+1305 1396 L
+1303 1397 L
+1301 1399 L
+1301 1399 L
+1299 1404 L
+1298 1407 L
+1297 1413 L
+1296 1415 L
+1295 1417 L
+1293 1418 L
+1291 1418 L
+1289 1417 L
+1287 1417 L
+1285 1416 L
+1284 1415 L
+1283 1415 L
+1281 1415 L
+1279 1414 L
+1277 1414 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1213 M
+1279 1213 L
+1281 1213 L
+1283 1213 L
+1285 1213 L
+1287 1213 L
+1289 1214 L
+1291 1215 L
+1293 1217 L
+1293 1217 L
+1295 1219 L
+1297 1222 L
+1299 1225 L
+1300 1225 L
+1301 1227 L
+1303 1228 L
+1305 1229 L
+1307 1230 L
+1309 1231 L
+1311 1233 L
+1311 1233 L
+1313 1236 L
+1315 1239 L
+1316 1241 L
+1317 1243 L
+1319 1245 L
+1321 1248 L
+1321 1249 L
+1321 1253 L
+1320 1257 L
+1321 1260 L
+1323 1263 L
+1325 1264 L
+1327 1264 L
+1329 1263 L
+1331 1262 L
+1333 1262 L
+1335 1264 L
+1336 1265 L
+1337 1266 L
+1339 1268 L
+1341 1270 L
+S
+1341 1394 M
+1339 1393 L
+1337 1391 L
+1337 1391 L
+1335 1390 L
+1333 1389 L
+1331 1387 L
+1329 1386 L
+1327 1384 L
+1325 1384 L
+1325 1384 L
+1323 1383 L
+1321 1382 L
+1319 1381 L
+1317 1380 L
+1315 1380 L
+1313 1380 L
+1311 1381 L
+1309 1382 L
+1307 1384 L
+1307 1384 L
+1305 1389 L
+1304 1391 L
+1303 1392 L
+1301 1395 L
+1299 1397 L
+1298 1399 L
+1297 1402 L
+1296 1407 L
+1295 1411 L
+1293 1414 L
+1291 1415 L
+1289 1414 L
+1287 1414 L
+1285 1413 L
+1283 1413 L
+1281 1412 L
+1279 1412 L
+1277 1411 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1215 M
+1279 1215 L
+1281 1215 L
+1283 1215 L
+1285 1215 L
+1287 1215 L
+1289 1216 L
+1291 1217 L
+1291 1218 L
+1293 1219 L
+1295 1222 L
+1297 1225 L
+1298 1225 L
+1299 1227 L
+1301 1229 L
+1303 1231 L
+1305 1232 L
+1307 1233 L
+1307 1233 L
+1309 1236 L
+1311 1239 L
+1312 1241 L
+1313 1243 L
+1315 1246 L
+1317 1248 L
+1318 1249 L
+1317 1251 L
+1315 1257 L
+1317 1265 L
+1317 1265 L
+1319 1266 L
+1321 1267 L
+1323 1267 L
+1325 1268 L
+1327 1268 L
+1329 1269 L
+1331 1269 L
+1333 1269 L
+1335 1269 L
+1337 1270 L
+1339 1272 L
+1339 1273 L
+1341 1273 L
+S
+1341 1391 M
+1339 1390 L
+1337 1389 L
+1335 1388 L
+1333 1386 L
+1331 1384 L
+1330 1384 L
+1329 1383 L
+1327 1382 L
+1325 1381 L
+1323 1381 L
+1321 1379 L
+1319 1378 L
+1317 1377 L
+1315 1376 L
+1313 1376 L
+1311 1377 L
+1309 1379 L
+1307 1380 L
+1305 1382 L
+1303 1384 L
+1303 1384 L
+1301 1389 L
+1300 1391 L
+1299 1392 L
+1297 1396 L
+1295 1399 L
+1295 1399 L
+1293 1407 L
+1293 1408 L
+1291 1410 L
+1289 1411 L
+1287 1411 L
+1285 1410 L
+1283 1410 L
+1281 1410 L
+1279 1409 L
+1277 1408 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1217 M
+1279 1217 L
+1281 1217 L
+1283 1217 L
+1285 1217 L
+1285 1217 L
+1287 1218 L
+1289 1218 L
+1291 1220 L
+1293 1222 L
+1295 1224 L
+1296 1225 L
+1297 1227 L
+1299 1230 L
+1301 1232 L
+1302 1233 L
+1303 1234 L
+1305 1237 L
+1307 1240 L
+1308 1241 L
+1309 1246 L
+1310 1249 L
+1311 1255 L
+1311 1257 L
+1313 1264 L
+1313 1265 L
+1315 1267 L
+1317 1268 L
+1319 1269 L
+1321 1270 L
+1323 1271 L
+1325 1272 L
+1326 1273 L
+1327 1273 L
+1329 1273 L
+1331 1274 L
+1333 1274 L
+1335 1274 L
+1337 1275 L
+1339 1275 L
+1341 1276 L
+S
+1341 1351 M
+1340 1352 L
+1339 1360 L
+1339 1360 L
+1339 1360 L
+1341 1364 L
+S
+1341 1388 M
+1339 1387 L
+1337 1386 L
+1335 1385 L
+1333 1384 L
+1333 1383 L
+1331 1382 L
+1329 1380 L
+1327 1380 L
+1325 1379 L
+1323 1378 L
+1321 1376 L
+1320 1376 L
+1319 1375 L
+1317 1374 L
+1315 1374 L
+1313 1374 L
+1311 1374 L
+1309 1375 L
+1308 1376 L
+1307 1376 L
+1305 1378 L
+1303 1380 L
+1301 1382 L
+1300 1384 L
+1299 1385 L
+1297 1390 L
+1297 1391 L
+1295 1394 L
+1293 1398 L
+1292 1399 L
+1291 1403 L
+1289 1406 L
+1287 1407 L
+1285 1407 L
+1283 1407 L
+1281 1406 L
+1279 1406 L
+1277 1404 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1219 M
+1279 1218 L
+1281 1218 L
+1283 1219 L
+1285 1219 L
+1287 1219 L
+1289 1220 L
+1291 1222 L
+1293 1224 L
+1294 1225 L
+1295 1227 L
+1297 1230 L
+1299 1233 L
+1299 1233 L
+1301 1236 L
+1303 1240 L
+1304 1241 L
+1305 1245 L
+1306 1249 L
+1307 1254 L
+1308 1257 L
+1309 1262 L
+1310 1265 L
+1311 1266 L
+1313 1268 L
+1315 1270 L
+1317 1272 L
+1319 1273 L
+1319 1273 L
+1321 1273 L
+1323 1274 L
+1325 1275 L
+1327 1275 L
+1329 1276 L
+1331 1277 L
+1333 1277 L
+1335 1278 L
+1337 1278 L
+1339 1279 L
+1341 1280 L
+S
+1341 1347 M
+1339 1349 L
+1337 1351 L
+1336 1352 L
+1335 1360 L
+1337 1363 L
+1339 1367 L
+1339 1368 L
+1341 1371 L
+S
+1341 1385 M
+1339 1384 L
+1337 1384 L
+1337 1383 L
+1335 1381 L
+1333 1380 L
+1331 1379 L
+1329 1378 L
+1327 1377 L
+1325 1376 L
+1325 1376 L
+1323 1374 L
+1321 1373 L
+1319 1372 L
+1317 1372 L
+1315 1371 L
+1313 1371 L
+1311 1372 L
+1309 1373 L
+1307 1373 L
+1305 1374 L
+1303 1375 L
+1303 1376 L
+1301 1378 L
+1299 1380 L
+1297 1383 L
+1297 1384 L
+1295 1388 L
+1294 1391 L
+1293 1392 L
+1291 1396 L
+1289 1399 L
+1289 1399 L
+1287 1401 L
+1285 1402 L
+1283 1403 L
+1281 1403 L
+1279 1402 L
+1277 1400 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1220 M
+1279 1220 L
+1281 1220 L
+1283 1220 L
+1285 1221 L
+1287 1221 L
+1289 1223 L
+1291 1225 L
+1291 1225 L
+1293 1227 L
+1295 1230 L
+1297 1233 L
+1297 1234 L
+1299 1237 L
+1301 1241 L
+1301 1241 L
+1303 1248 L
+1303 1249 L
+1304 1257 L
+1305 1260 L
+1306 1265 L
+1307 1266 L
+1309 1268 L
+1311 1271 L
+1313 1273 L
+1313 1273 L
+1315 1274 L
+1317 1274 L
+1319 1275 L
+1321 1275 L
+1323 1276 L
+1325 1277 L
+1327 1278 L
+1329 1279 L
+1331 1280 L
+1331 1281 L
+1333 1281 L
+1335 1282 L
+1337 1282 L
+1339 1283 L
+1341 1284 L
+S
+1341 1343 M
+1339 1344 L
+1338 1344 L
+1337 1345 L
+1335 1347 L
+1333 1350 L
+1331 1352 L
+1332 1360 L
+1333 1363 L
+1334 1368 L
+1335 1369 L
+1337 1373 L
+1339 1376 L
+1339 1376 L
+1339 1376 L
+1337 1377 L
+1335 1377 L
+1333 1376 L
+1332 1376 L
+1331 1375 L
+1329 1373 L
+1327 1373 L
+1325 1372 L
+1323 1371 L
+1321 1370 L
+1319 1369 L
+1317 1368 L
+1315 1368 L
+1313 1368 L
+1311 1369 L
+1309 1369 L
+1307 1370 L
+1305 1371 L
+1303 1373 L
+1301 1374 L
+1299 1376 L
+1299 1376 L
+1297 1380 L
+1295 1383 L
+1295 1384 L
+1293 1387 L
+1291 1390 L
+1290 1391 L
+1289 1393 L
+1287 1396 L
+1285 1398 L
+1283 1398 L
+1281 1398 L
+1279 1398 L
+1277 1397 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1223 M
+1279 1222 L
+1281 1222 L
+1283 1222 L
+1285 1223 L
+1287 1224 L
+1289 1225 L
+1289 1226 L
+1291 1228 L
+1293 1230 L
+1295 1233 L
+1295 1234 L
+1297 1238 L
+1299 1241 L
+1299 1243 L
+1301 1249 L
+1301 1251 L
+1302 1257 L
+1303 1265 L
+1303 1265 L
+1305 1267 L
+1307 1270 L
+1309 1273 L
+1309 1273 L
+1311 1274 L
+1313 1275 L
+1315 1276 L
+1317 1277 L
+1319 1277 L
+1321 1278 L
+1323 1279 L
+1325 1280 L
+1325 1281 L
+1327 1282 L
+1329 1283 L
+1331 1283 L
+1333 1284 L
+1335 1285 L
+1337 1286 L
+1339 1287 L
+1341 1288 L
+S
+1341 1341 M
+1339 1342 L
+1337 1342 L
+1335 1343 L
+1333 1344 L
+1332 1344 L
+1331 1346 L
+1329 1349 L
+1327 1352 L
+1328 1360 L
+1327 1368 L
+1325 1368 L
+1323 1367 L
+1321 1366 L
+1319 1366 L
+1317 1366 L
+1315 1366 L
+1313 1366 L
+1311 1366 L
+1309 1367 L
+1307 1367 L
+1305 1368 L
+1305 1368 L
+1303 1369 L
+1301 1371 L
+1299 1373 L
+1297 1375 L
+1297 1376 L
+1295 1379 L
+1293 1382 L
+1292 1384 L
+1291 1386 L
+1289 1389 L
+1287 1391 L
+1286 1391 L
+1285 1392 L
+1283 1394 L
+1281 1394 L
+1279 1394 L
+1277 1393 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1225 M
+1279 1225 L
+1281 1225 L
+1283 1225 L
+1284 1225 L
+1285 1226 L
+1287 1227 L
+1289 1228 L
+1291 1231 L
+1293 1233 L
+1293 1234 L
+1295 1238 L
+1296 1241 L
+1297 1243 L
+1299 1249 L
+1299 1257 L
+1299 1257 L
+1300 1265 L
+1301 1266 L
+1303 1269 L
+1305 1272 L
+1305 1273 L
+1307 1274 L
+1309 1275 L
+1311 1276 L
+1313 1277 L
+1315 1278 L
+1317 1279 L
+1319 1280 L
+1320 1281 L
+1321 1281 L
+1323 1282 L
+1325 1283 L
+1327 1285 L
+1329 1286 L
+1331 1287 L
+1333 1288 L
+1334 1289 L
+1335 1289 L
+1337 1290 L
+1339 1291 L
+1341 1292 L
+S
+1341 1338 M
+1339 1339 L
+1337 1340 L
+1335 1341 L
+1333 1342 L
+1331 1342 L
+1329 1343 L
+1328 1344 L
+1327 1346 L
+1325 1350 L
+1324 1352 L
+1323 1360 L
+1323 1360 L
+1321 1361 L
+1319 1362 L
+1317 1363 L
+1315 1363 L
+1313 1363 L
+1311 1364 L
+1309 1364 L
+1307 1365 L
+1305 1365 L
+1303 1366 L
+1301 1368 L
+1301 1368 L
+1299 1370 L
+1297 1373 L
+1295 1375 L
+1295 1376 L
+1293 1379 L
+1291 1382 L
+1290 1384 L
+1289 1384 L
+1287 1387 L
+1285 1388 L
+1283 1389 L
+1281 1390 L
+1279 1390 L
+1277 1390 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1228 M
+1279 1227 L
+1281 1227 L
+1283 1227 L
+1285 1228 L
+1287 1229 L
+1289 1231 L
+1290 1233 L
+1291 1234 L
+1293 1238 L
+1294 1241 L
+1295 1244 L
+1297 1249 L
+1297 1257 L
+1297 1259 L
+1298 1265 L
+1299 1266 L
+1301 1270 L
+1303 1273 L
+1303 1273 L
+1305 1274 L
+1307 1276 L
+1309 1277 L
+1311 1279 L
+1313 1280 L
+1313 1281 L
+1315 1281 L
+1317 1282 L
+1319 1283 L
+1321 1284 L
+1323 1286 L
+1325 1287 L
+1327 1289 L
+1327 1289 L
+1329 1290 L
+1331 1291 L
+1333 1292 L
+1335 1293 L
+1337 1294 L
+1339 1295 L
+1340 1296 L
+1341 1297 L
+S
+1341 1335 M
+1339 1336 L
+1339 1336 L
+1337 1337 L
+1335 1338 L
+1333 1339 L
+1331 1340 L
+1329 1341 L
+1327 1342 L
+1325 1344 L
+1324 1344 L
+1323 1347 L
+1321 1351 L
+1320 1352 L
+1319 1356 L
+1317 1358 L
+1315 1360 L
+1314 1360 L
+1313 1360 L
+1311 1361 L
+1309 1361 L
+1307 1362 L
+1305 1363 L
+1303 1364 L
+1301 1365 L
+1299 1367 L
+1298 1368 L
+1297 1369 L
+1295 1372 L
+1293 1375 L
+1292 1376 L
+1291 1378 L
+1289 1381 L
+1287 1383 L
+1286 1384 L
+1285 1384 L
+1283 1385 L
+1281 1386 L
+1279 1386 L
+1277 1385 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1231 M
+1279 1230 L
+1281 1230 L
+1283 1230 L
+1285 1231 L
+1287 1233 L
+1288 1233 L
+1289 1235 L
+1291 1239 L
+1292 1241 L
+1293 1245 L
+1294 1249 L
+1294 1257 L
+1295 1261 L
+1296 1265 L
+1297 1267 L
+1299 1270 L
+1300 1273 L
+1301 1273 L
+1303 1275 L
+1305 1277 L
+1307 1279 L
+1309 1280 L
+1309 1281 L
+1311 1282 L
+1313 1283 L
+1315 1284 L
+1317 1285 L
+1319 1286 L
+1321 1288 L
+1321 1289 L
+1323 1289 L
+1325 1291 L
+1327 1292 L
+1329 1294 L
+1331 1295 L
+1333 1296 L
+1333 1296 L
+1335 1297 L
+1337 1298 L
+1339 1299 L
+1341 1301 L
+S
+1341 1333 M
+1339 1334 L
+1337 1335 L
+1335 1335 L
+1333 1336 L
+1333 1336 L
+1331 1338 L
+1329 1339 L
+1327 1340 L
+1325 1341 L
+1323 1343 L
+1321 1344 L
+1321 1345 L
+1319 1349 L
+1317 1352 L
+1317 1352 L
+1315 1355 L
+1313 1357 L
+1311 1358 L
+1309 1358 L
+1307 1359 L
+1305 1360 L
+1304 1360 L
+1303 1361 L
+1301 1362 L
+1299 1364 L
+1297 1366 L
+1296 1368 L
+1295 1369 L
+1293 1372 L
+1291 1374 L
+1290 1376 L
+1289 1376 L
+1287 1379 L
+1285 1380 L
+1283 1381 L
+1281 1381 L
+1279 1381 L
+1277 1381 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1235 M
+1279 1234 L
+1281 1234 L
+1283 1234 L
+1285 1235 L
+1287 1237 L
+1289 1240 L
+1290 1241 L
+1291 1246 L
+1292 1249 L
+1292 1257 L
+1293 1263 L
+1293 1265 L
+1295 1267 L
+1297 1271 L
+1298 1273 L
+1299 1274 L
+1301 1276 L
+1303 1278 L
+1305 1280 L
+1306 1281 L
+1307 1281 L
+1309 1283 L
+1311 1284 L
+1313 1286 L
+1315 1287 L
+1316 1289 L
+1317 1289 L
+1319 1290 L
+1321 1291 L
+1323 1293 L
+1325 1295 L
+1327 1296 L
+1327 1297 L
+1329 1298 L
+1331 1299 L
+1333 1300 L
+1335 1301 L
+1337 1302 L
+1339 1304 L
+1339 1304 L
+1341 1306 L
+S
+1341 1330 M
+1339 1331 L
+1337 1332 L
+1335 1333 L
+1333 1334 L
+1331 1335 L
+1329 1336 L
+1328 1336 L
+1327 1337 L
+1325 1339 L
+1323 1340 L
+1321 1342 L
+1319 1344 L
+1318 1344 L
+1317 1347 L
+1315 1350 L
+1314 1352 L
+1313 1353 L
+1311 1354 L
+1309 1356 L
+1307 1357 L
+1305 1358 L
+1303 1359 L
+1301 1359 L
+1300 1360 L
+1299 1361 L
+1297 1364 L
+1295 1366 L
+1293 1368 L
+1293 1368 L
+1291 1371 L
+1289 1373 L
+1287 1375 L
+1285 1376 L
+1285 1376 L
+1283 1377 L
+1281 1377 L
+1279 1377 L
+1277 1376 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1240 M
+1279 1239 L
+1281 1238 L
+1283 1239 L
+1285 1240 L
+1286 1241 L
+1287 1243 L
+1289 1248 L
+1289 1249 L
+1289 1257 L
+1291 1265 L
+1291 1265 L
+1293 1268 L
+1295 1271 L
+1296 1273 L
+1297 1274 L
+1299 1276 L
+1301 1278 L
+1303 1280 L
+1303 1281 L
+1305 1282 L
+1307 1284 L
+1309 1286 L
+1311 1288 L
+1312 1289 L
+1313 1289 L
+1315 1291 L
+1317 1292 L
+1319 1294 L
+1321 1296 L
+1322 1296 L
+1323 1297 L
+1325 1298 L
+1327 1300 L
+1329 1301 L
+1331 1302 L
+1333 1304 L
+1334 1304 L
+1335 1305 L
+1337 1307 L
+1339 1309 L
+1341 1311 L
+S
+1341 1325 M
+1339 1328 L
+1338 1328 L
+1337 1329 L
+1335 1330 L
+1333 1331 L
+1331 1333 L
+1329 1334 L
+1327 1335 L
+1325 1336 L
+1324 1336 L
+1323 1338 L
+1321 1339 L
+1319 1341 L
+1317 1343 L
+1316 1344 L
+1315 1345 L
+1313 1349 L
+1311 1351 L
+1310 1352 L
+1309 1352 L
+1307 1354 L
+1305 1355 L
+1303 1356 L
+1301 1358 L
+1299 1359 L
+1298 1360 L
+1297 1360 L
+1295 1363 L
+1293 1365 L
+1291 1367 L
+1291 1368 L
+1289 1370 L
+1287 1371 L
+1285 1372 L
+1283 1373 L
+1281 1373 L
+1279 1373 L
+1277 1372 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1248 M
+1279 1246 L
+1281 1245 L
+1283 1246 L
+1285 1248 L
+1286 1249 L
+1286 1257 L
+1287 1261 L
+1288 1265 L
+1289 1266 L
+1291 1268 L
+1293 1272 L
+1294 1273 L
+1295 1274 L
+1297 1276 L
+1299 1279 L
+1301 1281 L
+1301 1281 L
+1303 1283 L
+1305 1285 L
+1307 1287 L
+1308 1289 L
+1309 1289 L
+1311 1291 L
+1313 1292 L
+1315 1294 L
+1317 1296 L
+1317 1296 L
+1319 1298 L
+1321 1299 L
+1323 1300 L
+1325 1302 L
+1327 1303 L
+1328 1304 L
+1329 1305 L
+1331 1306 L
+1333 1308 L
+1335 1311 L
+1336 1312 L
+1337 1314 L
+1339 1320 L
+1339 1320 L
+1339 1320 L
+1337 1323 L
+1335 1326 L
+1333 1328 L
+1333 1328 L
+1331 1330 L
+1329 1331 L
+1327 1332 L
+1325 1333 L
+1323 1335 L
+1321 1336 L
+1321 1336 L
+1319 1338 L
+1317 1340 L
+1315 1342 L
+1313 1344 L
+1313 1344 L
+1311 1347 L
+1309 1350 L
+1307 1351 L
+1305 1352 L
+1305 1352 L
+1303 1354 L
+1301 1355 L
+1299 1357 L
+1297 1358 L
+1295 1360 L
+1295 1360 L
+1293 1362 L
+1291 1365 L
+1289 1366 L
+1287 1368 L
+1287 1368 L
+1285 1369 L
+1283 1369 L
+1281 1369 L
+1279 1369 L
+1277 1368 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1259 M
+1279 1260 L
+1281 1261 L
+1283 1263 L
+1284 1265 L
+1285 1265 L
+1287 1267 L
+1289 1269 L
+1291 1272 L
+1291 1273 L
+1293 1274 L
+1295 1276 L
+1297 1279 L
+1298 1281 L
+1299 1281 L
+1301 1284 L
+1303 1286 L
+1305 1288 L
+1305 1289 L
+1307 1290 L
+1309 1292 L
+1311 1294 L
+1313 1296 L
+1313 1296 L
+1315 1298 L
+1317 1299 L
+1319 1301 L
+1321 1303 L
+1323 1304 L
+1323 1304 L
+1325 1306 L
+1327 1308 L
+1329 1310 L
+1331 1312 L
+1331 1312 L
+1333 1318 L
+1333 1320 L
+1333 1321 L
+1331 1324 L
+1329 1327 L
+1328 1328 L
+1327 1329 L
+1325 1331 L
+1323 1332 L
+1321 1334 L
+1319 1335 L
+1318 1336 L
+1317 1337 L
+1315 1339 L
+1313 1342 L
+1311 1344 L
+1310 1344 L
+1309 1346 L
+1307 1349 L
+1305 1350 L
+1303 1351 L
+1302 1352 L
+1301 1353 L
+1299 1354 L
+1297 1356 L
+1295 1358 L
+1293 1359 L
+1292 1360 L
+1291 1361 L
+1289 1363 L
+1287 1365 L
+1285 1366 L
+1283 1366 L
+1281 1366 L
+1279 1366 L
+1277 1365 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1266 M
+1279 1266 L
+1281 1266 L
+1283 1267 L
+1285 1269 L
+1287 1271 L
+1289 1273 L
+1289 1273 L
+1291 1275 L
+1293 1277 L
+1295 1279 L
+1296 1281 L
+1297 1282 L
+1299 1284 L
+1301 1287 L
+1303 1289 L
+1303 1289 L
+1305 1291 L
+1307 1294 L
+1309 1296 L
+1309 1296 L
+1311 1298 L
+1313 1299 L
+1315 1301 L
+1317 1303 L
+1318 1304 L
+1319 1305 L
+1321 1307 L
+1323 1309 L
+1325 1311 L
+1326 1312 L
+1327 1315 L
+1328 1320 L
+1327 1323 L
+1325 1326 L
+1324 1328 L
+1323 1329 L
+1321 1331 L
+1319 1333 L
+1317 1334 L
+1315 1336 L
+1315 1336 L
+1313 1339 L
+1311 1341 L
+1309 1343 L
+1308 1344 L
+1307 1346 L
+1305 1348 L
+1303 1349 L
+1301 1351 L
+1299 1352 L
+1299 1352 L
+1297 1354 L
+1295 1356 L
+1293 1357 L
+1291 1359 L
+1289 1360 L
+1289 1360 L
+1287 1362 L
+1285 1363 L
+1283 1363 L
+1281 1363 L
+1279 1362 L
+1277 1362 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1269 M
+1279 1269 L
+1281 1270 L
+1283 1271 L
+1285 1272 L
+1285 1273 L
+1287 1274 L
+1289 1275 L
+1291 1277 L
+1293 1279 L
+1294 1281 L
+1295 1282 L
+1297 1284 L
+1299 1287 L
+1300 1289 L
+1301 1290 L
+1303 1292 L
+1305 1295 L
+1306 1296 L
+1307 1297 L
+1309 1299 L
+1311 1301 L
+1313 1303 L
+1314 1304 L
+1315 1305 L
+1317 1307 L
+1319 1309 L
+1321 1312 L
+1321 1312 L
+1323 1317 L
+1324 1320 L
+1323 1323 L
+1321 1327 L
+1320 1328 L
+1319 1330 L
+1317 1332 L
+1315 1334 L
+1313 1336 L
+1312 1336 L
+1311 1338 L
+1309 1341 L
+1307 1343 L
+1306 1344 L
+1305 1345 L
+1303 1347 L
+1301 1349 L
+1299 1350 L
+1297 1351 L
+1296 1352 L
+1295 1353 L
+1293 1355 L
+1291 1357 L
+1289 1358 L
+1287 1359 L
+1285 1359 L
+1283 1360 L
+1281 1359 L
+1279 1359 L
+1277 1359 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1272 M
+1279 1273 L
+1279 1273 L
+1281 1273 L
+1283 1274 L
+1285 1275 L
+1287 1276 L
+1289 1277 L
+1291 1280 L
+1292 1281 L
+1293 1282 L
+1295 1285 L
+1297 1288 L
+1298 1289 L
+1299 1290 L
+1301 1293 L
+1303 1296 L
+1304 1296 L
+1305 1298 L
+1307 1300 L
+1309 1302 L
+1311 1304 L
+1311 1305 L
+1313 1307 L
+1315 1309 L
+1317 1312 L
+1317 1312 L
+1319 1316 L
+1320 1320 L
+1319 1323 L
+1317 1328 L
+1317 1328 L
+1315 1331 L
+1313 1333 L
+1311 1335 L
+1310 1336 L
+1309 1338 L
+1307 1341 L
+1305 1343 L
+1304 1344 L
+1303 1345 L
+1301 1347 L
+1299 1348 L
+1297 1350 L
+1295 1351 L
+1293 1352 L
+1293 1352 L
+1291 1354 L
+1289 1356 L
+1287 1357 L
+1285 1357 L
+1283 1357 L
+1281 1357 L
+1279 1357 L
+1277 1356 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1274 M
+1279 1275 L
+1281 1275 L
+1283 1276 L
+1285 1277 L
+1287 1278 L
+1289 1280 L
+1289 1281 L
+1291 1282 L
+1293 1285 L
+1295 1288 L
+1296 1289 L
+1297 1291 L
+1299 1293 L
+1301 1296 L
+1301 1296 L
+1303 1299 L
+1305 1301 L
+1307 1304 L
+1308 1304 L
+1309 1306 L
+1311 1308 L
+1313 1311 L
+1314 1312 L
+1315 1315 L
+1317 1320 L
+1315 1325 L
+1314 1328 L
+1313 1330 L
+1311 1332 L
+1309 1335 L
+1308 1336 L
+1307 1338 L
+1305 1340 L
+1303 1343 L
+1301 1344 L
+1301 1344 L
+1299 1346 L
+1297 1348 L
+1295 1349 L
+1293 1351 L
+1291 1351 L
+1290 1352 L
+1289 1353 L
+1287 1354 L
+1285 1355 L
+1283 1355 L
+1281 1355 L
+1279 1354 L
+1277 1353 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1276 M
+1279 1277 L
+1281 1277 L
+1283 1278 L
+1285 1280 L
+1287 1281 L
+1287 1281 L
+1289 1283 L
+1291 1285 L
+1293 1288 L
+1293 1289 L
+1295 1291 L
+1297 1294 L
+1299 1296 L
+1299 1297 L
+1301 1299 L
+1303 1302 L
+1305 1304 L
+1305 1305 L
+1307 1307 L
+1309 1310 L
+1311 1312 L
+1311 1313 L
+1313 1319 L
+1313 1320 L
+1313 1322 L
+1311 1328 L
+1311 1329 L
+1309 1332 L
+1307 1335 L
+1306 1336 L
+1305 1338 L
+1303 1340 L
+1301 1342 L
+1299 1344 L
+1299 1344 L
+1297 1346 L
+1295 1347 L
+1293 1349 L
+1291 1350 L
+1289 1351 L
+1287 1351 L
+1285 1352 L
+1284 1352 L
+1283 1352 L
+1282 1352 L
+1281 1352 L
+1279 1352 L
+1277 1351 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1279 M
+1279 1280 L
+1281 1280 L
+1282 1281 L
+1283 1281 L
+1285 1282 L
+1287 1284 L
+1289 1286 L
+1291 1289 L
+1291 1289 L
+1293 1291 L
+1295 1294 L
+1297 1296 L
+1297 1297 L
+1299 1299 L
+1301 1302 L
+1302 1304 L
+1303 1305 L
+1305 1308 L
+1307 1311 L
+1308 1312 L
+1309 1315 L
+1311 1320 L
+1309 1328 L
+1309 1328 L
+1307 1332 L
+1305 1335 L
+1304 1336 L
+1303 1338 L
+1301 1340 L
+1299 1342 L
+1297 1344 L
+1296 1344 L
+1295 1345 L
+1293 1347 L
+1291 1348 L
+1289 1349 L
+1287 1350 L
+1285 1350 L
+1283 1350 L
+1281 1350 L
+1279 1350 L
+1277 1349 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1282 M
+1279 1282 L
+1281 1283 L
+1283 1283 L
+1285 1285 L
+1287 1287 L
+1289 1289 L
+1289 1289 L
+1291 1291 L
+1293 1294 L
+1295 1296 L
+1295 1297 L
+1297 1300 L
+1299 1303 L
+1300 1304 L
+1301 1306 L
+1303 1309 L
+1305 1312 L
+1305 1312 L
+1307 1317 L
+1308 1320 L
+1307 1327 L
+1307 1328 L
+1305 1332 L
+1303 1335 L
+1302 1336 L
+1301 1338 L
+1299 1340 L
+1297 1342 L
+1295 1343 L
+1294 1344 L
+1293 1345 L
+1291 1346 L
+1289 1347 L
+1287 1348 L
+1285 1349 L
+1283 1349 L
+1281 1348 L
+1279 1348 L
+1277 1347 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1284 M
+1279 1284 L
+1281 1285 L
+1283 1286 L
+1285 1288 L
+1286 1289 L
+1287 1290 L
+1289 1292 L
+1291 1294 L
+1292 1296 L
+1293 1297 L
+1295 1300 L
+1297 1303 L
+1298 1304 L
+1299 1306 L
+1301 1309 L
+1303 1312 L
+1303 1313 L
+1305 1318 L
+1306 1320 L
+1305 1326 L
+1305 1328 L
+1303 1332 L
+1301 1335 L
+1300 1336 L
+1299 1338 L
+1297 1340 L
+1295 1342 L
+1293 1343 L
+1291 1344 L
+1291 1344 L
+1289 1345 L
+1287 1346 L
+1285 1346 L
+1283 1346 L
+1281 1346 L
+1279 1346 L
+1277 1344 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1287 M
+1279 1287 L
+1281 1288 L
+1282 1289 L
+1283 1289 L
+1285 1290 L
+1287 1292 L
+1289 1295 L
+1290 1296 L
+1291 1297 L
+1293 1300 L
+1295 1303 L
+1296 1304 L
+1297 1306 L
+1299 1309 L
+1301 1312 L
+1301 1313 L
+1303 1318 L
+1304 1320 L
+1303 1327 L
+1303 1328 L
+1301 1332 L
+1299 1335 L
+1299 1336 L
+1297 1338 L
+1295 1340 L
+1293 1342 L
+1291 1343 L
+1289 1343 L
+1287 1344 L
+1285 1344 L
+1283 1344 L
+1281 1344 L
+1279 1343 L
+1277 1343 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1289 M
+1279 1290 L
+1281 1291 L
+1283 1292 L
+1285 1293 L
+1287 1295 L
+1288 1296 L
+1289 1298 L
+1291 1300 L
+1293 1303 L
+1294 1304 L
+1295 1306 L
+1297 1309 L
+1299 1312 L
+1299 1313 L
+1301 1318 L
+1302 1320 L
+1301 1328 L
+1301 1328 L
+1299 1332 L
+1297 1335 L
+1297 1336 L
+1295 1338 L
+1293 1340 L
+1291 1341 L
+1289 1342 L
+1287 1343 L
+1285 1343 L
+1283 1343 L
+1281 1343 L
+1279 1342 L
+1277 1342 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1291 M
+1279 1292 L
+1281 1293 L
+1283 1295 L
+1285 1296 L
+1285 1296 L
+1287 1298 L
+1289 1300 L
+1291 1303 L
+1292 1304 L
+1293 1306 L
+1295 1309 L
+1297 1312 L
+1297 1313 L
+1299 1318 L
+1300 1320 L
+1299 1328 L
+1299 1329 L
+1297 1333 L
+1295 1335 L
+1295 1336 L
+1293 1338 L
+1291 1339 L
+1289 1340 L
+1287 1341 L
+1285 1341 L
+1283 1341 L
+1281 1341 L
+1279 1341 L
+1277 1340 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1293 M
+1279 1295 L
+1281 1296 L
+1282 1296 L
+1283 1297 L
+1285 1299 L
+1287 1300 L
+1289 1303 L
+1290 1304 L
+1291 1306 L
+1293 1309 L
+1295 1312 L
+1295 1313 L
+1297 1317 L
+1298 1320 L
+1298 1328 L
+1297 1329 L
+1295 1333 L
+1293 1335 L
+1292 1336 L
+1291 1337 L
+1289 1339 L
+1287 1339 L
+1285 1340 L
+1283 1340 L
+1281 1340 L
+1279 1339 L
+1277 1338 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1296 M
+1278 1296 L
+1279 1297 L
+1281 1298 L
+1283 1299 L
+1285 1301 L
+1287 1303 L
+1288 1304 L
+1289 1306 L
+1291 1309 L
+1293 1312 L
+1293 1312 L
+1295 1317 L
+1296 1320 L
+1296 1328 L
+1295 1330 L
+1293 1333 L
+1291 1335 L
+1290 1336 L
+1289 1336 L
+1287 1337 L
+1285 1338 L
+1283 1338 L
+1281 1338 L
+1279 1337 L
+1278 1336 L
+1277 1336 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1298 M
+1279 1299 L
+1281 1300 L
+1283 1302 L
+1285 1304 L
+1286 1304 L
+1287 1306 L
+1289 1309 L
+1291 1312 L
+1291 1312 L
+1293 1316 L
+1295 1320 L
+1294 1328 L
+1293 1330 L
+1291 1333 L
+1289 1334 L
+1287 1335 L
+1285 1336 L
+1283 1336 L
+1281 1336 L
+1279 1335 L
+1277 1334 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1300 M
+1279 1301 L
+1281 1303 L
+1283 1304 L
+1283 1305 L
+1285 1306 L
+1287 1309 L
+1289 1312 L
+1289 1312 L
+1291 1316 L
+1293 1320 L
+1292 1328 L
+1291 1330 L
+1289 1332 L
+1287 1333 L
+1285 1334 L
+1283 1334 L
+1281 1334 L
+1279 1334 L
+1277 1333 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1302 M
+1279 1304 L
+1280 1304 L
+1281 1305 L
+1283 1307 L
+1285 1309 L
+1287 1312 L
+1287 1312 L
+1289 1316 L
+1291 1320 L
+1290 1328 L
+1289 1330 L
+1287 1331 L
+1285 1332 L
+1283 1332 L
+1281 1332 L
+1279 1332 L
+1277 1331 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1305 M
+1279 1306 L
+1281 1308 L
+1283 1310 L
+1285 1312 L
+1285 1313 L
+1287 1316 L
+1289 1320 L
+1288 1328 L
+1287 1328 L
+1285 1330 L
+1283 1330 L
+1281 1330 L
+1279 1329 L
+1277 1328 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1308 M
+1279 1309 L
+1281 1311 L
+1282 1312 L
+1283 1314 L
+1285 1318 L
+1287 1320 L
+1285 1324 L
+1283 1327 L
+1281 1327 L
+1279 1326 L
+1277 1325 L
+S
+/level 0 def
+/levelcolor 3 def
+1277 1311 M
+1279 1312 L
+1279 1315 L
+1281 1318 L
+1283 1320 L
+1281 1321 L
+1279 1322 L
+1277 1322 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1264 M
+1341 1265 L
+1342 1266 L
+1344 1268 L
+1346 1269 L
+1348 1270 L
+1350 1270 L
+1352 1271 L
+1354 1272 L
+1356 1273 L
+1356 1273 L
+1358 1273 L
+1360 1273 L
+1362 1273 L
+1364 1273 L
+1366 1273 L
+1368 1273 L
+1370 1274 L
+1372 1275 L
+1374 1278 L
+1376 1281 L
+1376 1281 L
+1378 1281 L
+1380 1281 L
+1382 1281 L
+1382 1281 L
+1384 1280 L
+1386 1279 L
+1388 1280 L
+1390 1280 L
+1391 1281 L
+1392 1281 L
+1394 1281 L
+1396 1282 L
+1398 1284 L
+1400 1285 L
+1402 1286 L
+1404 1287 L
+S
+1404 1340 M
+1402 1341 L
+1400 1342 L
+1398 1342 L
+1396 1342 L
+1394 1342 L
+1392 1341 L
+1390 1341 L
+1388 1340 L
+1386 1339 L
+1384 1340 L
+1382 1341 L
+1380 1342 L
+1378 1344 L
+1377 1344 L
+1376 1346 L
+1374 1346 L
+1372 1345 L
+1371 1344 L
+1370 1344 L
+1368 1344 L
+1366 1344 L
+1365 1344 L
+1364 1345 L
+1362 1346 L
+1360 1348 L
+1358 1350 L
+1356 1351 L
+1354 1352 L
+1354 1360 L
+1356 1365 L
+1357 1368 L
+1357 1376 L
+1358 1377 L
+1360 1380 L
+1362 1381 L
+1364 1383 L
+1364 1384 L
+1366 1385 L
+1368 1386 L
+1370 1388 L
+1372 1388 L
+1374 1389 L
+1376 1391 L
+1376 1391 L
+1378 1399 L
+1378 1399 L
+1378 1400 L
+1376 1405 L
+1375 1407 L
+1374 1409 L
+1372 1412 L
+1370 1414 L
+1368 1414 L
+1366 1414 L
+1364 1414 L
+1362 1414 L
+1360 1413 L
+1358 1412 L
+1356 1411 L
+1354 1410 L
+1352 1408 L
+1352 1407 L
+1350 1406 L
+1348 1405 L
+1346 1402 L
+1344 1400 L
+1344 1399 L
+1342 1398 L
+1341 1398 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1267 M
+1342 1269 L
+1344 1270 L
+1346 1272 L
+1348 1273 L
+1348 1273 L
+1350 1274 L
+1352 1274 L
+1354 1275 L
+1356 1276 L
+1358 1276 L
+1360 1276 L
+1362 1276 L
+1364 1276 L
+1366 1276 L
+1368 1276 L
+1370 1278 L
+1372 1280 L
+1372 1281 L
+1374 1282 L
+1376 1284 L
+1378 1285 L
+1380 1285 L
+1382 1285 L
+1384 1284 L
+1386 1283 L
+1388 1283 L
+1390 1283 L
+1392 1284 L
+1394 1285 L
+1396 1287 L
+1397 1289 L
+1398 1289 L
+1400 1290 L
+1402 1291 L
+1404 1291 L
+S
+1404 1336 M
+1402 1337 L
+1400 1339 L
+1398 1339 L
+1396 1340 L
+1394 1339 L
+1392 1339 L
+1390 1338 L
+1388 1337 L
+1386 1337 L
+1384 1337 L
+1382 1338 L
+1380 1340 L
+1378 1341 L
+1376 1342 L
+1374 1342 L
+1372 1342 L
+1370 1342 L
+1368 1342 L
+1366 1343 L
+1364 1343 L
+1362 1344 L
+1361 1344 L
+1360 1345 L
+1358 1347 L
+1356 1348 L
+1354 1349 L
+1352 1350 L
+1350 1351 L
+1349 1352 L
+1349 1360 L
+1350 1362 L
+1352 1365 L
+1354 1368 L
+1354 1374 L
+1354 1376 L
+1356 1379 L
+1358 1382 L
+1360 1384 L
+1360 1384 L
+1362 1385 L
+1364 1387 L
+1366 1388 L
+1368 1390 L
+1370 1391 L
+1371 1391 L
+1372 1393 L
+1374 1397 L
+1375 1399 L
+1374 1402 L
+1372 1407 L
+1372 1408 L
+1370 1410 L
+1368 1411 L
+1366 1412 L
+1364 1412 L
+1362 1411 L
+1360 1410 L
+1358 1409 L
+1356 1408 L
+1356 1407 L
+1354 1406 L
+1352 1405 L
+1350 1404 L
+1348 1402 L
+1347 1399 L
+1346 1399 L
+1344 1398 L
+1342 1397 L
+1341 1396 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1270 M
+1342 1272 L
+1344 1273 L
+1344 1273 L
+1346 1274 L
+1348 1275 L
+1350 1276 L
+1352 1277 L
+1354 1278 L
+1356 1279 L
+1358 1280 L
+1360 1280 L
+1362 1280 L
+1364 1279 L
+1366 1279 L
+1368 1280 L
+1369 1281 L
+1370 1281 L
+1372 1283 L
+1374 1285 L
+1376 1287 L
+1377 1289 L
+1378 1289 L
+1380 1289 L
+1382 1290 L
+1384 1289 L
+1385 1289 L
+1386 1288 L
+1388 1287 L
+1390 1287 L
+1392 1288 L
+1393 1289 L
+1394 1290 L
+1396 1292 L
+1398 1293 L
+1400 1293 L
+1402 1294 L
+1404 1295 L
+S
+1404 1334 M
+1402 1335 L
+1400 1335 L
+1398 1336 L
+1397 1336 L
+1396 1336 L
+1394 1336 L
+1393 1336 L
+1392 1336 L
+1390 1335 L
+1388 1335 L
+1386 1335 L
+1384 1335 L
+1382 1335 L
+1380 1336 L
+1380 1336 L
+1378 1338 L
+1376 1340 L
+1374 1340 L
+1372 1341 L
+1370 1341 L
+1368 1341 L
+1366 1341 L
+1364 1342 L
+1362 1342 L
+1360 1343 L
+1358 1344 L
+1357 1344 L
+1356 1345 L
+1354 1346 L
+1352 1348 L
+1350 1349 L
+1348 1350 L
+1346 1351 L
+1346 1352 L
+1345 1360 L
+1346 1362 L
+1348 1366 L
+1349 1368 L
+1350 1370 L
+1352 1376 L
+1352 1377 L
+1354 1380 L
+1356 1384 L
+1356 1384 L
+1358 1386 L
+1360 1388 L
+1362 1390 L
+1364 1391 L
+1365 1391 L
+1366 1393 L
+1368 1395 L
+1370 1398 L
+1371 1399 L
+1370 1403 L
+1369 1407 L
+1368 1408 L
+1366 1409 L
+1364 1409 L
+1362 1408 L
+1361 1407 L
+1360 1407 L
+1358 1406 L
+1356 1405 L
+1354 1404 L
+1352 1403 L
+1350 1401 L
+1349 1399 L
+1348 1399 L
+1346 1397 L
+1344 1396 L
+1342 1395 L
+1341 1394 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1273 M
+1342 1275 L
+1344 1276 L
+1346 1277 L
+1348 1278 L
+1350 1280 L
+1352 1281 L
+1352 1281 L
+1354 1282 L
+1356 1283 L
+1358 1283 L
+1360 1283 L
+1362 1283 L
+1364 1283 L
+1366 1283 L
+1368 1283 L
+1370 1285 L
+1372 1287 L
+1374 1289 L
+1374 1289 L
+1376 1290 L
+1378 1291 L
+1380 1292 L
+1382 1293 L
+1384 1293 L
+1386 1294 L
+1388 1295 L
+1390 1296 L
+1390 1296 L
+1392 1297 L
+1394 1297 L
+1396 1297 L
+1398 1297 L
+1400 1297 L
+1402 1298 L
+1404 1299 L
+S
+1404 1331 M
+1402 1332 L
+1400 1333 L
+1398 1333 L
+1396 1334 L
+1394 1334 L
+1392 1334 L
+1390 1334 L
+1388 1333 L
+1386 1333 L
+1384 1333 L
+1382 1334 L
+1380 1335 L
+1378 1335 L
+1377 1336 L
+1376 1337 L
+1374 1338 L
+1372 1338 L
+1370 1339 L
+1368 1339 L
+1366 1339 L
+1364 1340 L
+1362 1341 L
+1360 1341 L
+1358 1342 L
+1356 1343 L
+1354 1343 L
+1353 1344 L
+1352 1344 L
+1350 1346 L
+1348 1347 L
+1346 1349 L
+1344 1351 L
+1343 1352 L
+1342 1356 L
+1342 1360 L
+1342 1361 L
+1344 1365 L
+1346 1368 L
+1346 1369 L
+1348 1374 L
+1349 1376 L
+1350 1378 L
+1352 1382 L
+1353 1384 L
+1354 1386 L
+1356 1388 L
+1358 1391 L
+1359 1391 L
+1360 1394 L
+1362 1396 L
+1364 1398 L
+1365 1399 L
+1364 1401 L
+1362 1402 L
+1360 1402 L
+1358 1402 L
+1356 1402 L
+1354 1401 L
+1352 1400 L
+1352 1399 L
+1350 1397 L
+1348 1396 L
+1346 1395 L
+1344 1394 L
+1342 1392 L
+1341 1391 L
+1341 1391 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1276 M
+1342 1278 L
+1344 1279 L
+1346 1280 L
+1347 1281 L
+1348 1282 L
+1350 1283 L
+1352 1284 L
+1354 1285 L
+1356 1286 L
+1358 1286 L
+1360 1286 L
+1362 1286 L
+1364 1286 L
+1366 1286 L
+1368 1287 L
+1370 1289 L
+1370 1289 L
+1372 1291 L
+1374 1292 L
+1376 1293 L
+1378 1294 L
+1380 1295 L
+1382 1296 L
+1382 1297 L
+1384 1298 L
+1386 1299 L
+1388 1300 L
+1390 1301 L
+1392 1301 L
+1394 1301 L
+1396 1301 L
+1398 1301 L
+1400 1301 L
+1402 1302 L
+1404 1303 L
+S
+1404 1328 M
+1404 1328 L
+1402 1329 L
+1400 1330 L
+1398 1331 L
+1396 1331 L
+1394 1331 L
+1392 1331 L
+1390 1331 L
+1388 1331 L
+1386 1331 L
+1384 1331 L
+1382 1332 L
+1380 1333 L
+1378 1334 L
+1376 1334 L
+1374 1335 L
+1372 1336 L
+1370 1336 L
+1370 1336 L
+1368 1337 L
+1366 1337 L
+1364 1338 L
+1362 1339 L
+1360 1340 L
+1358 1340 L
+1356 1341 L
+1354 1342 L
+1352 1342 L
+1350 1343 L
+1349 1344 L
+1348 1344 L
+1346 1346 L
+1344 1347 L
+1342 1349 L
+1341 1351 L
+S
+1341 1364 M
+1342 1368 L
+1343 1368 L
+1344 1372 L
+1346 1376 L
+1346 1377 L
+1348 1380 L
+1350 1384 L
+1350 1385 L
+1352 1390 L
+1354 1391 L
+1352 1393 L
+1350 1393 L
+1348 1392 L
+1346 1392 L
+1346 1391 L
+1344 1390 L
+1342 1389 L
+1341 1388 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1280 M
+1341 1281 L
+1342 1281 L
+1344 1282 L
+1346 1284 L
+1348 1285 L
+1350 1287 L
+1352 1289 L
+1352 1289 L
+1354 1290 L
+1356 1290 L
+1358 1290 L
+1360 1290 L
+1362 1290 L
+1364 1291 L
+1366 1292 L
+1368 1293 L
+1370 1294 L
+1372 1295 L
+1374 1296 L
+1376 1296 L
+1376 1297 L
+1378 1298 L
+1380 1300 L
+1382 1301 L
+1384 1303 L
+1386 1304 L
+1386 1304 L
+1388 1305 L
+1390 1306 L
+1392 1306 L
+1394 1306 L
+1396 1306 L
+1398 1306 L
+1400 1307 L
+1402 1309 L
+1404 1312 L
+1404 1313 L
+S
+1404 1321 M
+1402 1323 L
+1400 1325 L
+1398 1327 L
+1396 1328 L
+1395 1328 L
+1394 1328 L
+1392 1328 L
+1390 1328 L
+1388 1328 L
+1386 1328 L
+1384 1329 L
+1382 1329 L
+1380 1330 L
+1378 1331 L
+1376 1332 L
+1374 1333 L
+1372 1334 L
+1370 1334 L
+1368 1335 L
+1366 1335 L
+1364 1336 L
+1363 1336 L
+1362 1337 L
+1360 1337 L
+1358 1338 L
+1356 1339 L
+1354 1340 L
+1352 1340 L
+1350 1341 L
+1348 1342 L
+1346 1343 L
+1344 1344 L
+1344 1344 L
+1342 1345 L
+1341 1347 L
+S
+1341 1371 M
+1342 1375 L
+1343 1376 L
+1344 1382 L
+1345 1384 L
+1344 1384 L
+1342 1385 L
+1341 1385 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1284 M
+1342 1285 L
+1344 1286 L
+1346 1288 L
+1347 1289 L
+1348 1290 L
+1350 1291 L
+1352 1293 L
+1354 1294 L
+1356 1294 L
+1358 1295 L
+1360 1295 L
+1362 1296 L
+1363 1296 L
+1364 1297 L
+1366 1298 L
+1368 1299 L
+1370 1299 L
+1372 1300 L
+1374 1300 L
+1376 1302 L
+1378 1303 L
+1379 1304 L
+1380 1305 L
+1382 1307 L
+1384 1308 L
+1386 1309 L
+1388 1309 L
+1390 1310 L
+1392 1310 L
+1394 1311 L
+1396 1311 L
+1397 1312 L
+1398 1317 L
+1398 1320 L
+1398 1321 L
+1396 1323 L
+1394 1324 L
+1392 1324 L
+1390 1324 L
+1388 1324 L
+1386 1324 L
+1384 1325 L
+1382 1326 L
+1380 1327 L
+1379 1328 L
+1378 1329 L
+1376 1330 L
+1374 1331 L
+1372 1331 L
+1370 1332 L
+1368 1333 L
+1366 1333 L
+1364 1334 L
+1362 1334 L
+1360 1335 L
+1358 1336 L
+1357 1336 L
+1356 1336 L
+1354 1337 L
+1352 1338 L
+1350 1339 L
+1348 1340 L
+1346 1341 L
+1344 1342 L
+1342 1343 L
+1341 1343 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1288 M
+1342 1289 L
+1342 1289 L
+1344 1291 L
+1346 1292 L
+1348 1294 L
+1350 1296 L
+1351 1296 L
+1352 1297 L
+1354 1298 L
+1356 1298 L
+1358 1299 L
+1360 1299 L
+1362 1300 L
+1364 1302 L
+1366 1303 L
+1368 1304 L
+1370 1304 L
+1371 1304 L
+1372 1305 L
+1374 1306 L
+1376 1308 L
+1378 1311 L
+1380 1312 L
+1380 1313 L
+1382 1317 L
+1384 1320 L
+1382 1321 L
+1380 1322 L
+1378 1324 L
+1376 1326 L
+1374 1327 L
+1373 1328 L
+1372 1329 L
+1370 1329 L
+1368 1330 L
+1366 1331 L
+1364 1331 L
+1362 1332 L
+1360 1333 L
+1358 1333 L
+1356 1334 L
+1354 1335 L
+1352 1335 L
+1351 1336 L
+1350 1336 L
+1348 1337 L
+1346 1338 L
+1344 1339 L
+1342 1340 L
+1341 1341 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1292 M
+1342 1293 L
+1344 1295 L
+1346 1296 L
+1346 1297 L
+1348 1298 L
+1350 1299 L
+1352 1300 L
+1354 1301 L
+1356 1302 L
+1358 1303 L
+1360 1304 L
+1361 1304 L
+1362 1306 L
+1364 1307 L
+1366 1308 L
+1368 1309 L
+1370 1310 L
+1372 1311 L
+1373 1312 L
+1374 1316 L
+1375 1320 L
+1374 1322 L
+1372 1324 L
+1370 1325 L
+1368 1326 L
+1366 1327 L
+1365 1328 L
+1364 1328 L
+1362 1329 L
+1360 1330 L
+1358 1331 L
+1356 1331 L
+1354 1332 L
+1352 1333 L
+1350 1334 L
+1348 1335 L
+1346 1336 L
+1345 1336 L
+1344 1337 L
+1342 1337 L
+1341 1338 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1297 M
+1342 1298 L
+1344 1299 L
+1346 1300 L
+1348 1302 L
+1350 1303 L
+1352 1304 L
+1354 1304 L
+1354 1305 L
+1356 1306 L
+1358 1307 L
+1360 1309 L
+1362 1311 L
+1364 1312 L
+1364 1312 L
+1366 1316 L
+1368 1319 L
+1368 1320 L
+1368 1320 L
+1366 1322 L
+1364 1323 L
+1362 1324 L
+1360 1325 L
+1358 1327 L
+1357 1328 L
+1356 1328 L
+1354 1329 L
+1352 1330 L
+1350 1331 L
+1348 1332 L
+1346 1333 L
+1344 1334 L
+1342 1335 L
+1341 1335 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1301 M
+1342 1302 L
+1344 1303 L
+1346 1304 L
+1346 1305 L
+1348 1306 L
+1350 1307 L
+1352 1308 L
+1354 1309 L
+1356 1311 L
+1358 1312 L
+1358 1317 L
+1359 1320 L
+1358 1321 L
+1356 1323 L
+1354 1325 L
+1352 1326 L
+1350 1328 L
+1350 1328 L
+1348 1329 L
+1346 1330 L
+1344 1331 L
+1342 1332 L
+1341 1333 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1306 M
+1342 1307 L
+1344 1309 L
+1346 1310 L
+1348 1311 L
+1350 1312 L
+1351 1312 L
+1352 1318 L
+1353 1320 L
+1352 1321 L
+1350 1322 L
+1348 1324 L
+1346 1326 L
+1344 1328 L
+1344 1328 L
+1342 1329 L
+1341 1330 L
+S
+/level 0 def
+/levelcolor 3 def
+1341 1311 M
+1342 1312 L
+1342 1315 L
+1344 1319 L
+1345 1320 L
+1344 1321 L
+1342 1323 L
+1341 1325 L
+S
+/level 0 def
+/levelcolor 3 def
+1404 1287 M
+1406 1286 L
+1408 1286 L
+1410 1285 L
+1412 1285 L
+1414 1285 L
+1416 1286 L
+1417 1287 L
+1419 1288 L
+1420 1289 L
+1421 1291 L
+1423 1292 L
+1425 1294 L
+1427 1294 L
+1429 1294 L
+1431 1293 L
+1433 1293 L
+1435 1293 L
+1437 1293 L
+1439 1294 L
+1441 1295 L
+1443 1296 L
+1443 1296 L
+1445 1298 L
+1447 1300 L
+1449 1302 L
+1451 1303 L
+1453 1304 L
+1453 1305 L
+1455 1306 L
+1457 1306 L
+1459 1306 L
+1461 1306 L
+1463 1305 L
+1464 1304 L
+1465 1304 L
+1467 1304 L
+S
+1467 1323 M
+1465 1324 L
+1463 1325 L
+1461 1325 L
+1459 1325 L
+1457 1325 L
+1455 1327 L
+1453 1328 L
+1453 1328 L
+1451 1330 L
+1449 1331 L
+1447 1331 L
+1445 1331 L
+1443 1331 L
+1441 1329 L
+1440 1328 L
+1439 1328 L
+1437 1327 L
+1435 1328 L
+1435 1328 L
+1433 1330 L
+1431 1332 L
+1429 1334 L
+1427 1334 L
+1425 1335 L
+1423 1335 L
+1421 1335 L
+1419 1335 L
+1417 1335 L
+1416 1335 L
+1414 1335 L
+1412 1335 L
+1410 1336 L
+1409 1336 L
+1408 1337 L
+1406 1338 L
+1404 1340 L
+S
+/level 0 def
+/levelcolor 3 def
+1404 1291 M
+1406 1291 L
+1408 1290 L
+1410 1289 L
+1410 1289 L
+1412 1288 L
+1414 1288 L
+1416 1288 L
+1416 1289 L
+1417 1290 L
+1419 1293 L
+1421 1295 L
+1423 1296 L
+1424 1296 L
+1425 1297 L
+1427 1298 L
+1429 1298 L
+1431 1297 L
+1433 1297 L
+1435 1297 L
+1437 1298 L
+1439 1299 L
+1441 1301 L
+1443 1304 L
+1443 1305 L
+1445 1306 L
+1447 1307 L
+1449 1309 L
+1451 1310 L
+1453 1312 L
+1453 1312 L
+1455 1318 L
+1456 1320 L
+1455 1321 L
+1453 1322 L
+1451 1325 L
+1449 1327 L
+1447 1328 L
+1445 1328 L
+1443 1327 L
+1441 1326 L
+1439 1325 L
+1437 1324 L
+1435 1325 L
+1433 1326 L
+1432 1328 L
+1431 1329 L
+1429 1331 L
+1427 1333 L
+1425 1333 L
+1423 1334 L
+1421 1334 L
+1419 1333 L
+1417 1333 L
+1416 1332 L
+1414 1332 L
+1412 1333 L
+1410 1334 L
+1408 1335 L
+1406 1335 L
+1404 1336 L
+1404 1336 L
+S
+1461 1312 M
+1463 1311 L
+1465 1312 L
+1466 1312 L
+1465 1316 L
+1463 1320 L
+1461 1320 L
+1461 1320 L
+1461 1320 L
+1460 1312 L
+1461 1312 L
+S
+/level 0 def
+/levelcolor 3 def
+1404 1295 M
+1406 1296 L
+1407 1296 L
+1408 1297 L
+1410 1298 L
+1412 1298 L
+1414 1298 L
+1416 1298 L
+1417 1297 L
+1419 1298 L
+1421 1299 L
+1423 1300 L
+1425 1300 L
+1427 1301 L
+1429 1301 L
+1431 1301 L
+1433 1301 L
+1435 1302 L
+1437 1303 L
+1439 1304 L
+1439 1305 L
+1441 1307 L
+1443 1309 L
+1445 1311 L
+1447 1312 L
+1447 1313 L
+1449 1317 L
+1450 1320 L
+1449 1322 L
+1447 1323 L
+1445 1324 L
+1443 1323 L
+1441 1322 L
+1439 1321 L
+1437 1321 L
+1435 1321 L
+1433 1322 L
+1431 1325 L
+1430 1328 L
+1429 1329 L
+1427 1331 L
+1425 1331 L
+1423 1332 L
+1421 1331 L
+1419 1331 L
+1417 1330 L
+1416 1329 L
+1414 1329 L
+1412 1330 L
+1410 1331 L
+1408 1332 L
+1406 1333 L
+1404 1334 L
+S
+/level 0 def
+/levelcolor 3 def
+1404 1299 M
+1406 1300 L
+1408 1302 L
+1410 1304 L
+1410 1304 L
+1412 1305 L
+1414 1305 L
+1416 1305 L
+1417 1304 L
+1417 1304 L
+1419 1303 L
+1421 1303 L
+1423 1304 L
+1425 1304 L
+1425 1304 L
+1427 1305 L
+1429 1306 L
+1431 1307 L
+1433 1308 L
+1435 1309 L
+1437 1311 L
+1439 1312 L
+1439 1312 L
+1439 1312 L
+1437 1314 L
+1435 1315 L
+1433 1316 L
+1431 1320 L
+1431 1320 L
+1429 1324 L
+1427 1328 L
+1427 1328 L
+1425 1329 L
+1423 1329 L
+1421 1329 L
+1420 1328 L
+1419 1328 L
+1417 1326 L
+1416 1326 L
+1414 1326 L
+1412 1327 L
+1410 1328 L
+1410 1328 L
+1408 1329 L
+1406 1330 L
+1404 1331 L
+S
+/level 0 def
+/levelcolor 3 def
+1404 1303 M
+1405 1304 L
+1406 1306 L
+1408 1308 L
+1410 1309 L
+1412 1309 L
+1414 1309 L
+1416 1309 L
+1417 1309 L
+1419 1309 L
+1421 1309 L
+1423 1310 L
+1425 1311 L
+1427 1312 L
+1427 1320 L
+1425 1323 L
+1423 1324 L
+1421 1324 L
+1419 1323 L
+1417 1323 L
+1416 1323 L
+1414 1323 L
+1412 1323 L
+1410 1324 L
+1408 1325 L
+1406 1327 L
+1404 1328 L
+S
+/level 0 def
+/levelcolor 3 def
+1404 1313 M
+1406 1319 L
+1406 1320 L
+1406 1320 L
+1404 1321 L
+S
+/level 0 def
+/levelcolor 3 def
+1467 1304 M
+1467 1304 L
+1469 1306 L
+1471 1312 L
+1471 1312 L
+1471 1320 L
+1471 1321 L
+1469 1322 L
+1467 1323 L
+S
+/level 0 def
+/levelcolor 3 def
+1524 1565 M
+1524 1566 L
+1526 1569 L
+1527 1574 L
+1526 1574 L
+1524 1575 L
+1523 1574 L
+1524 1566 L
+1524 1565 L
+S
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+gsave 0 setlinewidth 0 setgray
+gsave PEAKLINEWIDTH setlinewidth
+1 1 366 406 9 9 0 0 PP
+1 1 1268 1309 9 9 0 0 PP
+1 1 1274 1313 9 9 0 0 PP
+1 1 1195 1235 9 9 0 0 PP
+1 1 368 1242 9 9 1 0 PP
+grestore
+gsave PEAKLINEWIDTH setlinewidth
+grestore
+/LineEndSizeX 3.958312 def
+/LineEndSizeY 3.958300 def
+LabelFont findfont setfont
+currentfont 547.383803 (Standard Width) stringwidth pop div scalefont setfont
+{gsave -156.395372 -15.994981 rmoveto 1 1 scale 0 setpixel (T12H3-H3) show grestore} {0 0 461.627 639.665 373.573 418.078 440.727 639.665 PaintPointer} -1 -1 510 677 313 60 PA
+{gsave -351.889588 -15.994981 rmoveto 1 1 scale 0 setpixel (G3/G7/G11/G15H1-H1) show grestore} {0 0 1325.681 1495.170 1274.804 1320.631 1304.781 1495.170 PaintPointer} -1 -1 1416 1532 704 60 PA
+{gsave -156.395372 -15.994981 rmoveto 1 1 scale 0 setpixel (G13H1-H1) show grestore} {0 0 1129.413 1301.210 1192.568 1245.698 1129.413 1322.110 PaintPointer} -1 -1 966 1333 313 60 PA
+{gsave -215.043637 -15.994981 rmoveto 1 1 scale 0 setpixel (G13H1-T12H3) show grestore} {0 0 373.976 1329.709 371.617 1253.466 353.076 1329.709 PaintPointer} -1 -1 336 1367 430 60 PA
+grestore
+grestore
+edgeview
+grestore
+gsave
+4.25 I 7.75 1.75 add I translate
+[
+[(Spectrum:  out:1)]
+[(User:  HenryXu     Date:  Sat Jul  4 20:51:03 2015)]
+[(Positive contours: low 2.30e+06  levels 40  factor 1.20)]
+[(Negative contours: low -2.67e+08  levels 30  factor 1.20)]
+] banner
+grestore
+showpage

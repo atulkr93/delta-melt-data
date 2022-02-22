@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 8	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2020-07-02 20:22:14.560 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/hs_20200702_A6DNAA16lb_high_5.4_HSQC_25C/101/pdata/1/clevels
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$LEVELS= (0..255)
+-12492961.972992 -6940534.42944 -3855852.4608 -2142140.256 -1190077.92
+-661154.4 -367308 -204060 204060 367308 661154.4 1190077.92 2142140.256
+3855852.4608 6940534.42944 12492961.972992 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -204060
+##$NEGINCR= 1.8
+##$POSBASE= 204060
+##$POSINCR= 1.8
+##END=

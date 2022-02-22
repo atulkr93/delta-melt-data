@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2019-05-08T20:52:24">
+  <PeakList2D>
+    <PeakList2DHeader creator="hashimi@EP-10018760" date="2019-05-08T20:52:25" expNo="3" name="hs_20190508_A2-tbl-DNA_HSQC_5.4_25C" owner="hashimi" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails># Manually picked peaks
+</PeakPickDetails>
+    </PeakList2DHeader>
+    <Peak2D F1="135.6913" F2="7.7591" intensity="61162.67" type="0"/>
+  </PeakList2D>
+</PeakList>

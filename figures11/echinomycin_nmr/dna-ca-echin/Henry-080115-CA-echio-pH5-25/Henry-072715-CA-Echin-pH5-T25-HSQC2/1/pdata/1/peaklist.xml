@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2015-07-31T13:41:58">
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2015-07-31T13:41:58" expNo="1" name="Henry-072715-CA-Echin-pH5-T25" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.756616ppm, F2=4.753571ppm, MI=0.57cm, MAXI=16.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2015-07-31T13:41:58" expNo="1" name="Henry-072715-CA-Echin-pH5-T25" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.753571ppm, F2=4.740547ppm, MI=2.70cm, MAXI=15.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2015-07-31T13:41:58" expNo="1" name="Henry-072715-CA-Echin-pH5-T25" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.726701ppm, F2=4.670231ppm, MI=-0.19cm, MAXI=16.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="4.6961" intensity="15.00" type="0"/>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2015-07-31T13:41:58" expNo="1" name="Henry-072715-CA-Echin-pH5-T25" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.670231ppm, F2=4.634340ppm, MI=2.70cm, MAXI=15.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2015-07-31T13:41:58" expNo="1" name="Henry-072715-CA-Echin-pH5-T25" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.634340ppm, F2=4.631958ppm, MI=0.57cm, MAXI=16.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+</PeakList>

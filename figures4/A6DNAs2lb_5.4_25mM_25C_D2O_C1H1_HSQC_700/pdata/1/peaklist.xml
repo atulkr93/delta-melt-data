@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2017-07-03T10:02:23">
+  <PeakList2D>
+    <PeakList2DHeader creator="hashimi@EP-10018760" date="2017-07-03T10:02:24" expNo="104" name="hs_20170702_T6lbl_CTHSQC" owner="hashimi" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails># Manually picked peaks
+</PeakPickDetails>
+    </PeakList2DHeader>
+    <Peak2D F1="81.3662" F2="5.5213" intensity="378439.09" type="0"/>
+    <Peak2D F1="76.2709" F2="4.9133" intensity="496473.66" type="0"/>
+    <Peak2D F1="74.2392" F2="4.8144" intensity="381306.08" type="0"/>
+    <Peak2D F1="82.5916" F2="4.0342" intensity="483706.06" type="0"/>
+    <Peak2D F1="84.4298" F2="4.2760" intensity="713945.02" type="0"/>
+  </PeakList2D>
+</PeakList>

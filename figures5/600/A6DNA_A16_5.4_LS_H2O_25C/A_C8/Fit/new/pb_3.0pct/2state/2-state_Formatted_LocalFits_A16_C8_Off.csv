@@ -1,0 +1,8 @@
+Fit #1
+A16_C8_Off Pars,Fit Value,Error
+pB (%),3.000,3.000
+dwB (ppm),3.17,0.15
+kexAB (s^-1),91,8
+R1 (s^-1),2.51,0.13
+R2 (s^-1),25.96,0.18
+Red. Chi-sq,0.92

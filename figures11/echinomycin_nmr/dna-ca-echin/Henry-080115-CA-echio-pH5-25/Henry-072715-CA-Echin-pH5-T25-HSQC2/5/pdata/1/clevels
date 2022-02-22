@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 8	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2015-07-31 14:34:51.239 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-072715-CA-Echin-pH5-T25/5/pdata/1/clevels
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$LEVELS= (0..255)
+-1781376.6271104 -989653.681728 -549807.60096 -305448.6672 -169693.704
+-94274.28 -52374.6 -29097 29097 52374.6 94274.28 169693.704 305448.6672
+549807.60096 989653.681728 1781376.6271104 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -29097
+##$NEGINCR= 1.8
+##$POSBASE= 29097
+##$POSINCR= 1.8
+##END=

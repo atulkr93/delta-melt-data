@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 2	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2018-06-18 02:13:32.862 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/Henry-061818-A2DNA-m1A7-pH6.8-10C-150NaCl/3/acqu2s
+$$ process /opt/topspin3.1/prog/mod/go
+##$ACQT0= 0
+##$BF1= 70.948117
+##$FnMODE= 5
+##$NUC1= <15N>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 1
+##$O1= 10857
+##$SFO1= 70.958974
+##$SW= 4.28217873358244
+##$SW_h= 303.859009419629
+##$TD= 1
+##END=

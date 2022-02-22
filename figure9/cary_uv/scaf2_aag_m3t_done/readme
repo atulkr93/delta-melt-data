@@ -1,0 +1,11 @@
+run1 - chamber 1
+run2 - chamber 2
+run3 - chamber 2
+run4 - chamber 1
+run5 - chamber 1
+
+given that run3 does not agree with 4 and 5, discard chamber 2 data entirely, even then run1 disagrees, so run sample again
+run6 - chamber 1 (low temp)
+run7 - chamber 1 (low temp)
+run8 - chamber 1 (low temp) (weird)
+run9 - chamber 1 (low temp)

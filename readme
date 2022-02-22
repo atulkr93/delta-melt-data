@@ -1,0 +1,11 @@
+REQUIREMENTS
+- Python 2.7 with
+  -- scipy
+  -- numpy
+  -- pandas
+  -- matplotlib
+  -- uncertainties
+  -- nmrglue
+
+NMRPipe for processing NMR data - https://www.ibbr.umd.edu/nmrpipe/install.html
+

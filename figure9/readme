@@ -1,0 +1,5 @@
+scripts for generating fig9b are inside the respective folders
+the two directories correspond to UV data collected on two different spectrophotometers
+which were fit using python scripts (uv_multiple.py) in directories corresponding to each sample
+
+Execute scripts for 9b to get csv files which are used by the scripts for 9c

@@ -1,0 +1,28 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 8	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2018-06-19 10:33:25.329 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/Henry-061818-A2DNA-m1A1617-pH6.8-10C-150NaCl/90/pdata/1/clevels
+$$ process /opt/topspin3.1/prog/mod/dataserver
+##$LEVELS= (0..255)
+-745469.7219648 -414149.845536 -230083.24752 -127824.0264 -71013.348 -39451.86
+-21917.7 -12176.5 12176.5 21917.7 39451.86 71013.348 127824.0264 230083.24752
+414149.845536 745469.7219648 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0 0 0
+##$LEVSIGN= 3
+##$MAXLEV= 8
+##$METHOD= 0
+##$NEGBASE= -12176.5
+##$NEGINCR= 1.8
+##$POSBASE= 12176.5
+##$POSINCR= 1.8
+##END=

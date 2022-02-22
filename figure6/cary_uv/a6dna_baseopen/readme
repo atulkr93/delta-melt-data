@@ -1,0 +1,10 @@
+run1 - from 20210105_melting1.csv
+run2 - from 20201005_melting4.csv
+run3 - from 20201005_melting5.csv
+run4 - from 20200108_melting4.csv - to test whether probe in 1st block, sample is second block gives good data
+- it does, the values match runs1+3
+
+run5 - chamber 1 - new open stock pH 8.84
+- all thermodynamics parameters are close to dick values
+- buffer is good!
+

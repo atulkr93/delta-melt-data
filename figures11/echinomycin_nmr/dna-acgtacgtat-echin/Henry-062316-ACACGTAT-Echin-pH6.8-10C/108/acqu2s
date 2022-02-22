@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 112	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2016-06-23 22:43:14.008 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/Henry-062316-ACACGTAT-Echin-pH6.8-10C/108/acqu2s
+$$ process /opt/topspin3.1/prog/mod/go
+##$ACQT0= 0
+##$BF1= 70.960783
+##$FnMODE= 5
+##$NUC1= <15N>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 110
+##$O1= 10998.921365001
+##$SFO1= 70.971781921365
+##$SW= 22.0020408843681
+##$SW_h= 1561.52404747033
+##$TD= 110
+##END=

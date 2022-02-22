@@ -1,0 +1,23 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/hs_20190508_A2-tbl-DNA_HSQC_5.4_25C/3/pdata/2/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2019-05-08 20:13:29.349 -0400>,<hashimi>,<EP-10018760>,<go>,<TOPSPIN 3.1>,
+      <created by zg
+	started at 2019-05-08 20:13:11.691 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       C2 16 5F A8 3D 8F C0 7D 59 82 55 84 90 06 83 2D
+       data hash MD5: 1436 * 1
+       5E 92 F2 B8 1C F2 05 DA E5 E5 F9 73 2B 2D 14 75>)
+(   2,<2019-05-08 20:13:35.168 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <Start of raw data processing
+       efp 1 2 y BC_mod = 6 BCFW = 1 LB = 10 FT_mod = 6 PKNL = 1 PHC0 = 486.113 PHC1 = 103.1534 SI = 4K 
+       data hash MD5: 4K
+       5B DC 40 A3 0F FE 95 67 A9 58 F4 FA 36 D9 5B A6>)
+##END=
+
+$$ hash MD5
+$$ E7 D3 1B BB 9D 2A 1F 7D 6F 8E 9D 2B E0 49 D7 B2

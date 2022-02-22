@@ -1,0 +1,16 @@
+##TITLE= Audit trail, XWIN-NMR		Version 3.6
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/xwinnmr/data/hashimi/nmr/evgenia_AT6ul_m1dG10A16_pH5.2_09Jul11/11/audita.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, WHAT)
+(   1,<2011-07-09 15:38:32.38 -0400>,<hashimi>,<bloch600>,
+      <created by zg, POWCHK disabled, PULCHK disabled
+       configuration hash MD5:
+       E9 7B E6 77 A0 06 44 16 04 82 50 02 11 C2 E2 AA
+       data hash MD5: 1146 * 256
+       A8 63 5B 12 47 87 00 40 6D 5B 6C 3F 27 FF 92 6E>)
+##END=
+
+$$ hash MD5
+$$ C5 0E EB A1 75 14 D3 34 E3 79 2C 58 79 D5 B7 8C

@@ -1,0 +1,7 @@
+this directory contains simulations and fits of the cest and r1rho data sets used in this study
+R1rho fitting and simulation is done using BMNS
+https://github.com/alhashimilab/BMNS
+
+CEST fitting and simulation is done using 
+https://github.com/alhashimilab/m6A_hybridization_kinetics
+

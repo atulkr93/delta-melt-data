@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 9	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2015-05-02 17:40:42.522 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-050215-DNA-CA-echino/6/acqu2
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$ACQT0= 0
+##$BF1= 599.66
+##$FnMODE= 5
+##$NUC1= <1H>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 2816.00336
+##$SFO1= 599.66281600336
+##$SW= 23.9999999472003
+##$SW_h= 14391.9075524186
+##$TD= 2264
+##END=

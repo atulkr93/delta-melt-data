@@ -1,0 +1,2853 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 0 0 612 792
+%
+% PostScript initialization file for Sparky, version 1.08 and above.
+%
+%%ColorUsage: Color
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       Start of user-definable section                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Flags that can be changed - use "true" or "false".
+%
+/bottomAxisScale?	true	def	% If the bottom axis is shown
+/topAxisScale?		true	def	% If the top axis is shown
+/leftAxisScale?		true	def	% If the left axis is shown
+/rightAxisScale?	true	def	% If the right axis is shown
+
+/leftAxisLabel?		true	def	% If the left axis label is shown
+/bottomAxisLabel?	true	def	% If the bottom axis label is shown
+
+/bottomTick?		true	def	% If the bottom ticks are shown
+/topTick?		true	def	% If the top ticks are shown
+/leftTick?		true	def	% If the left ticks are shown
+/rightTick?		true	def	% If the right ticks are shown
+
+/showBanner?		true	def	% If the banner is to be shown
+/shadowUnderBanner?	true	def	% Place shadow box under banner
+/planeBanner?		true	def	% In N-D spectra, shows current plane
+
+/useGray?		true	def	% On B/W printer use gray scale?
+
+
+%
+% Sizes that can be changed.
+%
+/MajorTickInset		0	def	% Amount major tick goes inside panel
+/MajorTickOutset	12	def	% Amount major tick goes outside panel
+/MajorTickThickness	4	def	% Thickness of major tick
+/MinorTickInset		0	def	% Amount minor tick goes inside panel
+/MinorTickOutset	8	def	% Amount minor tick goes outside panel
+/MinorTickThickness	1	def	% Thickness of minor tick
+/EdgeLineWidth		4	def	% Thickness of border around panels
+/LeftLabelPad		32	def	% Pad between left axis labels & label
+/BottomLabelPad		32	def	% Pad between bottom axis labels & label
+/AxisPad		8	def	% Pad between ticks and labels
+
+
+%
+% Fonts that can be changed
+%
+/AxisFont		/Helvetica	def	% Font used for X/Y axis
+/AxisFontSize		12		def	%   and its size
+/BannerFont		/Helvetica	def	% Font used for the banner
+/BannerFontSize		12 		def	%   and its size
+/LabelFont		/Courier	def	% Font used for peak labels
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       End of user-definable section                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Check whether color is available
+/has_color false def
+% the following is for Display PostScript and PostScript Level 2
+/deviceinfo where {
+	pop deviceinfo /Colors known {
+		deviceinfo /Colors get exec
+		1 ne {
+			/has_color true def
+		} if
+	} if
+} if
+% the following is for PostScript Level 1 printers
+statusdict /processcolors known {
+	statusdict /processcolors get exec
+	1 ne {
+		/has_color true def
+	} if
+} if
+
+
+%
+% Color printer check. If true, the /4color variable is set to be true.
+%
+has_color {
+	/4color true def
+	1.0 setlinewidth
+}{
+	/4color false def
+	0.25 setlinewidth
+} ifelse
+
+
+%
+% Small dictionary used by the axis label routines
+%
+/plot_dict 2 dict begin
+	/subdis 0.0 def
+	/len 0.0 def
+	currentdict
+end def
+
+%
+%
+%
+/SCALE	1 def
+/SC	{ SCALE div } def
+/EdgePad {
+	EdgeLineWidth MajorTickOutset add AxisPad add
+} def
+/setAxisFont {
+	AxisFont findfont AxisFontSize SC scalefont setfont
+} def
+/LeftMostAxisPos EdgePad neg def
+/BottomMostAxisPos EdgePad neg def
+
+
+%
+% Low level defines
+%
+/bdef { bind def } bind def
+/ldef { load def } bdef
+/xdef { exch def } bdef
+/x { 0 rlineto } bdef
+/y { 0 exch rlineto } bdef
+/I {72 mul} bdef
+/L /lineto ldef
+/r /rmoveto ldef
+/s /gsave ldef
+/T /grestore ldef
+/M /moveto ldef
+/L /lineto ldef
+/C /closepath ldef
+
+%
+% Return the min or max of two numbers
+%
+/max { 2 copy lt {exch} {} ifelse pop } def
+/min { 2 copy gt {exch} {} ifelse pop } def
+
+
+/WHITE	1 def
+/BLACK	0 def
+/CLEAR	-1 def
+/DASH	4   def
+/TF	{ 0 ne {true}{false} ifelse } def
+
+%
+% A case/switch statement.  Takes a key for the case and an array.
+% Generally the array is executable to avoid evaluating the array
+% each time case is called:
+%	obj {
+%	    key1	{proc1}
+%	    key2 key3	{proc2}
+%	    key4	{proc3}
+%	    /Default	{proc4}
+%	} case
+%
+/case where { pop } {
+  /case {			%  v { k {} k k {} .... /Default {} }  CASE  -
+    false exch {				% v bool k|{}
+	exch {					% v k|{}
+	    dup xcheck {exit} {pop true} ifelse	% v bool|{}
+	} {
+	    2 copy eq exch /Default eq or	% v bool
+	} ifelse
+    } forall					% v bool|{}
+    dup xcheck {exch pop exec} {pop pop} ifelse
+  } bind def
+} ifelse
+
+
+%
+% String justification routines
+%
+/rshow { dup stringwidth exch neg exch rmoveto show } def
+/cshow { dup stringwidth pop -.5 mul 0 rmoveto show } bdef
+/stringsize {
+	gsave
+	newpath
+	0 0 moveto				% str
+	false charpath pathbbox			% x1 y1 x2 y2
+	4 2 roll pop pop			% x2 y2
+	grestore
+} def
+/stringcenter {	% str -> cx cy
+	stringsize
+	.5 mul exch .5 mul exch			% cx cy
+} def
+/tickrshow {	% str x y -> -
+	moveto					% str
+	MajorTickOutset neg 0 rlineto s stroke T	% str
+	dup stringsize				% str w h
+	-.5 mul exch pop 0 exch			% str 0 dy
+	rmoveto rshow
+} def
+
+%
+% Set the dash pattern for either color or B&W printing
+%
+/set_dash {	% bwdash colordash
+	4color {
+		0 setdash pop
+	}{
+		pop 0 setdash
+	} ifelse
+} def
+
+
+%
+% Set the color for either color printing or black for B&W printing
+%
+/contour_color {	% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		dashpatterns level get aload pop set_dash
+		pop 0 setgray
+	} ifelse
+} def
+
+/set_stroke {
+	levelcolor contour_color
+} bdef
+
+%
+% Set the stroke color and perform the stroke
+%
+/S {set_stroke stroke} bdef
+
+%
+% Set the color from the color index, whether RBG or B&W
+%
+/setpixel {		% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		useGray? {
+			colors exch get aload pop
+			pop pop pop setgray
+		}{
+			WHITE eq { 1 } { 0 } ifelse setgray
+		} ifelse
+	} ifelse
+} bdef
+
+%
+% Add a rectangular path to the current path at the current point
+%
+/rect {			% w h => -
+    dup 0 exch rlineto 
+    exch 0 rlineto 
+    neg 0 exch rlineto 
+    closepath 
+} bdef
+
+%
+% Compute the rectangle that is inset by <delta> from the input
+% rectangle <x> <y> <w> <h>
+%
+/insetrect { 		% delta x y w h => x' y' w' h'
+    3 index 5 index add		% delta x y w h x'
+    3 index 6 index add		% delta x y w h x' y'
+    3 index 7 index 2 mul sub	% delta x y w h x' y' w'
+    3 index 8 index 2 mul sub	% delta x y w h x' y' w' h'
+    mark 10 5 roll cleartomark
+} bdef
+
+%
+% Add a rectangular path to the current path
+%
+/rectpath { 		% x y w h  =>  - 
+    4 2 roll moveto rect
+} def
+
+%
+% Given x y w h coordinates, create a shadow box offset down and right
+% of this box
+%
+/shadowbox {		% x y w h dx dy => -
+	%
+	% Draw dark box
+	%
+	gsave
+		neg translate
+		4 copy rectpath
+		0 setgray fill
+	grestore
+
+	%
+	% Fill white box then stroke dark border
+	%
+	rectpath
+	gsave
+		1 setgray fill
+	grestore
+	0 setgray stroke
+} def
+
+
+
+/Xshow /show ldef
+/Xs /show ldef
+
+%
+% Switch fonts
+%
+/XfR {
+	/Times-Roman findfont setfont
+} def
+/XfS {
+	/Symbol findfont setfont
+} def
+
+
+%
+% Attach a font to a variable name if the font exists. This should
+% check if the font exists before trying the bind, but the code
+% that has been "%%"ed out below fails on SPARCprinters!
+%
+/bindFont {	% variable fontname	=> -
+%%	dup FontDirectory exch known {			% var name t|f
+		[ exch findfont /setfont load ] cvx	% var proc
+		store					% -
+%%	}{
+%%		pop pop					% -
+%%	} ifelse
+} def
+
+%
+% For filled objects, if the fill is white or nil, and the border is
+% white or nil, replace the border with black
+%
+/FixFill {	% bo bg
+	0 index dup 0 lt exch		% bo bg bool bg
+	WHITE eq or {			% bo bg
+		1 index dup 0 lt exch	% bo bg bool bo
+		WHITE eq or {		% bo bg
+			exch pop
+			BLACK exch
+		} if
+	} if
+} def
+
+
+%
+% Draw the pointer in colors <bo> <bg> in the 3 point area <x1, y1>,
+% <x2, y2>, <x3, y3>
+%
+/PaintPointer {		% bo bg x1 y1 x2 y2 x3 y3 => -
+	moveto				% bo bg x1 y1 x2 y2
+	lineto				% bo bg x1 y1
+	lineto				% bo bg
+	closepath			% bo bg
+
+	FixFill				% bo' bg
+
+	%
+	% First the fill
+	%
+	dup 0 ge {
+		setpixel
+		gsave fill grestore
+	}{
+		pop
+	} ifelse
+
+	%
+	% Now stroke the edge, unless it is white or nil.
+	%
+	dup WHITE eq {
+		pop
+	}{
+		dup 0 ge {
+			setpixel
+			stroke
+		}{
+			pop
+		} ifelse
+	} ifelse
+} def
+
+%
+% Paint a grid line from <x,y> size <w,h> in color <bg>
+%
+/PG {		% bg x y w h => -
+	4 2 roll				% bg w h x y
+	moveto					% bg w h 
+	rlineto					% bg
+	stroke					% bg
+	pop					% -
+} def
+
+%
+% Place a border around the peak (this doesn't do much except handle
+% the above-plane, below-plane pointer for printing)
+%
+/BorderPeak {	% x y w h sel {-1 | 0 | 1 }  => x y w h
+	dup 0 ne {
+		6 copy exch pop			% x y w h {above|below}
+
+		0 ge {
+			4 2 roll moveto rmoveto	% x y w h sel {u/d}
+			2 index .5 mul dup .5 mul
+		}{
+			4 2 roll moveto exch pop 0 exch rmoveto
+			2 index .5 mul neg dup -.5 mul
+		} ifelse
+		2 copy rlineto
+		exch neg exch rlineto
+		closepath
+		BLACK setpixel stroke
+	} if
+	pop				% x y w h sel
+	pop				% x y w h
+} bdef
+
+%
+% Paint a Peak from <x,y> with size <w,h> in border color <bo> and
+% background color <bg>. If <bg> is -1, the peak is not printed at all.
+% For Peaks, the border color is currently ignored because the peak is
+% drawn as an "X".  The selected state <sel> is also ignored but show
+% a flag on the edge if the peak is above or below this plane.
+%
+/PP {		% bo bg x y w h sel { -1 | 0 | 1 } => -
+	BorderPeak 				% bo bg x y w h
+	5 -1 roll dup 0 lt {			% bo x y w h bg
+		pop pop pop pop pop		% bo
+	}{
+		dup WHITE eq {			% bo x y w h bg|WHITE
+			pop BLACK		% bo x y w h bg|BLACK
+		} if				% bo x y w h bg|BLACK
+		setpixel			% bo x y w h
+		4 2 roll moveto			% bo w h
+		2 copy rlineto			% bo w h
+		1 index neg 0 rmoveto		% bo w h
+		neg rlineto			% bo 
+		stroke				% bo
+	} ifelse
+} def
+
+/PaintBox {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	6 -2 roll			% x y w h bo bg
+	FixFill				% x y w h bo' bg
+	exch 6 1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+/PaintBox2 {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	5 -1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+
+%
+% Paint a crosspeak
+%
+/PX {	% bo bg x y w h => -
+	PaintBox			% x y w h
+	4 {pop} repeat			% -
+} def
+
+
+%
+% Resonance information
+%
+/PaintResBY {		% labelpos => matrix
+	15 SC exch moveto			% -
+	matrix currentmatrix			% CTM
+	resScale dup scale			% CTM
+} def
+/PaintResBX {		% labelpos => matrix
+	matrix currentmatrix exch		% CTM labelpos
+	15 SC					% CTM labelpos x
+	exch translate				% CTM
+	resScale dup scale			% CTM
+	0 0 moveto				% CTM
+} def
+
+/PaintResA {		% matrix shift ypos => -
+	3 -1 roll
+	setmatrix		% shift ypos
+	0 exch moveto		% shift
+	3 SC 0 rlineto
+	8 SC exch rlineto	% -
+	3 SC 0 rlineto
+	stroke
+} def
+/PaintResB null def
+
+%
+% Paint a resonance
+%
+/PaintRes {	% pos shift {labelproc} bot => -
+	PaintResB			% pos shift {labelproc} matrix
+	4 1 roll			% matrix pos shift {labelproc}
+	exec				% matrix pos shift
+	exch PaintResA			% -
+} def
+
+
+%
+% Produce a linepath with an arrow at the appropriate end.
+% Arrows are at 1 (x, facing left), 3 (y, facing down),
+% 2 (x + w, facing right), 4 (y + h, facing up).
+%
+%
+/LEX	{ LineEndSizeX } def
+/LEY	{ LineEndSizeY } def
+/ArrowX	{ h .3535 mul } def
+/ArrowY	{ w .3535 mul } def
+/w	0 def
+/h	0 def
+/LinePath {	% ends x y w h => - (builds path)
+	5 -1 roll {				% x y w h
+	    1 {	%  at left end
+		%
+		%   +- 7 ---------------+	+
+		%   | /| <LEY 			|
+		%    / 6----------------5	|
+		%   1                   |	h
+		%    \ 3----------------4	|
+		%   | \| <LEY			|
+		%   +--2 ---------------+	+
+		% x,y ^ArrowX
+		%
+		%   +----------w--------+
+
+		/h exch store			% x y w
+		/w exch store			% x y w
+
+		h .5 mul add moveto		% 1)
+		ArrowX h -.5 mul rlineto	% 2)
+		0 LEY rlineto			% 3)
+		w ArrowX sub dup 0 rlineto	% w' 4)
+		0 h LEY dup add sub rlineto	% w' 5)
+		neg 0 rlineto			% 6)
+		0 LEY rlineto			% 7)
+		closepath
+	    }
+
+	    2 {	% at right end
+		%
+		%   +----------------5--+	+
+		%        	LEY> |\ |	|
+		%   7----------------6 \	|
+		%   |                   4 	h
+		%   1----------------2 /	|
+		%        	LEY> |/ |	|
+		%   +----------------3--+	+
+		% x,y           ArrowX^
+		%
+		%   +---------w---------+
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		LEY add moveto			% 1)
+		w ArrowX sub dup 0 rlineto	% w' 2)
+		0 LEY neg rlineto		% w' 3)
+		ArrowX h .5 mul rlineto		% w' 4)
+		ArrowX neg h .5 mul rlineto	% w' 5)
+		0 LEY neg rlineto		% w' 6)
+		neg 0 rlineto			% 7)
+		closepath
+	    }
+
+	    4 {
+		%         
+		%   +--5-4--+  		+
+		%      | |		|
+		%  LEX^| |^LEX		|
+		%      | |  		|
+		%   7--6-3--2		h
+		%    \     /		|
+		%   | \   / | <ArrowY	|
+		%   |  \ /  |		|
+		%   +---1---+		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		exch w .5 mul add exch moveto	% 1)
+		w .5 mul ArrowY rlineto		% 2)
+		LEX neg 0 rlineto		% 3)
+		0 h ArrowY sub rlineto		% 4)
+		w LEX dup add sub neg 0 rlineto	% 5)
+		0 ArrowY h sub rlineto		% 6)
+		LEX neg 0 rlineto		% 7)
+		closepath
+	    }
+
+	    5 {	% at top
+		%         
+		%   +---7---+		+
+		%   |  / \  |		|
+		%   | /   \ | <ArrowY	|
+		%    /     \		|
+		%   1--2-5--6		h
+		%    ^ | | ^ 		|
+		%   LEX| |LEX		|
+		%      | |   		|
+		%   +--3-4--+  		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		h ArrowY sub add moveto		% 1)
+		LEX 0 rlineto			% 2)
+		0 ArrowY h sub rlineto		% 3)
+		w LEX dup add sub 0 rlineto	% 4)
+		0 h ArrowY sub rlineto		% 5)
+		LEX 0 rlineto			% 6)
+		w -.5 mul ArrowY rlineto	% 7)
+		closepath
+	    }
+	    /Default { rectpath }
+	} case
+} bdef
+
+%
+% Paint a line
+%
+/PL {	% ends bo bg x y w h => -
+
+	%
+	% CLEAR or WHITE border WHITE background becomes 
+	% CLEAR border BLACK background
+	%
+	7 -1 roll 5 1 roll		% bo bg ends x y w h
+	LinePath 			% bo bg
+	dup WHITE eq {
+		1 index 0 lt
+		2 index WHITE eq or {
+			pop pop
+			-1 BLACK	% x y w h CLEAR BLACK
+		} if
+	} if
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	dup 0 ge {			% bo bg
+		gsave			% bo bg
+		  setpixel		% bo
+		  fill			% bo
+		grestore		% bo
+	}{
+		pop			% bo
+	} ifelse			
+
+	%
+	% If the border color is positive, edge it.
+	%
+	dup 0 ge {			% bo
+		setpixel		% -
+		stroke			% -
+	}{
+		pop			% -
+	} ifelse
+} bdef
+
+/PA {	% {} {} bo bg x y w h => -
+	PaintBox2 			% {} {} x y w h
+	5 -1 roll exec			% {} x y w h
+	pop pop moveto
+	matrix currentmatrix		% {} CTM
+	exch				% CTM {}
+	exec				% CTM
+	setmatrix			% -
+} bdef
+
+
+% xlabel : labels the graph with ppm scale.
+% On stack: labels label_count ylength incr_distance
+/xlabel {
+  gsave plot_dict begin
+    /subdis exch store
+    /len exch store
+    {
+	gsave
+	    bottomAxisScale? {
+		gsave
+			0 1 index stringsize exch pop EdgePad add neg r
+
+			%
+			% Find the bottom-most axis label position, for
+			% positioning the horizontal axis label
+			%
+			currentpoint exch pop	% label y
+			dup BottomMostAxisPos lt {
+				/BottomMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+
+			dup cshow
+		grestore
+	    } if
+	    topAxisScale? {
+		0 len EdgePad add r dup cshow
+	    }if
+	    pop
+	grestore
+	subdis 0 r
+    } repeat
+  end grestore
+} bdef
+
+% ylabel : labels the graph with ppm scale.
+/ylabel {
+  s
+  plot_dict begin
+	/subdis exch store
+	/len exch store
+	{
+		dup stringsize			% str w h
+		-.5 mul exch neg exch		% str dx dy
+		s 2 copy r 2 index
+		leftAxisScale? {
+			EdgePad neg 0 r		% label
+
+			%
+			% Find the left-most axis label position, for
+			% positioning the vertical axis label
+			%
+			currentpoint pop	% label x
+			dup LeftMostAxisPos lt {
+				/LeftMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+			show			% -
+		}{
+			pop			% -
+		} ifelse T
+		s exch pop 0 exch r len 0 r
+		rightAxisScale? { EdgePad 0 r show } { pop } ifelse T
+		0 subdis r
+	} repeat
+  end T
+} bdef
+
+% grid : draws grid of dashed lines on plot.  The major increment has
+% a solid line rather than a dashed line.
+% On stack : incr_index num_incrs yheight incr end
+/grid
+{
+  s
+  [DASH] 0 setdash
+  0 6 1 roll 0
+  {
+    dup 2 index le		% while not at end of scale
+    {
+      6 index 6 index sub	% check if major increment
+      5 index mod 0 ne
+      {				% No so draw dashed line.
+      	dup 0 M
+      	3 index y stroke
+      }
+      {				% Yes so set to solid line
+      	[] 0 setdash
+      	dup -5 M
+      	3 index 10 add y stroke
+	[DASH] 0 setdash
+      } ifelse
+      2 index add		% increment position
+      7 -1 roll 1 add		% increment counter
+      7 1 roll
+    }
+    { exit } ifelse
+  } loop
+  7 { pop } repeat
+  T
+} bdef
+
+% tick : draws tick marks on axes.
+% On stack : [ yposition ... ] i longAt inc end
+% On stack : [ [ yposition direction ] ... ] i longAt inc end
+/tick
+{
+	s
+	10 dict begin
+	    /xend	exch def
+	    /xinc	exch def
+	    /longAtI	exch def
+	    /istart	exch def
+	    /heights	exch def
+
+	    /xpos	0 def
+	    /ipos	0 def
+	    /tickin	null def
+	    /tickout	null def
+	    /direction	1 def
+	    {
+		xpos xend ge { exit } if
+
+		ipos istart sub longAtI mod 0 eq {
+			MajorTickThickness setlinewidth
+			MajorTickInset MajorTickOutset	% long ticks
+		}{
+			MinorTickThickness setlinewidth
+			MinorTickInset MinorTickOutset	% short ticks
+		} ifelse
+		/tickout exch EdgeLineWidth add store
+		/tickin exch store
+
+		heights {
+			dup type /arraytype eq {
+				aload pop
+				/direction exch store
+			} if
+								% ypos
+			xpos exch M				% -
+			0 tickin direction mul r		% -
+			0 tickin tickout add neg direction mul y% -
+			stroke
+		} forall
+
+		/xpos xpos xinc add store	% increment position
+		/ipos ipos 1 add store		% increment counter
+	    } loop
+	end
+	T
+} bdef
+
+/xTick {		% [ yposition ... ] i longAt inc end
+	5 -1 roll
+	bottomTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	topTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/yTick {
+	5 -1 roll
+	leftTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	rightTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/getScale {	% sz, maxSz
+	dup 0 gt 2 index 2 index gt and {
+		div				% scale
+	}{
+		1				% scale==1
+	} ifelse
+} def
+
+/displayOneLine {	% proc []
+	aload length 1 add -1 roll load exec	% -
+} def
+
+/displayLines {		% [[(...) .. ] ... ] fontht proc => -
+    3 dict begin
+	/proc exch def
+	/height exch def
+	/y 0 def
+	{
+		newpath
+		0 y moveto			% x1  y1  x2  y2 []		
+		proc exch displayOneLine	% x y
+		/y y height sub 2 sub store
+	} forall
+   end
+} def
+
+%
+% Return the box that fits around all the input strings
+%
+/getBoundingBox {	% [[(...)] ...] fontht proc => x1 y1 x2 y2
+    9 dict begin
+	/bbox_x1 0 def
+	/bbox_y1 0 def
+	/bbox_x2 0 def
+	/bbox_y2 0 def
+
+	%
+	% Determine the largest limits of these positions and the positions
+	% stored in the dictionary elements (of getBoundingBox) of bbox_x1 ...
+	% bbox_y2.
+	%
+	/combineBBox {		% x1 y1 x2 y2 => -
+		bbox_y2 max /bbox_y2 exch store		% x1 y1 x2
+		bbox_x2 max /bbox_x2 exch store		% x1 y1
+		bbox_y1 min /bbox_y1 exch store		% x1
+		bbox_x1 min /bbox_x1 exch store		% -
+	} def
+
+
+	%
+	% Xshow produces a bounding box which is the union of the input
+	% bounding box and the bounding box of this <string>. We iterate
+	% through the <string> because of charpath limits imposed by
+	% some PostScript interpreters. Otherwise we could have used:
+	%	{ false charpath pathbbox combineBBox }
+	%
+	/Xshow {	% string => -
+	    3 dict begin
+		dup /str exch def
+		length 1 sub 0 1 3 -1 roll {
+			str exch 1 getinterval
+			false charpath
+			currentpoint /y exch def /x exch def
+			pathbbox combineBBox
+			newpath x y moveto
+		} for
+	    end
+	} def
+	/proc exch def
+	/height exch def
+	/y 0 def
+
+	%
+	% Iterate over the string arrays, computing the bounding box
+	%
+	gsave
+	    {
+		newpath
+		0 y moveto			% []		
+		proc exch displayOneLine	% -
+		pathbbox combineBBox		% -
+		/y y height sub 2 sub store	% -
+	    } forall
+	grestore
+
+	%
+	% And return the bounding box
+	%
+	bbox_x1 bbox_y1 bbox_x2 bbox_y2
+    end
+} def
+
+/CurrFontSize AxisFontSize def
+/FontSize { CurrFontSize SC } def
+
+/showOmega {
+	currentfont
+	/Symbol findfont CurrFontSize SC 1.25 mul scalefont setfont
+	(w) Xshow
+	setfont
+} def
+
+/showUnits {	% (units)
+	(  \() Xshow					% u
+	Xshow						% -
+	(\)) Xshow					% -
+} def
+
+/showAxisAtom {	% (atom) (axis) => -
+	showOmega
+	subscript Xshow unsubscript
+	( - ) Xshow					% u a
+	showAtom					% u
+} def
+
+/showAxis {	% (units) (atoms) (axis) => -
+	showAxisAtom
+	showUnits
+} def
+
+/doPlaneLine {		% (units) (atom) (axis) (offset)
+	3 1 roll
+	showAxisAtom
+	( :  ) Xshow
+	Xshow
+	showUnits
+} def
+
+/doBannerLine {
+	Xshow
+} def
+
+/setBannerFont { BannerFont findfont BannerFontSize scalefont setfont } def
+/planeBannerFont { BannerFont findfont BannerFontSize SC scalefont } def
+
+/banner {	% [() ...] => -
+  showBanner? {
+    gsave
+    7 dict begin
+	/oCurrFontSize CurrFontSize def
+	/CurrFontSize BannerFontSize store
+
+	setBannerFont
+	dup BannerFontSize /doBannerLine getBoundingBox	% [] x1 y1 x2 y2
+
+	%
+	%
+	/TRy exch BANNERWIDTHFUDGE add def
+	/TRx exch BANNERWIDTHFUDGE add def
+	/BLy exch BANNERWIDTHFUDGE sub def
+	/BLx exch BANNERWIDTHFUDGE sub def		% []
+	/xsize TRx BLx sub def
+	/ysize TRy BLy sub def
+
+
+	% Center the box
+	%
+	xsize -2 div 0 translate			% move to left edge
+
+	%
+	% Put down a shadow box
+	%
+	shadowUnderBanner? {
+		BLx BLy xsize ysize 2 2 shadowbox
+	} if
+
+	BannerFontSize /doBannerLine displayLines
+
+	/CurrFontSize oCurrFontSize store
+    end
+    grestore
+  }{
+	pop
+  } ifelse
+
+} bdef
+
+%
+% Place a small box that shows the plane of this view. Make sure the
+% box is completely visible, sizing it down for really skinny views.
+%
+%
+% The location of the box is within 5% of the left/top corner. The size
+% of the box is large enough to fit the text, but the box is never larger
+% than 90 of the width.
+%
+/BANNERWIDTHFUDGE	8 def
+/planebanner {		% [ [ (units) (atom) (axis) (offset) ] ... ] => -
+    planeBanner? not {
+	pop
+    }{
+	gsave
+	7 dict begin
+		%
+		% Set the "current font size" to the banner size. This
+		% is used globally by the routines that make the omegas
+		% and sub- and super-scripts.
+		%
+		/oCurrFontSize CurrFontSize def
+		/CurrFontSize BannerFontSize store
+
+		planeBannerFont setfont
+		dup BannerFontSize SC /doPlaneLine
+		getBoundingBox				 % [] x1 y1 x2 y2
+
+		/TRy exch BANNERWIDTHFUDGE add def
+		/TRx exch BANNERWIDTHFUDGE add def
+		/BLy exch BANNERWIDTHFUDGE sub def
+		/BLx exch BANNERWIDTHFUDGE sub def	% []
+		/xsize TRx BLx sub def
+		/ysize TRy BLy sub def
+
+
+		% Move to a few units from the top left corner
+		%
+		WIDTH .05 mul 30 min HEIGHT translate
+
+		% Limit the width/height to 90% of the view
+		%
+		xsize WIDTH  .90 mul div 1 max
+		ysize HEIGHT .90 mul div 1 max
+		max 1 exch div dup
+		scale
+
+		% Once scaled, move down to the bottom-left corner
+		%
+		0 ysize neg translate
+
+
+		% Put a box around the region
+		%
+		BLx BLy xsize ysize 2 SC 2 SC shadowbox		% []
+
+
+		% Display the lines from the bottom up.
+		%
+		0 0 moveto
+		BannerFontSize SC /doPlaneLine displayLines
+
+		%
+		% Restore the old "current font size"
+		%
+		/CurrFontSize oCurrFontSize store
+	end
+	grestore
+    } ifelse
+} bdef
+
+
+/subscript {
+	FontSize .05 mul FontSize -.3 mul r
+	.8 .8 scale
+} def
+
+/unsubscript {
+	1.25 1.25 scale
+	0 FontSize .3 mul r
+} def
+
+/superscript {
+	0 FontSize .4 mul r
+	.8 .8 scale
+} def
+
+/unsuperscript {
+	1.25 1.25 scale
+	0 FontSize -.4 mul r
+} def
+
+/isdigit {		% char => bool
+	dup 48 ge exch 57 le and
+} def
+
+%
+% Display the atom name with a superscripted atom weight
+%
+/showAtom {		% (atom) => -
+	%
+	% If (atom) starts with a digit, collect all digits and display them
+	% with a superscript, then display the rest of the thing normally.
+	%
+	dup length 0 gt {
+	    dup 0 get isdigit {
+		1				% (atom) digits
+		{
+			2 copy get		% (atom) digits dig
+			isdigit not {exit} if	% (atom) digits
+			1 add
+		} loop
+
+		% On stack are the string and the number of characters
+		% that are digits
+		%				% (atom) digits
+		1 index 0 2 index getinterval	% (atom) digits (substr)
+		superscript Xshow unsuperscript	% (atom) digits
+
+		% And get the remaining part of the string
+		%
+		1 index length			% (atom) digits length
+		1 index sub			% (atom) digits lengthLeft
+		getinterval			% (substr)
+	    } if
+	} if
+	Xshow
+} def
+
+%
+% Put the label (axis legend) along the X axis
+%
+/xaxislabel {		% (units) (atom) (axis) => -
+      bottomAxisLabel? {
+	xslice_pos M					% u a x
+	WIDTH 2 div					% u a x midx
+	BottomMostAxisPos BottomLabelPad sub r		% u a x
+
+	%
+	% Do the bounding box to find the true ascender (y2) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move down the amount of the ascender
+	%
+	0 exch neg r					% u a x x1 y1 x2
+	exch pop					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+      }{
+	pop pop pop
+      } ifelse
+
+} bdef
+
+%
+% Put the label (axis legend) along the X axis
+%
+/yaxislabel {		% (units) (atom) (axis) => -
+  leftAxisLabel? {
+    gsave
+	90 rotate
+	HEIGHT 2 div
+	LeftLabelPad LeftMostAxisPos sub M
+
+	%
+	% Do the bounding box to find the true descender (y1) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move up the amount of the descender
+	%
+	pop exch					% u a x x1 x2 y1
+	0 exch neg r					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+    grestore
+  }{
+    pop pop pop
+  } ifelse
+
+} bdef
+
+
+%
+% Stroke an "x y w h" box with linewidth "lw". The inside of the box is
+% exactly "x y w h" and the thick border falls along the outside edge.
+%
+/strokeThickBox {		% x y w h lw => -
+	6 dict begin
+		dup /lw exch def
+		2 div /lwBy2 exch def
+		/h exch def
+		/w exch def
+		/y exch def
+		/x exch def
+
+		currentlinewidth		% clw
+		lw setlinewidth
+
+		x lwBy2 sub			% x'
+		y lwBy2 sub			% x' y'
+		w lw add			% x' y' w'
+		h lw add			% x' y' w' h'
+		rectpath stroke
+
+		setlinewidth
+	end
+} def
+
+%
+% Draw an edge around the data area, the slice boxes and resonance boxes.
+%
+/edgeview {
+	newpath
+	0 setgray
+
+	%
+	% Edge the data area
+	%
+	0 0 WIDTH HEIGHT EdgeLineWidth strokeThickBox
+
+	%
+	% Edge the slice areas
+	%
+	userdict /SLICE known {
+		xslice_init
+		0 0 WIDTH SLICE EdgeLineWidth strokeThickBox
+		xslice_done
+
+		yslice_init
+		0 0 HEIGHT SLICE EdgeLineWidth strokeThickBox
+		yslice_done
+	} if
+
+	%
+	% Edge the resonance areas
+	%
+	userdict /RESONANCE known {
+		xres_init
+		0 0 RESONANCE WIDTH EdgeLineWidth strokeThickBox
+		xres_done
+
+		yres_init
+		0 0 RESONANCE HEIGHT EdgeLineWidth strokeThickBox
+		yres_done
+	} if
+} bdef
+
+%
+% Print a set of full width half max between the
+%
+/showhalfmax {		% [ [str xmin xmax yp] ... ] width => -
+	/wid exch def
+	/toright true def
+	/limit 0 def
+	{
+		aload pop				% str xmin xmax yp
+		dup 3 1 roll				% str xmin yp xmax yp
+
+		%
+		% See if can still be on the right
+		%
+		toright {
+			1 index limit max 15 add	% starting pos
+			5 index stringwidth pop add	% ending pos
+			wid ge {			% too big?
+				/toright false store	% do on left
+				/limit wid store
+			} if
+		} if
+
+		%
+		% str xmin yp xmax yp
+		%
+		toright {
+			4 2 roll
+			moveto 2 copy lineto		% str x yp
+
+			pop limit max			% str x'
+			SLICE .15 mul 2 copy lineto	% str x' y
+			exch 10 add exch		% str x' y
+			2 copy lineto stroke		% str x' y
+			exch 5 add exch
+			2 copy moveto
+			pop 1 index stringwidth pop add	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			show
+		}{
+			moveto 2 copy lineto		% str tox yp
+
+			pop limit min			% str x'
+			SLICE .30 mul 2 copy lineto	% str x' y
+			exch 10 sub exch
+			2 copy lineto stroke		% str x' y'
+			exch 5 sub exch
+			2 copy moveto
+			pop 1 index stringwidth pop sub	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			rshow
+		} ifelse
+	} forall
+} bdef
+
+/slice_pad { 24 } def
+
+/xres_pos {
+	0 0
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add sub
+	} if
+} def
+/xslice_pos {
+	xres_pos
+	userdict /SLICE known {
+		SLICE slice_pad add sub
+	} if
+} def
+/xslice_y {
+	xslice_pos exch pop
+} def
+
+/xslice_init {
+	gsave
+	xslice_pos translate
+} def
+/xslice_done {
+	grestore
+} def
+/xres_init {
+	/PaintResB { PaintResBX } store
+	gsave
+	xres_pos translate
+	-90 rotate
+	RESONANCE neg 0 translate
+} def
+/xres_done {
+	grestore
+} def
+
+/yres_pos {
+	WIDTH
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add add
+	} if
+	0
+} def
+/yslice_pos {
+	yres_pos
+	userdict /SLICE known {
+		exch SLICE slice_pad add add exch
+	} if
+} def
+/yslice_x {
+	yslice_pos pop
+} def
+/yslice_init {
+	gsave
+	yslice_pos translate
+	90 rotate
+} def
+/yslice_done {
+	grestore
+} def
+/yres_init {
+	/PaintResB { PaintResBY } store
+	gsave
+	yres_pos translate
+	RESONANCE neg 0 translate
+} def
+/yres_done {
+	grestore
+} def
+/SparkyMajorVersion 3 def
+/SparkyMinorVersion 115 def
+/SCALE 0.240000 def
+/PEAKLINEWIDTH 5 def
+/colors [
+[0.00 0.00 0.00 0.00]
+[1.00 1.00 1.00 1.00]
+[0.75 0.75 0.75 0.75]
+[0.30 1.00 0.00 0.00]
+[0.58 0.00 1.00 0.00]
+[0.11 0.00 0.00 1.00]
+[0.89 1.00 1.00 0.00]
+[0.42 1.00 0.00 1.00]
+[0.70 0.00 1.00 1.00]
+[0.80 0.68 0.85 0.90]
+[0.78 0.56 0.93 0.56]
+[0.99 1.00 1.00 0.88]
+[0.79 1.00 0.84 0.00]
+[0.68 1.00 0.65 0.00]
+[0.83 1.00 0.75 0.80]
+[0.95 0.96 0.96 0.86]
+[0.68 0.25 0.88 0.82]
+[0.63 1.00 0.50 0.31]
+[0.36 0.69 0.19 0.38]
+[0.37 0.63 0.13 0.94]
+[0.56 1.00 0.39 0.28]
+[0.62 1.00 0.55 0.00]
+[0.73 0.50 1.00 0.00]
+[0.64 0.00 1.00 0.50]
+[0.55 0.00 0.75 1.00]
+] def
+/PositiveLevels 30 def
+/NegativeLevels 1 def
+/strokecolors [
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 0 1 0]
+] def
+/fillcolors [
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+] def
+/dashpatterns [
+[[] []]
+[[DASH] []]
+] def
+%%EndProlog
+
+%%Page: 1 1
+/WIDTH 1950 def
+/HEIGHT 962 def
+gsave
+1.00 I 3.02 I translate
+SCALE dup scale
+setAxisFont 0 setgray
+gsave
+243.750000 xslice_y translate 0 0 moveto
+(11.9)
+(12.0)
+(12.1)
+(12.2)
+(12.3)
+(12.4)
+6 HEIGHT xslice_y sub 304.687500 xlabel
+grestore
+(ppm) (1H) (2) xaxislabel
+gsave
+0.000000 0 translate
+[[xslice_y 1] [0 1] [HEIGHT -1]] 4 5 60.937500 WIDTH 0.000000 sub xTick
+grestore
+gsave
+0 85.312500
+ translate 0 0 moveto
+(7.30)
+(7.35)
+(7.40)
+(7.45)
+(7.50)
+(7.55)
+6 yslice_x 152.343750 ylabel
+grestore
+(ppm) (1H) (1) yaxislabel
+gsave
+-90 rotate -1 1 scale 24.375000 0 translate
+[[0 1] [WIDTH -1] [yslice_x -1]] 2 5 30.468750 HEIGHT 24.375000 sub yTick
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+/level 0 def
+/levelcolor 3 def
+1132 150 M
+1123 143 L
+1114 139 L
+1104 137 L
+1095 137 L
+1086 139 L
+1077 141 L
+1067 144 L
+1058 148 L
+1049 155 L
+1039 163 L
+1034 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 152 M
+1123 145 L
+1114 141 L
+1104 139 L
+1095 139 L
+1086 141 L
+1077 143 L
+1067 146 L
+1058 151 L
+1049 157 L
+1039 166 L
+1037 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 156 M
+1123 148 L
+1114 144 L
+1104 142 L
+1095 142 L
+1086 143 L
+1077 146 L
+1067 149 L
+1058 154 L
+1049 161 L
+1041 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 159 M
+1123 152 L
+1114 147 L
+1104 145 L
+1095 145 L
+1086 147 L
+1077 149 L
+1067 153 L
+1058 158 L
+1049 166 L
+1046 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 164 M
+1123 156 L
+1114 151 L
+1104 149 L
+1095 149 L
+1086 151 L
+1077 153 L
+1067 157 L
+1058 163 L
+1052 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1059 168 M
+1067 163 L
+1077 158 L
+1086 156 L
+1095 154 L
+1104 153 L
+1114 156 L
+1123 161 L
+1131 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1069 168 M
+1077 165 L
+1086 162 L
+1095 160 L
+1104 159 L
+1114 162 L
+1123 167 L
+1124 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1089 168 M
+1095 167 L
+1104 166 L
+1111 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 681 M
+1123 685 L
+1114 687 L
+1104 688 L
+1103 688 L
+1095 689 L
+1086 690 L
+1077 691 L
+1067 691 L
+1058 690 L
+1056 688 L
+1049 686 L
+1039 680 L
+1030 670 L
+1021 657 L
+1017 651 L
+1011 646 L
+1002 637 L
+993 627 L
+984 615 L
+983 614 L
+974 594 L
+967 577 L
+965 564 L
+959 540 L
+965 504 L
+965 503 L
+974 474 L
+977 465 L
+984 447 L
+993 432 L
+995 428 L
+1002 412 L
+1008 391 L
+1002 379 L
+993 358 L
+991 354 L
+984 344 L
+974 325 L
+972 317 L
+965 294 L
+960 280 L
+959 242 L
+965 235 L
+974 220 L
+983 205 L
+984 205 L
+993 194 L
+1002 185 L
+1011 180 L
+1021 175 L
+1030 170 L
+1034 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 678 M
+1123 682 L
+1114 684 L
+1104 685 L
+1095 686 L
+1086 686 L
+1077 687 L
+1067 687 L
+1058 686 L
+1049 682 L
+1039 675 L
+1030 665 L
+1021 651 L
+1021 651 L
+1011 642 L
+1002 633 L
+993 622 L
+987 614 L
+984 607 L
+974 585 L
+971 577 L
+965 540 L
+965 540 L
+965 539 L
+969 503 L
+974 487 L
+981 465 L
+984 458 L
+993 441 L
+1002 428 L
+1002 427 L
+1011 391 L
+1011 391 L
+1011 391 L
+1002 371 L
+995 354 L
+993 351 L
+984 338 L
+974 317 L
+974 316 L
+965 284 L
+964 280 L
+965 245 L
+965 242 L
+974 227 L
+984 211 L
+987 205 L
+993 198 L
+1002 189 L
+1011 182 L
+1021 178 L
+1030 173 L
+1037 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 673 M
+1123 678 L
+1114 681 L
+1104 682 L
+1095 682 L
+1086 682 L
+1077 683 L
+1067 683 L
+1058 681 L
+1049 677 L
+1039 670 L
+1030 659 L
+1025 651 L
+1021 647 L
+1011 638 L
+1002 628 L
+993 616 L
+991 614 L
+984 598 L
+975 577 L
+974 569 L
+970 540 L
+974 504 L
+975 503 L
+984 473 L
+986 465 L
+993 451 L
+1002 436 L
+1006 428 L
+1011 409 L
+1015 391 L
+1011 383 L
+1002 360 L
+1000 354 L
+993 345 L
+984 330 L
+978 317 L
+974 303 L
+968 280 L
+970 242 L
+974 236 L
+984 218 L
+991 205 L
+993 203 L
+1002 193 L
+1011 186 L
+1021 181 L
+1030 175 L
+1039 169 L
+1041 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 668 M
+1123 673 L
+1114 676 L
+1104 677 L
+1095 677 L
+1086 677 L
+1077 678 L
+1067 678 L
+1058 676 L
+1049 672 L
+1039 663 L
+1030 651 L
+1030 651 L
+1021 642 L
+1011 632 L
+1002 622 L
+996 614 L
+993 608 L
+984 587 L
+980 577 L
+975 540 L
+980 503 L
+984 491 L
+993 465 L
+993 465 L
+1002 447 L
+1011 429 L
+1012 428 L
+1019 391 L
+1011 373 L
+1004 354 L
+1002 351 L
+993 338 L
+984 320 L
+982 317 L
+974 287 L
+972 280 L
+974 259 L
+976 242 L
+984 226 L
+993 209 L
+995 205 L
+1002 198 L
+1011 190 L
+1021 184 L
+1030 179 L
+1039 173 L
+1046 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 662 M
+1123 668 L
+1114 670 L
+1104 671 L
+1095 671 L
+1086 672 L
+1077 672 L
+1067 672 L
+1058 670 L
+1049 664 L
+1039 655 L
+1036 651 L
+1030 646 L
+1021 636 L
+1011 626 L
+1002 614 L
+1002 614 L
+993 597 L
+985 577 L
+984 563 L
+981 540 L
+984 522 L
+986 503 L
+993 483 L
+999 465 L
+1002 459 L
+1011 440 L
+1017 428 L
+1021 407 L
+1024 391 L
+1021 385 L
+1011 361 L
+1009 354 L
+1002 344 L
+993 329 L
+987 317 L
+984 305 L
+977 280 L
+981 242 L
+984 237 L
+993 217 L
+1001 205 L
+1002 204 L
+1011 195 L
+1021 189 L
+1030 183 L
+1039 177 L
+1049 170 L
+1052 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 170 M
+1131 168 L
+S
+1132 418 M
+1131 428 L
+1132 430 L
+S
+1132 654 M
+1123 660 L
+1114 664 L
+1104 665 L
+1095 664 L
+1086 664 L
+1077 665 L
+1067 664 L
+1058 662 L
+1049 656 L
+1044 651 L
+1039 648 L
+1030 639 L
+1021 629 L
+1011 618 L
+1009 614 L
+1002 603 L
+993 583 L
+990 577 L
+987 540 L
+993 506 L
+993 503 L
+1002 476 L
+1006 465 L
+1011 453 L
+1021 432 L
+1022 428 L
+1030 391 L
+1021 372 L
+1014 354 L
+1011 350 L
+1002 335 L
+993 318 L
+992 317 L
+984 285 L
+982 280 L
+984 268 L
+986 242 L
+993 227 L
+1002 211 L
+1007 205 L
+1011 202 L
+1021 194 L
+1030 188 L
+1039 181 L
+1049 175 L
+1058 169 L
+1059 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 176 M
+1124 168 L
+S
+1132 380 M
+1127 391 L
+1123 422 L
+1122 428 L
+1123 429 L
+1132 443 L
+S
+1132 647 M
+1124 651 L
+1123 652 L
+1114 655 L
+1104 656 L
+1095 656 L
+1086 656 L
+1077 656 L
+1067 655 L
+1058 652 L
+1057 651 L
+1049 647 L
+1039 640 L
+1030 631 L
+1021 620 L
+1016 614 L
+1011 607 L
+1002 589 L
+997 577 L
+994 540 L
+1000 503 L
+1002 497 L
+1011 470 L
+1013 465 L
+1021 446 L
+1029 428 L
+1030 422 L
+1038 391 L
+1030 377 L
+1021 356 L
+1020 354 L
+1011 341 L
+1002 325 L
+998 317 L
+993 300 L
+988 280 L
+991 242 L
+993 239 L
+1002 221 L
+1011 209 L
+1016 205 L
+1021 201 L
+1030 194 L
+1039 187 L
+1049 180 L
+1058 174 L
+1067 169 L
+1069 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 183 M
+1123 174 L
+1114 169 L
+1111 168 L
+S
+1132 358 M
+1123 378 L
+1115 391 L
+1114 395 L
+1104 415 L
+1095 418 L
+1086 421 L
+1083 428 L
+1086 429 L
+1095 431 L
+1104 432 L
+1114 436 L
+1123 445 L
+1132 460 L
+S
+1132 640 M
+1123 645 L
+1114 647 L
+1104 648 L
+1095 648 L
+1086 647 L
+1077 647 L
+1067 646 L
+1058 644 L
+1049 639 L
+1039 632 L
+1030 622 L
+1024 614 L
+1021 609 L
+1011 592 L
+1004 577 L
+1002 548 L
+1002 540 L
+1002 536 L
+1008 503 L
+1011 491 L
+1020 465 L
+1021 464 L
+1030 442 L
+1038 428 L
+1039 424 L
+1049 405 L
+1058 398 L
+1067 393 L
+1069 391 L
+1067 391 L
+1058 388 L
+1049 384 L
+1039 375 L
+1030 359 L
+1028 354 L
+1021 345 L
+1011 331 L
+1004 317 L
+1002 310 L
+993 280 L
+997 242 L
+1002 232 L
+1011 218 L
+1021 210 L
+1026 205 L
+1030 202 L
+1039 195 L
+1049 187 L
+1058 181 L
+1067 176 L
+1077 172 L
+1086 169 L
+1089 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 193 M
+1123 183 L
+1114 177 L
+1104 174 L
+1095 175 L
+1086 177 L
+1077 180 L
+1067 184 L
+1058 189 L
+1049 196 L
+1039 203 L
+1037 205 L
+1030 211 L
+1021 219 L
+1011 230 L
+1004 242 L
+1002 257 L
+1000 280 L
+1002 289 L
+1011 317 L
+1011 317 L
+1021 334 L
+1030 346 L
+1039 354 L
+1039 354 L
+1049 364 L
+1058 369 L
+1067 372 L
+1077 375 L
+1086 377 L
+1095 379 L
+1104 377 L
+1114 369 L
+1122 354 L
+1123 353 L
+1132 331 L
+S
+1132 473 M
+1124 465 L
+1123 464 L
+1114 455 L
+1104 451 L
+1095 450 L
+1086 447 L
+1077 442 L
+1067 437 L
+1058 434 L
+1049 436 L
+1039 445 L
+1030 462 L
+1029 465 L
+1021 487 L
+1016 503 L
+1011 528 L
+1009 540 L
+1011 564 L
+1013 577 L
+1021 593 L
+1030 609 L
+1034 614 L
+1039 621 L
+1049 629 L
+1058 635 L
+1067 637 L
+1077 639 L
+1086 639 L
+1095 640 L
+1104 641 L
+1114 640 L
+1123 637 L
+1132 631 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 204 M
+1123 193 L
+1114 186 L
+1104 184 L
+1095 184 L
+1086 186 L
+1077 189 L
+1067 193 L
+1058 199 L
+1050 205 L
+1049 206 L
+1039 214 L
+1030 222 L
+1021 231 L
+1012 242 L
+1011 247 L
+1007 280 L
+1011 295 L
+1019 317 L
+1021 319 L
+1030 332 L
+1039 341 L
+1049 346 L
+1058 349 L
+1067 351 L
+1077 353 L
+1084 354 L
+1086 354 L
+1095 354 L
+1096 354 L
+1104 351 L
+1114 343 L
+1123 327 L
+1127 317 L
+1132 302 L
+S
+1132 485 M
+1123 476 L
+1114 472 L
+1104 470 L
+1095 469 L
+1086 468 L
+1080 465 L
+1077 463 L
+1067 457 L
+1058 454 L
+1049 457 L
+1041 465 L
+1039 468 L
+1030 489 L
+1025 503 L
+1021 526 L
+1018 540 L
+1021 564 L
+1022 577 L
+1030 592 L
+1039 606 L
+1046 614 L
+1049 617 L
+1058 623 L
+1067 627 L
+1077 628 L
+1086 630 L
+1095 631 L
+1104 631 L
+1114 631 L
+1123 627 L
+1132 621 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 234 M
+1123 205 L
+1123 205 L
+1114 198 L
+1104 195 L
+1095 196 L
+1086 198 L
+1077 201 L
+1068 205 L
+1067 206 L
+1058 212 L
+1049 219 L
+1039 227 L
+1030 236 L
+1024 242 L
+1021 254 L
+1016 280 L
+1021 294 L
+1030 316 L
+1031 317 L
+1039 326 L
+1049 331 L
+1058 334 L
+1067 334 L
+1077 335 L
+1086 334 L
+1095 332 L
+1104 326 L
+1112 317 L
+1114 315 L
+1123 298 L
+1129 280 L
+1132 260 L
+S
+1132 500 M
+1123 490 L
+1114 485 L
+1104 483 L
+1095 483 L
+1086 482 L
+1077 480 L
+1067 478 L
+1058 478 L
+1049 484 L
+1039 499 L
+1038 503 L
+1030 536 L
+1029 540 L
+1030 547 L
+1034 577 L
+1039 586 L
+1049 598 L
+1058 607 L
+1067 613 L
+1070 614 L
+1077 616 L
+1086 618 L
+1095 619 L
+1104 620 L
+1114 619 L
+1123 615 L
+1125 614 L
+1132 607 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 521 M
+1123 508 L
+1116 503 L
+1114 501 L
+1104 499 L
+1095 499 L
+1086 500 L
+1077 501 L
+1067 502 L
+1066 503 L
+1058 510 L
+1049 528 L
+1045 540 L
+1049 566 L
+1050 577 L
+1058 585 L
+1067 593 L
+1077 598 L
+1086 602 L
+1095 604 L
+1104 606 L
+1114 605 L
+1123 599 L
+1132 589 L
+S
+1030 272 M
+1039 246 L
+1041 242 L
+1049 236 L
+1058 230 L
+1067 225 L
+1077 221 L
+1086 217 L
+1095 213 L
+1104 213 L
+1114 220 L
+1123 239 L
+1124 242 L
+1123 249 L
+1116 280 L
+1114 285 L
+1104 297 L
+1095 304 L
+1086 308 L
+1077 311 L
+1067 313 L
+1058 314 L
+1049 310 L
+1039 301 L
+1030 285 L
+1028 280 L
+1030 272 L
+S
+/level 0 def
+/levelcolor 3 def
+1058 279 M
+1066 280 L
+1058 280 L
+1058 280 L
+1058 279 L
+S
+1077 534 M
+1086 527 L
+1095 523 L
+1104 522 L
+1114 524 L
+1123 532 L
+1127 540 L
+1125 577 L
+1123 579 L
+1114 586 L
+1104 587 L
+1095 586 L
+1086 582 L
+1078 577 L
+1077 568 L
+1071 540 L
+1077 534 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 150 M
+1142 159 L
+1149 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 152 M
+1142 162 L
+1146 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 156 M
+1142 166 L
+1143 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 159 M
+1140 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 164 M
+1136 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 681 M
+1142 675 L
+1151 666 L
+1160 655 L
+1163 651 L
+1169 645 L
+1179 633 L
+1188 619 L
+1191 614 L
+1197 585 L
+1199 577 L
+1197 568 L
+1193 540 L
+1188 522 L
+1184 503 L
+1179 479 L
+1175 465 L
+1169 444 L
+1163 428 L
+1163 391 L
+1166 354 L
+1169 327 L
+1171 317 L
+1177 280 L
+1179 262 L
+1181 242 L
+1179 232 L
+1173 205 L
+1169 199 L
+1160 184 L
+1151 171 L
+1149 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 678 M
+1142 671 L
+1151 662 L
+1159 651 L
+1160 650 L
+1169 640 L
+1179 627 L
+1187 614 L
+1188 608 L
+1195 577 L
+1190 540 L
+1188 532 L
+1182 503 L
+1179 488 L
+1172 465 L
+1169 455 L
+1160 432 L
+1158 428 L
+1159 391 L
+1160 387 L
+1164 354 L
+1169 317 L
+1169 312 L
+1175 280 L
+1178 242 L
+1171 205 L
+1169 203 L
+1160 187 L
+1151 174 L
+1146 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 673 M
+1142 666 L
+1151 656 L
+1155 651 L
+1160 646 L
+1169 635 L
+1179 620 L
+1182 614 L
+1188 589 L
+1191 577 L
+1188 554 L
+1187 540 L
+1179 503 L
+1179 499 L
+1169 467 L
+1169 465 L
+1160 442 L
+1151 428 L
+1155 391 L
+1160 364 L
+1161 354 L
+1166 317 L
+1169 299 L
+1173 280 L
+1176 242 L
+1169 212 L
+1168 205 L
+1160 191 L
+1151 178 L
+1143 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 668 M
+1142 660 L
+1149 651 L
+1151 650 L
+1160 640 L
+1169 628 L
+1177 614 L
+1179 608 L
+1186 577 L
+1184 540 L
+1179 514 L
+1177 503 L
+1169 477 L
+1164 465 L
+1160 455 L
+1151 438 L
+1145 428 L
+1149 391 L
+1151 387 L
+1158 354 L
+1160 340 L
+1163 317 L
+1169 283 L
+1170 280 L
+1173 242 L
+1169 225 L
+1165 205 L
+1160 197 L
+1151 182 L
+1142 170 L
+1140 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 662 M
+1142 653 L
+1143 651 L
+1151 644 L
+1160 634 L
+1169 619 L
+1172 614 L
+1179 590 L
+1182 577 L
+1180 540 L
+1179 533 L
+1173 503 L
+1169 489 L
+1160 468 L
+1158 465 L
+1151 450 L
+1142 434 L
+1138 428 L
+1142 402 L
+1143 391 L
+1151 368 L
+1154 354 L
+1160 317 L
+1160 316 L
+1167 280 L
+1169 246 L
+1170 242 L
+1169 241 L
+1161 205 L
+1160 203 L
+1151 187 L
+1142 175 L
+1136 168 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 170 M
+1142 180 L
+1151 194 L
+1157 205 L
+1160 217 L
+1166 242 L
+1163 280 L
+1160 295 L
+1156 317 L
+1151 344 L
+1149 354 L
+1142 377 L
+1136 391 L
+1132 418 L
+S
+1132 430 M
+1142 446 L
+1151 465 L
+1151 465 L
+1160 478 L
+1169 503 L
+1169 504 L
+1176 540 L
+1177 577 L
+1169 606 L
+1167 614 L
+1160 625 L
+1151 638 L
+1142 647 L
+1135 651 L
+1132 654 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 176 M
+1142 187 L
+1151 202 L
+1152 205 L
+1160 237 L
+1161 242 L
+1160 258 L
+1158 280 L
+1151 316 L
+1151 317 L
+1142 354 L
+1142 355 L
+1132 380 L
+S
+1132 443 M
+1142 461 L
+1144 465 L
+1151 474 L
+1160 491 L
+1164 503 L
+1169 526 L
+1172 540 L
+1172 577 L
+1169 588 L
+1161 614 L
+1160 615 L
+1151 630 L
+1142 640 L
+1132 647 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 183 M
+1142 196 L
+1147 205 L
+1151 220 L
+1156 242 L
+1153 280 L
+1151 289 L
+1144 317 L
+1142 329 L
+1134 354 L
+1132 358 L
+S
+1132 460 M
+1135 465 L
+1142 472 L
+1151 486 L
+1159 503 L
+1160 508 L
+1167 540 L
+1167 577 L
+1160 600 L
+1155 614 L
+1151 620 L
+1142 632 L
+1132 640 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 193 M
+1141 205 L
+1142 209 L
+1150 242 L
+1146 280 L
+1142 300 L
+1137 317 L
+1132 331 L
+S
+1132 473 M
+1142 484 L
+1151 500 L
+1152 503 L
+1160 531 L
+1162 540 L
+1161 577 L
+1160 581 L
+1151 607 L
+1147 614 L
+1142 622 L
+1132 631 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 204 M
+1133 205 L
+1142 237 L
+1143 242 L
+1142 254 L
+1138 280 L
+1132 302 L
+S
+1132 485 M
+1142 498 L
+1144 503 L
+1151 521 L
+1156 540 L
+1155 577 L
+1151 589 L
+1142 609 L
+1138 614 L
+1132 621 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 234 M
+1135 242 L
+1132 260 L
+S
+1132 500 M
+1134 503 L
+1142 518 L
+1149 540 L
+1148 577 L
+1142 592 L
+1132 607 L
+S
+/level 0 def
+/levelcolor 3 def
+1132 521 M
+1140 540 L
+1139 577 L
+1132 589 L
+S
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+gsave 0 setlinewidth 0 setgray
+gsave PEAKLINEWIDTH setlinewidth
+1 1 1071 230 46 46 0 0 PP
+1 1 1041 248 46 46 0 0 PP
+1 1 1080 532 46 46 0 0 PP
+grestore
+gsave PEAKLINEWIDTH setlinewidth
+grestore
+/LineEndSizeX 18.579318 def
+/LineEndSizeY 18.579318 def
+LabelFont findfont setfont
+currentfont 1036.218034 (Standard Width) stringwidth pop div scalefont setfont
+{gsave -370.077869 -30.839822 rmoveto 1 1 scale 0 setpixel (A5H8-T12H3) show grestore} {0 0 1121.195 710.866 1102.969 588.809 1084.742 710.866 PaintPointer} -1 -1 1103 783 740 105 PA
+grestore
+grestore
+edgeview
+grestore
+gsave
+4.25 I 6.23 1.75 add I translate
+[
+[(Spectrum:  out)]
+[(User:  HenryXu     Date:  Mon Aug 31 01:35:38 2015)]
+[(Positive contours: low 5.00e+05  levels 30  factor 1.23)]
+[(Negative contours: low -8.00e+09  levels  1  factor 1.23)]
+] banner
+grestore
+showpage

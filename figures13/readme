@@ -1,0 +1,2 @@
+run get_ft2.sh to process nmr data in each directory
+then run the python scripts to generate the images

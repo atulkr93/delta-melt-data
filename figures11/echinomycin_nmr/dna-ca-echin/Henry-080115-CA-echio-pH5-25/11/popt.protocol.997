@@ -1,0 +1,21 @@
+
+Report of AU program poptau
+# Start time: 2015-08-01 11:54:01.446 -0400
+
+F1P=5.250ppm F2P=4.281ppm
+PH_mode=1  FT_mod=6
+
+
+PROCNO=997
+
+Linear optimization of P 11 in 2 steps, as Step: Group 0
+starting at 900.000000000 endval= 1000.000000000
+OPTIMUM= POSMAX
+VARMOD= LIN
+
+Experiment       P 11         Maximum point   Minimum point       Integral
+     1     900.000000000000        52231242       -50006751      -2009771.225000
+     2    1000.000000000000       287986771       -18569462      26860256.600000
+poptau for P 11 finished.
+POSMAX at experiment 2:  P 11 = 1000.000000  
+

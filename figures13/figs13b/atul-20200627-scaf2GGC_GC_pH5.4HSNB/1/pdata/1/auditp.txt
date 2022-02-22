@@ -1,0 +1,58 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/atul-20200627-scaf2GGC_GC_pH5.4HSNB/1/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2020-06-28 12:08:07.289 -0400>,<hashimi>,<EP-10018760>,<go>,<TOPSPIN 3.1>,
+      <created by zg
+	started at 2020-06-28 12:07:59.152 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       E0 05 14 40 FE C0 7A 06 57 2F 1B E2 7A ED C4 FA
+       data hash MD5: 64K
+       88 6D 09 BE FF B0 CC E9 25 E2 CA 9E 8E 83 09 E0>)
+(   2,<2020-06-28 12:08:08.395 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <Start of raw data processing
+       efp LB = 0.3 FT_mod = 6 PKNL = 1 PHC0 = 280.2719 PHC1 = -248.4626 SI = 64K 
+       data hash MD5: 64K
+       C7 7B BC D6 68 40 6C C3 C9 63 85 51 6F 2D 07 A2>)
+(   3,<2020-06-28 12:53:15.143 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGC_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       C7 7B BC D6 68 40 6C C3 C9 63 85 51 6F 2D 07 A2>)
+(   4,<2020-06-28 12:53:15.654 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGC_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       C7 7B BC D6 68 40 6C C3 C9 63 85 51 6F 2D 07 A2>)
+(   5,<2020-06-28 12:53:15.846 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGC_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       C7 7B BC D6 68 40 6C C3 C9 63 85 51 6F 2D 07 A2>)
+(   6,<2020-06-28 12:53:16.215 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGC_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       C7 7B BC D6 68 40 6C C3 C9 63 85 51 6F 2D 07 A2>)
+(   7,<2020-06-28 12:53:16.399 -0400>,<hashimi>,<EP-10018760>,<audit>,<TOPSPIN 3.1>,
+      <user comment:
+       TITLE=Proton
+       72uM scaf2_GGC_GC
+       pH 5.4 HSNB 10% D2OTITLE_END
+       data hash MD5: 64K
+       C7 7B BC D6 68 40 6C C3 C9 63 85 51 6F 2D 07 A2>)
+##END=
+
+$$ hash MD5
+$$ E3 78 A4 2A 85 80 A7 40 9F FE E9 7A F4 2D 8B BC

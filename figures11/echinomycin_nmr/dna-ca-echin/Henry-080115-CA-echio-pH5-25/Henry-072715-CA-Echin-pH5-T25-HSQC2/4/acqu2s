@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 488	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2015-07-28 02:38:42.609 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-072715-CA-Echin-pH5-T25/4/acqu2s
+$$ process C:\Bruker\TopSpin3.2\prog\mod\go.exe
+##$ACQT0= 0
+##$BF1= 150.784627
+##$FnMODE= 5
+##$NUC1= <13C>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 472
+##$O1= 21486.8093475
+##$SFO1= 150.806113809347
+##$SW= 26.0040427300496
+##$SW_h= 3921.56862745098
+##$TD= 472
+##END=

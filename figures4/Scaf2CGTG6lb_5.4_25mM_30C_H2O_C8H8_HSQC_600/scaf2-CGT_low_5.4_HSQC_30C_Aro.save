@@ -1,0 +1,115 @@
+<sparky save file>
+<version 3.115>
+<user>
+set mode 0
+set saveprompt 1
+set saveinterval 0
+set resizeViews 0
+set keytimeout 3000
+set cachesize 4
+set contourgraying 1
+default print command lpr
+default print file 
+default print options 2 27 1.000000 1.000000
+<end user>
+<spectrum>
+name scaf2-CGT_low_5.4_HSQC_30C_Aro
+pathname ../Scaf2CGTG6lb_5.4_25mM_30C_H2O_C8H8_HSQC_600/scaf2-CGT_low_5.4_HSQC_30C_Aro.ucsf
+dimension 2
+shift 0.000000 0.000000
+points 3441 1309
+assignMultiAxisGuess 0
+assignGuessThreshold 0.000000
+assignRelation 1 4 
+assignRelation 2 4 
+assignRange 1 0.000000
+assignRange 2 0.000000
+assignFormat %a1-%a2
+listTool sortBy label
+listTool nameType assignment
+listTool sortAxis w1
+listTool showFlags frequency
+integrate.overlapped_sep 120.000 30.000
+integrate.methods 1 0 1
+integrate.allow_motion 1
+integrate.adjust_linewidths 1
+integrate.motion_range 0.040 0.010
+integrate.min_linewidth 0.0133 0.0033
+integrate.max_linewidth 1.3262 0.3335
+integrate.fit_baseline 0
+integrate.subtract_peaks 0
+integrate.contoured_data 1
+integrate.rectangle_data 0
+integrate.maxiterations 10000
+integrate.tolerance 0.001000
+peak.pick 0.000000 0.000000 0.000000 0.000000 0
+peak.pick-minimum-linewidth 0.000000 0.000000
+peak.pick-minimum-dropoff 0.00
+noise.sigma 35798.238281
+ornament.label.size 16.381441
+ornament.line.size 0.327629
+ornament.peak.size 8.190720
+ornament.grid.size 0.400000
+ornament.peakgroup.size 0.819072
+ornament.selectsize 0.500000
+ornament.pointersize 0.500000
+ornament.lineendsize 0.500000
+<attached data>
+<end attached data>
+<view>
+name scaf2-CGT_low_5.4_HSQC_30C_Aro
+precision 0
+precision_by_units 0 0 0
+viewmode 0
+show 1 label line peak grid peakgroup
+axistype 2
+flags crosshair crosshair2
+contour.pos 15 1e+06 1.200000 0.000000 red
+contour.neg 0 -100000 1.400000 0.000000 green
+<params>
+orientation 1 0
+location 103 151
+size 500 500
+offset 2641.844037 242.997575
+scale 1.000000 0.801607
+zoom 1.247496
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 103 151
+size 500 500
+offset 2641.844037 242.997575
+scale 1.000000 0.801607
+zoom 1.247496
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 103 151
+size 500 500
+offset 2641.844037 242.997575
+scale 1.000000 0.801607
+zoom 1.247496
+flags 0
+<end params>
+<end view>
+<ornament>
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 1
+pos 138.389 7.864
+height 0.000 12337671.000
+rs |G6|C8| |G6|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.389 7.864
+label G6C8-H8
+xy 138.389,7.801 7.864,138.139
+]
+<end ornament>
+<end spectrum>

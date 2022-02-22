@@ -1,0 +1,88 @@
+
+Report of AU program poptau
+# Start time: 2015-08-01 11:42:50.157 -0400
+
+Number of experiments: 4
+total experiment time will be:  5 min  0 sec
+
+F1P=5.992ppm F2P=3.409ppm
+PH_mode=1  FT_mod=6
+
+
+PROCNO=999
+
+Linear optimization of P 11 in 4 steps, as Step: Group 0
+starting at 600.000000000 endval= 1200.000000000
+OPTIMUM= POSMAX
+VARMOD= LIN
+
+poptaustop was executed for P 11, step 2
+
+Report of AU program poptau
+# Start time: 2015-08-01 11:47:12.013 -0400
+
+Number of experiments: 4
+total experiment time will be:  6 min  8 sec
+
+F1P=5.250ppm F2P=4.281ppm
+PH_mode=1  FT_mod=6
+
+
+PROCNO=998
+
+Linear optimization of P 11 in 4 steps, as Step: Group 0
+starting at 600.000000000 endval= 1200.000000000
+OPTIMUM= POSMAX
+VARMOD= LIN
+
+Experiment       P 11         Maximum point   Minimum point       Integral
+     1     600.000000000000       277041944       -22249072      20820145.900000
+     2     800.000000000000        21201780        -9226311       1978248.350000
+     3    1000.000000000000        18199898        -1221921       1706297.100000
+     4    1200.000000000000       167778078        -2236059      14334939.875000
+poptau for P 11 finished.
+POSMAX at experiment 1:  P 11 = 600.000000  
+
+
+Report of AU program poptau
+# Start time: 2015-08-01 11:54:00.002 -0400
+
+Number of experiments: 2
+total experiment time will be:  3 min  4 sec
+
+F1P=5.250ppm F2P=4.281ppm
+PH_mode=1  FT_mod=6
+
+
+PROCNO=997
+
+Linear optimization of P 11 in 2 steps, as Step: Group 0
+starting at 900.000000000 endval= 1000.000000000
+OPTIMUM= POSMAX
+VARMOD= LIN
+
+Experiment       P 11         Maximum point   Minimum point       Integral
+     1     900.000000000000        52231242       -50006751      -2009771.225000
+     2    1000.000000000000       287986771       -18569462      26860256.600000
+poptau for P 11 finished.
+POSMAX at experiment 2:  P 11 = 1000.000000  
+
+
+Report of AU program poptau
+# Start time: 2015-08-01 12:02:10.432 -0400
+
+Number of experiments: 2
+total experiment time will be:  3 min  4 sec
+
+F1P=5.311ppm F2P=4.020ppm
+PH_mode=1  FT_mod=6
+
+
+PROCNO=996
+
+Linear optimization of P 11 in 2 steps, as Step: Group 0
+starting at 900.000000000 endval= 1000.000000000
+OPTIMUM= POSMAX
+VARMOD= LIN
+
+poptaustop was executed for P 11, step 2

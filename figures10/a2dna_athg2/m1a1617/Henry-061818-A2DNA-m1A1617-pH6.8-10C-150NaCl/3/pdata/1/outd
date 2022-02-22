@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2018-06-18 11:32:21.524 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/Henry-061818-A2DNA-m1A1617-pH6.8-10C-150NaCl/3/pdata/1/outd
+$$ process /opt/topspin3.1/prog/mod/edparproc
+##$CURPLOT= <HP LaserJet 1200 Series PCL 5>
+##$CURPRIN= <$HP LaserJet 1200 Series PCL 5>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/2D_inv.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

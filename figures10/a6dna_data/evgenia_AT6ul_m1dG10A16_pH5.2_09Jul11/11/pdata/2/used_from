@@ -1,0 +1,16 @@
+##TITLE= Parameter file, XWIN-NMR		Version 3.6
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ Sat Jul  9 11:11:34 2011 EDT (UT-4h)  hashimi@bloch600
+$$ /opt/xwinnmr/data/hashimi/nmr/evgenia_AT6ul_m1dG10A16_pH5.2_09Jul11/11/pdata/2/used_from
+##$CUREXP= <ser>
+##$DU= </opt/xwinnmr>
+##$EXPNO= 11
+##$NAME= <evgenia_AT6ul_m1dG10A16_pH5.2_09Jul11>
+##$PROCNO= 1
+##$PROCNO2= 1
+##$TYPE= <nmr>
+##$USER= <hashimi>
+##END=

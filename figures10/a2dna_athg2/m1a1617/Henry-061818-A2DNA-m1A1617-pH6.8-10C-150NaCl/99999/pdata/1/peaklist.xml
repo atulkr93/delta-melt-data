@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashimi" date="2018-06-18T11:48:41.468-04:00" expNo="99999" name="Henry-061818-A2DNA-m1A1617-pH6.8-10C-150NaCl" owner="" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails>F1=2.380ppm, F2=-2.380ppm, MI=25.00cm, MAXI=110.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="0.6120" intensity="2.748495e+01" type="0"/>
+    <Peak1D F1="0.5598" intensity="1.000000e+02" type="0"/>
+    <Peak1D F1="-0.5598" intensity="1.000000e+02" type="0"/>
+    <Peak1D F1="-0.6120" intensity="2.748495e+01" type="0"/>
+  </PeakList1D>
+</PeakList>

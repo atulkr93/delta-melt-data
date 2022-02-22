@@ -1,0 +1,15 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2016-09-17 00:29:41.574 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/Henry-091716-CA-deazaG-Echin-pH5.3-25C/3/pdata/1/used_from
+$$ process /opt/topspin3.1/prog/mod/proc1d
+##$CUREXP= <ser>
+##$DATPATH= </opt/topspin3.1/hashimi>
+##$EXPNO= 3
+##$NAME= <Henry-091716-CA-deazaG-Echin-pH5.3-25C>
+##$PROCNO2= 1
+##END=

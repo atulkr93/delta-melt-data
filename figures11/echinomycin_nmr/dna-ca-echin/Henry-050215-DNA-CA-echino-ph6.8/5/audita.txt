@@ -1,0 +1,18 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.2
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-050215-DNA-CA-echino/5/audita.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2015-05-02 17:26:28.181 -0400>,<hashim>,<CZC3510JM8>,<go>,<TOPSPIN 3.2>,
+      <created by zg
+	started at 2015-05-02 12:54:25.198 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       42 86 CA AE 84 C9 9B C6 1E CD F4 C5 86 B9 8D D6
+       data hash MD5: 1914 * 512
+       64 21 4C F2 5E 41 75 D6 02 96 BD 2F B3 37 9E 12>)
+##END=
+
+$$ hash MD5
+$$ 45 56 82 36 17 FC D9 6D 1D 87 83 A1 10 DB 46 B0

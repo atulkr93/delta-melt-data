@@ -1,0 +1,8 @@
+Fit #1
+T8_N3_Off Pars,Fit Value,Error
+pB (%),0.500,0.500
+dwB (ppm),-0.89,0.04
+kexAB (s^-1),673,135
+R1 (s^-1),1.41,0.05
+R2 (s^-1),7.99,0.09
+Red. Chi-sq,0.46

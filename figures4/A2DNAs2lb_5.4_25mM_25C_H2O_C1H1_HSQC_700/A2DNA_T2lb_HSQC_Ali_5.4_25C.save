@@ -1,0 +1,211 @@
+<sparky save file>
+<version 3.115>
+<user>
+set mode 0
+set saveprompt 0
+set saveinterval 0
+set resizeViews 0
+set keytimeout 3000
+set cachesize 4
+set contourgraying 1
+default print command lpr
+default print file /Users/shihonglue/Desktop/A6DNA_adia_HSQC_Aro.ps
+default print options 2 1 1.000000 1.000000
+<end user>
+<spectrum>
+name A2DNA_T2lb_HSQC_Ali_5.4_25C
+pathname A2DNA_T2lb_HSQC_Ali_5.4_25C.ucsf
+dimension 2
+shift 0.000000 0.000000
+points 2975 2949
+assignMultiAxisGuess 0
+assignGuessThreshold 0.000000
+assignRelation 1 4 
+assignRelation 2 4 
+assignRange 1 0.000000
+assignRange 2 0.000000
+assignFormat %a1-%a2
+listTool sortBy label
+listTool nameType assignment
+listTool sortAxis w1
+listTool showFlags frequency
+integrate.overlapped_sep 120.000 30.000
+integrate.methods 1 0 1
+integrate.allow_motion 1
+integrate.adjust_linewidths 1
+integrate.motion_range 0.040 0.010
+integrate.min_linewidth 0.0114 0.0029
+integrate.max_linewidth 1.1360 0.2857
+integrate.fit_baseline 0
+integrate.subtract_peaks 0
+integrate.contoured_data 1
+integrate.rectangle_data 0
+integrate.maxiterations 10000
+integrate.tolerance 0.001000
+peak.pick 0.000000 0.000000 0.000000 0.000000 0
+peak.pick-minimum-linewidth 0.000000 0.000000
+peak.pick-minimum-dropoff 0.00
+noise.sigma 42892.601562
+ornament.label.size 81.919391
+ornament.line.size 0.409597
+ornament.peak.size 81.919391
+ornament.grid.size 0.400000
+ornament.peakgroup.size 0.819194
+ornament.selectsize 0.500000
+ornament.pointersize 0.500000
+ornament.lineendsize 0.500000
+<attached data>
+<end attached data>
+<view>
+name A2DNA_T2lb_HSQC_Ali_5.4_25C
+precision 0
+precision_by_units 0 0 0
+viewmode 0
+show 1 label line peak grid peakgroup
+axistype 2
+flags crosshair crosshair2
+contour.pos 15 2.14e+06 1.200000 0.000000 red
+contour.neg 0 -214000 1.400000 0.000000 green
+<params>
+orientation 1 0
+location 574 327
+size 500 500
+offset -177.000000 -901.419979
+scale 1.000000 1.000244
+zoom 0.125000
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 574 327
+size 500 500
+offset -177.000000 -901.419979
+scale 1.000000 1.000244
+zoom 0.125000
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 574 327
+size 500 500
+offset -177.000000 -901.419979
+scale 1.000000 1.000244
+zoom 0.125000
+flags 0
+<end params>
+<end view>
+<ornament>
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 1
+pos 85.279 5.762
+height 0.000 7969631.000
+rs |T9|C1'| |T9|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 85.279 5.762
+label T9C1'-H1'
+xy 85.282,5.619 5.507,85.474
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 2
+pos 85.363 5.968
+height 0.000 13992667.000
+rs |G1|C1'| |G1|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 85.363 5.968
+label G1C1'-H1'
+xy 85.245,5.833 6.165,85.511
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 3
+pos 85.104 5.882
+height 0.000 9507252.000
+rs |T8|C1'| |T8|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 85.104 5.882
+label T8C1'-H1'
+xy 85.083,5.744 5.785,85.664
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 4
+pos 84.996 5.858
+height 0.000 8405712.000
+rs |T4|C1'| |T4|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 84.996 5.858
+label T4C1'-H1'
+xy 84.967,5.722 5.699,84.564
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 5
+pos 84.715 5.957
+height 0.000 11429616.000
+rs |G11|C1'| |G11|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 84.715 5.957
+label G11C1'-H1'
+xy 84.679,5.804 6.019,83.931
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 6
+pos 84.130 5.582
+height 0.000 6486229.000
+rs |G10|C1'| |G10|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 84.130 5.582
+label G10C1'-H1'
+xy 84.117,5.454 5.267,83.870
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 7
+pos 83.933 5.624
+height 0.000 7231427.000
+rs |G6|C1'| |G6|H1'|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 83.933 5.624
+label G6C1'-H1'
+xy 83.945,5.486 5.830,83.465
+]
+<end ornament>
+<end spectrum>

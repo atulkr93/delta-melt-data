@@ -1,0 +1,14 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/Henry-080115-CA-echio-pH5-25/11/pdata/997/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2015-08-01 11:57:13.256 -0400>,<hashimi>,<EP-10018760>,<poptau>,<TOPSPIN 3.1>,
+      <created by poptau
+       data hash MD5: 80
+       A8 4A 46 19 E3 35 5B 8B 95 34 2D F5 9C D2 37 9E>)
+##END=
+
+$$ hash MD5
+$$ 62 B1 99 84 28 20 DA 1F 69 CD 9B 28 50 68 28 DA

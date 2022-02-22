@@ -1,0 +1,33 @@
+##TITLE= Audit trail, XWIN-NMR		Version 3.6
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/xwinnmr/data/hashimi/nmr/evgenia_AT6ul_m1dG10A16_pH5.2_09Jul11/1/pdata/2/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, WHAT)
+(   1,<2011-07-09 19:27:44.46 -0400>,<hashimi>,<bloch600>,
+      <created by zg, POWCHK disabled, PULCHK disabled
+       configuration hash MD5:
+       E9 7B E6 77 A0 06 44 16 04 82 50 02 11 C2 E2 AA
+       data hash MD5: 3600 * 1
+       7E 1C F8 8F 1C E7 AE 5F CD 10 65 FB E7 13 DC C8>)
+(   2,<2011-07-09 19:27:46.21 -0400>,<hashimi>,<bloch600>,
+      <Start of raw data processing
+       qsin SSB = 2 SI = 4K 
+       data hash MD5: 4K
+       FE 38 CA E5 4F 64 EB 5F 80 A7 A0 6E CE 95 63 F8>)
+(   3,<2011-07-09 19:27:46.25 -0400>,<hashimi>,<bloch600>,
+      <ft FT_mod = 6 PKNL = 1 SI = 4K 
+       data hash MD5: 4K
+       5B DD AB 62 26 5C BA 9A A7 BB 85 2B 75 43 01 5D>)
+(   4,<2011-07-09 19:27:46.30 -0400>,<hashimi>,<bloch600>,
+      <pk PHC0 = 239.3605 PHC1 = -33.79999 
+       data hash MD5: 4K
+       A2 AE 07 3C 87 88 A1 E4 34 65 E7 95 18 73 69 8C>)
+(   5,<2011-07-09 19:27:48.24 -0400>,<hashimi>,<bloch600>,
+      <apk0 
+       data hash MD5: 4K
+       18 9A A3 42 16 02 4D 15 B8 6B B7 4E EB AC 48 6D>)
+##END=
+
+$$ hash MD5
+$$ 0E 68 4E F0 96 45 32 C9 EE 9C 6B 91 70 E8 A9 C5

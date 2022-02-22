@@ -1,0 +1,18 @@
+concentrated stock in water
+sample is good based on pH 6.8 measurements
+
+
+# pH 4.4HS buffer is good!
+run8, run9 - from 20201223_pH4p4HSStock_testing.csv - shape looks good, fit value too
+runn10 - from 20201228_melting.csv
+run11 - from 20201228_melting1.csv
+run12 - from 20200108_melting4 - to test whether probe1 in block1, sample in block2 would give good data
+- this is slightly off relative to probe 1, sample 1
+- however, we can correct for this, by assuming that offset is temperature independent between both probes, and then the thermodynamic parameters match
+- that from dick and (probe+sample in chamber1). 
+
+run13 - new stock 4.4hsnb (buffer in old falcon)
+run14 - new stock 4.4hsnb (buffer in old falcon)
+run15 - new stock 4.4hsnb (buffer in new falcon)
+run16 - new2* stock 4.4hsnb (buffer in new2* falcon)
+

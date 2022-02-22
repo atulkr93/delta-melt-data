@@ -1,0 +1,8 @@
+Fit #1
+G_C1p_Off_reduce_new_trunc Pars,Fit Value,Error
+pB (%),0.094,0.022
+dwB (ppm),2.52,0.38
+kexAB (s^-1),2206,544
+R1 (s^-1),2.23,0.05
+R2 (s^-1),14.27,0.10
+Red. Chi-sq,0.15

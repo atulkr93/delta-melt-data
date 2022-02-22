@@ -1,0 +1,23 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.2
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-072715-CA-Echin-pH5-T25/1/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2015-07-31 13:41:11.971 -0400>,<hashim>,<CZC3510JM8>,<go>,<TOPSPIN 3.2>,
+      <created by zg
+	started at 2015-07-31 13:41:04.389 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       42 86 CA AE 84 C9 9B C6 1E CD F4 C5 86 B9 8D D6
+       data hash MD5: 64K
+       CD FE 46 14 C9 FC A1 54 4B 32 F7 5C 27 8E 02 77>)
+(   2,<2015-07-31 13:41:35.745 -0400>,<hashim>,<CZC3510JM8>,<proc1d>,<TOPSPIN 3.2>,
+      <Start of raw data processing
+       efp LB = 0.3 FT_mod = 6 PKNL = 1 PHC0 = 153.7558 PHC1 = 87.03746 SI = 64K 
+       data hash MD5: 64K
+       B8 3A A1 80 98 DD E5 55 74 C2 2B 3F 14 4C CF 78>)
+##END=
+
+$$ hash MD5
+$$ EC 76 D9 9D F1 D3 91 F5 DE D8 A3 FC 9F A0 17 C4

@@ -1,0 +1,23 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.2
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ C:/Bruker/TopSpin3.2/hashimi/at_20210521_scaf2AAG_AT_10C/1/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2021-05-23 18:12:04.843 -0400>,<hashim>,<CZC3510JM8>,<go>,<TOPSPIN 3.2>,
+      <created by zg
+	started at 2021-05-23 18:11:57.105 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       25 FA B5 D5 51 A6 BE DC 7B 1C FD ED 2A DD 68 BE
+       data hash MD5: 64K
+       AE 07 32 E2 CE 2A C6 4A B4 7F 13 24 97 E4 FF 51>)
+(   2,<2021-05-23 18:12:06.075 -0400>,<hashim>,<CZC3510JM8>,<proc1d>,<TOPSPIN 3.2>,
+      <Start of raw data processing
+       efp LB = 0.3 FT_mod = 6 PKNL = 1 PHC0 = 296.6457 PHC1 = -235.6055 SI = 64K 
+       data hash MD5: 64K
+       CA 92 30 10 44 CF 2E 9D D6 9A BC B7 0E 04 A9 93>)
+##END=
+
+$$ hash MD5
+$$ DC 8C F1 BB 82 6E 4A 88 2B 25 8B 85 FA 8A EB 4F

@@ -1,0 +1,17 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.2
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-050215-DNA-CA-echino/7/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2015-05-03 07:59:52.948 -0400>,<hashim>,<CZC3510JM8>,<go>,<TOPSPIN 3.2>,
+      <acquisition in progress>)
+(   2,<2015-05-03 12:22:26.109 -0400>,<hashim>,<CZC3510JM8>,<proc2d>,<TOPSPIN 3.2>,
+      <Start of raw data processing
+       xfb F2: SI = 2K BC_mod = 4 WDW = 4 SSB = 2 FT_mod = 6 PKNL = 1 PHC0 = 163.1282 PHC1 = 20 F1: SI = 1K ME_mod = 2 NCOEF = 32 WDW = 4 SSB = 2 FT_mod = 4 FCOR = 0.5 PHC0 = 83.2 PHC1 = -180
+       data hash MD5: 2K * 1K
+       5D 06 F2 9B FD B2 A1 19 44 47 07 D1 ED 83 99 8C>)
+##END=
+
+$$ hash MD5
+$$ 90 AB 27 E2 DC 26 6D 3A 31 0F CF 5C E6 14 E6 74

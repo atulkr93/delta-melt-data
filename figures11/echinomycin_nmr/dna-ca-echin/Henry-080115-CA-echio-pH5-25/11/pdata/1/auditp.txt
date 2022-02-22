@@ -1,0 +1,17 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/Henry-080115-CA-echio-pH5-25/11/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2015-08-01 12:12:04.627 -0400>,<hashimi>,<EP-10018760>,<go>,<TOPSPIN 3.1>,
+      <acquisition in progress>)
+(   2,<2015-08-01 17:24:41.987 -0400>,<hashimi>,<EP-10018760>,<proc2d>,<TOPSPIN 3.1>,
+      <Start of raw data processing
+       xfb F2: SI = 1K WDW = 4 SSB = 3 FT_mod = 6 PKNL = 1 PHC0 = 118.4 PHC1 = 0 F1: SI = 1K BC_mod = 1 WDW = 4 SSB = 3 FT_mod = 4 PHC0 = 87.47969 PHC1 = -174.4
+       data hash MD5: 1K * 1K
+       CA E9 BE 80 E5 BD 1C F0 8E 46 9F 0E 8C 93 1A CF>)
+##END=
+
+$$ hash MD5
+$$ 42 2E 09 CC 0A 3B 47 22 63 7E 11 BD A7 BC 37 31

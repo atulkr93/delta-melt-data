@@ -1,0 +1,35 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/atul-20200627-scaf2GGT_GC_pH5.4HSNB/99999/pdata/1/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2020-06-28 12:30:32.170 -0400>,<hashimi>,<EP-10018760>,<go>,<TOPSPIN 3.1>,
+      <created by zg
+	started at 2020-06-28 12:30:25.022 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       E0 05 14 40 FE C0 7A 06 57 2F 1B E2 7A ED C4 FA
+       data hash MD5: 4K
+       D1 B0 FB 52 B5 34 36 B7 4B 03 9A A0 6D C3 8C 6F>)
+(   2,<2020-06-28 12:30:33.253 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <Start of raw data processing
+       gm BC_mod = 6 BCFW = 0.1142755 LB = -10 GB = 0.1 SI = 16K 
+       data hash MD5: 16K
+       96 49 8D 57 42 3A BD B9 75 1B F2 AD 9F 47 71 12>)
+(   3,<2020-06-28 12:30:33.271 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <ft FT_mod = 6 PKNL = 1 SI = 16K 
+       data hash MD5: 16K
+       98 8C 6D E2 63 EF 04 5B 27 69 BD DA 80 00 93 0C>)
+(   4,<2020-06-28 12:30:33.279 -0400>,<hashimi>,<EP-10018760>,<proc1d>,<TOPSPIN 3.1>,
+      <mc 
+       data hash MD5: 16K
+       EC BE 14 1B B0 8A 8B 57 AB 27 6A E7 7E 66 AD CA>)
+(   5,<2020-06-28 12:30:33.286 -0400>,<hashimi>,<EP-10018760>,<pulsecal>,<TOPSPIN 3.1>,
+      <pulsecal , symmetrised
+       data hash MD5: 16K
+       B9 9E 8A 6D 9E 83 4F FC 47 83 7B CB 05 AC 2E 8A>)
+##END=
+
+$$ hash MD5
+$$ A9 EB ED DB AD ED 7F C9 7B 25 2E 81 DB 4A 23 68

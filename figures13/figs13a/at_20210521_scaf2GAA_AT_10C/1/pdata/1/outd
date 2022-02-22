@@ -1,0 +1,16 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2021-06-05 12:57:38.051 -0400  hashim@CZC3510JM8
+$$ C:\Bruker\TopSpin3.2\hashimi/at_20210521_scaf2GAA_m1A_10C/1/pdata/1/outd
+$$ process C:\Bruker\TopSpin3.2\prog\mod\edparproc.exe
+##$CURPLOT= <HP LaserJet 1200 Series PCL 5>
+##$CURPRIN= <$HP LaserJet 1200 Series PCL 5>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##END=

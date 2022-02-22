@@ -1,0 +1,3 @@
+the scripts for generating the nmr spectra are in the echinomycin_nmr/ directory
+execute get_ft2.sh to process the NMR data
+then the python scripts to generate the plots

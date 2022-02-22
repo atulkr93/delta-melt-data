@@ -1,0 +1,328 @@
+<sparky save file>
+<version 3.115>
+<user>
+set mode 7
+set saveprompt 1
+set saveinterval 0
+set resizeViews 0
+set keytimeout 3000
+set cachesize 4
+set contourgraying 1
+default print command lpr
+default print options 2 27 1.000000 1.000000
+<end user>
+<spectrum>
+name out
+pathname out.ucsf
+dimension 2
+shift 0.000000 0.000000
+points 2048 8192
+assignMultiAxisGuess 0
+assignGuessThreshold 0.000000
+assignRelation 1 4 
+assignRelation 2 4 
+assignRange 1 0.000000
+assignRange 2 0.000000
+assignFormat %a1-%a2
+listTool sortBy label
+listTool nameType assignment
+listTool sortAxis w1
+listTool showFlags frequency
+integrate.overlapped_sep 120.000 30.000
+integrate.methods 1 0 1
+integrate.allow_motion 1
+integrate.adjust_linewidths 1
+integrate.motion_range 0.040 0.010
+integrate.min_linewidth 0.0133 0.0033
+integrate.max_linewidth 1.3262 0.3335
+integrate.fit_baseline 0
+integrate.subtract_peaks 0
+integrate.contoured_data 1
+integrate.rectangle_data 0
+integrate.maxiterations 10000
+integrate.tolerance 0.001000
+peak.pick 0.000000 0.000000 0.000000 0.000000 0
+peak.pick-minimum-linewidth 0.000000 0.000000
+peak.pick-minimum-dropoff 0.00
+noise.sigma 230272.515625
+ornament.label.size 7.313584
+ornament.line.size 0.365679
+ornament.peak.size 3.656792
+ornament.grid.size 0.400000
+ornament.peakgroup.size 0.804494
+ornament.selectsize 0.500000
+ornament.pointersize 0.500000
+ornament.lineendsize 0.500000
+<attached data>
+<end attached data>
+<view>
+name out
+precision 0
+precision_by_units 0 0 0
+viewmode 0
+show 1 label line peak grid peakgroup
+axistype 2
+flags crosshair crosshair2
+contour.pos 20 1.15e+06 1.400000 0.000000 red
+contour.neg 20 -1.15e+06 1.400000 0.000000 green
+<params>
+orientation 1 0
+location 735 105
+size 500 500
+offset 1174.090111 2204.500000
+scale 1.000000 0.570417
+zoom 0.876552
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 735 105
+size 500 500
+offset 1174.090111 2204.500000
+scale 1.000000 0.570417
+zoom 0.876552
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 735 105
+size 500 500
+offset 1174.090111 2204.500000
+scale 1.000000 0.570417
+zoom 0.876552
+flags 0
+<end params>
+<end view>
+<ornament>
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 1
+pos 138.196 7.048
+height 0.000 5164951.000
+rs |T6|C6| |T6|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.196 7.048
+label T6C6-H6
+xy 138.196,7.028 7.048,137.771
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 2
+pos 138.411 7.148
+height 0.000 8947241.000
+rs |T4|C6| |T4|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.411 7.148
+label T4C6-H6
+xy 138.411,7.086 7.191,138.005
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 3
+pos 138.415 7.149
+height 0.000 8819558.000
+rs |T10|C6| |T10|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.415 7.149
+label T10C6-H6
+xy 138.415,7.087 7.299,138.165
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 4
+pos 138.650 7.192
+height 0.000 6450412.000
+rs |T12|C6| |T12|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.650 7.192
+label T12C6-H6
+xy 138.650,7.130 7.192,138.400
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 5
+pos 140.178 7.588
+height 0.000 17629792.000
+rs |T14|C6| |T14|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 140.178 7.588
+label T14C6-H6
+xy 140.178,7.525 7.588,139.928
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 6
+pos 138.086 7.757
+height 0.000 8030459.500
+rs |G7|C8| |G7|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.086 7.757
+label G7C8-H8
+xy 138.086,7.694 7.757,137.836
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 7
+pos 138.203 7.878
+height 0.000 9812101.000
+rs |G2|C8| |G2|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 138.203 7.878
+label G2C8-H8
+xy 138.203,7.815 7.878,137.953
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 8
+pos 141.301 8.203
+height 0.000 8368150.500
+rs |A3|C8| |A3|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 141.301 8.203
+label A3C8-H8
+xy 141.301,8.141 8.203,141.051
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 9
+pos 141.636 8.233
+height 0.000 5459644.500
+rs |A9|C8| |A9|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 141.636 8.233
+label A9C8-H8
+xy 141.636,8.171 8.233,141.386
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 10
+pos 141.906 8.222
+height 0.000 11454195.000
+rs |A5|C8| |A5|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 141.906 8.222
+label A5C8-H8
+xy 141.906,8.160 8.222,141.656
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 11
+pos 141.917 8.222
+height 0.000 11190990.000
+rs |A11|C8| |A11|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 141.917 8.222
+label A11C8-H8
+xy 141.917,8.159 8.222,141.667
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 12
+pos 142.527 7.973
+height 0.000 14426936.000
+rs |A1|C8| |A1|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 142.527 7.973
+label A1C8-H8
+xy 142.527,7.910 7.973,142.277
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 13
+pos 142.443 7.299
+height 0.000 4926668.000
+rs |C8|C6| |C8|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 142.443 7.299
+label C8C6-H6
+xy 142.443,7.236 7.299,142.193
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 14
+pos 144.131 7.622
+height 0.000 5977531.000
+rs |C13|C6| |C13|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 144.131 7.622
+label C13C6-H6
+xy 144.131,7.559 7.622,143.881
+]
+type peak
+color 0 2 0 white
+flags 1 0 0 0
+id 15
+pos 143.805 7.808
+height 0.000 323350.719
+<end ornament>
+<end spectrum>

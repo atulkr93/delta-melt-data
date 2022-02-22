@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2021-05-23T13:05:42">
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2021-05-23T13:05:42" expNo="1" name="at_20210521_scaf2AAG_m1A_10C" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.844366ppm, F2=4.789402ppm, MI=50.00cm, MAXI=10000.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2021-05-23T13:05:42" expNo="1" name="at_20210521_scaf2AAG_m1A_10C" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.789402ppm, F2=4.788393ppm, MI=39.88cm, MAXI=159.95cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2021-05-23T13:05:42" expNo="1" name="at_20210521_scaf2AAG_m1A_10C" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.788393ppm, F2=4.560855ppm, MI=0.41cm, MAXI=148.44cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="4.6921" intensity="15.00" type="0"/>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2021-05-23T13:05:42" expNo="1" name="at_20210521_scaf2AAG_m1A_10C" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.560855ppm, F2=4.547814ppm, MI=50.00cm, MAXI=10000.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+</PeakList>

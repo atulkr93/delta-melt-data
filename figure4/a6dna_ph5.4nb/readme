@@ -1,0 +1,9 @@
+run1 from 20201228_melting2.csv
+- this buffer is slightly unstable ~0.2kcal/mol relative to old buffer stock
+try from bottle
+
+run2 from 20201230_melting.csv
+- buffer from bottle, value matches dick
+run3 - new stock - chamber 1 - but weird probe temperatures, so may not be trustworthy
+run4 - chamber 1
+run5 - chamber 1

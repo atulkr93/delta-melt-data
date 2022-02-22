@@ -1,0 +1,119 @@
+# 1 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+;pulsecal
+;avance-version (11/08/08)
+;for single scan pulse calibration
+;requires analog mode
+;
+;P.S.C.Wu & G. Otting, J. Magn. Reson. 176, 115-119 (2005)
+;
+;$CLASS=HighRes HWT
+;$DIM=1D
+;$TYPE=
+;$SUBTYPE=
+;$COMMENT=
+;$HIDE=y
+
+
+# 1 "/opt/topspin3.1/exp/stan/nmr/lists/pp/Avance.incl" 1
+;Avance3.incl
+;   for AV III
+;
+;avance-version (07/12/14)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+# 165 "/opt/topspin3.1/exp/stan/nmr/lists/pp/Avance.incl"
+;$Id: Avance3.incl,v 1.9 2009/07/02 16:40:43 ber Exp $
+# 16 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal" 2
+
+# 1 "/opt/topspin3.1/exp/stan/nmr/lists/pp/De.incl" 1
+;De2.incl
+;   for AVi
+;
+;avance-version (08/02/15)
+;
+;$CLASS=HighRes Incl
+;$COMMENT=
+
+# 10 "/opt/topspin3.1/exp/stan/nmr/lists/pp/De.incl"
+define delay rde1
+
+
+"rde1=de-de1"
+# 24 "/opt/topspin3.1/exp/stan/nmr/lists/pp/De.incl"
+;for multi receive
+
+
+# 33 "/opt/topspin3.1/exp/stan/nmr/lists/pp/De.incl"
+;$Id: De2.incl,v 1.7 2009/07/02 16:40:43 ber Exp $
+# 17 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal" 2
+
+
+# 20 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+define delay dwdel1
+define delay dwdel2
+define delay dwdel3
+define delay dwdel4
+define delay dwdel5
+
+define pulse dwpul
+
+define loopcounter tdcount
+# 31 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+"cnst31=10"
+
+
+"d12=20u"
+# 37 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+"dwdel1=2u"
+"dwdel2=5u"
+"dwdel5=35u"
+"dwpul=dw*2*cnst31/100"
+
+"dwdel3=larger(de1,depa)-dwdel1+1u"
+"dwdel4=dw*2-dwpul-dwdel1*4-dwdel2-dwdel5-dwdel3"
+
+# 46 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+"tdcount = td/2+2"
+
+
+"anavpt=256"
+# 1 "mc_line 52 file /opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal dc-measurement inserted automatically"
+
+    dccorr
+# 52 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+# 52 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+1 ze
+  d12 pl29:f1
+2 30m
+  d1
+  (rde1 sync de1 adc ph31 syrec) (1u 1u ph30:r):f1 (de)
+
+4 dwdel1 setrtp1^5
+  dwdel2 sytra
+  (dwpul ph1):f1
+  dwdel3
+  dwdel1 syrec
+  dwdel1 setrtp1|5
+  dwdel5
+  dwdel4 setrtp1|0
+  dwdel1 setrtp1^0
+  lo to 4 times tdcount
+
+  rcyc = 2
+  wr #0
+exit
+# 74 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+ph1=0
+ph30=0
+ph31=0 
+
+
+;pl1 : f1 channel - power level for pulse (default)
+;pl24: f2 channel - power level for hd/hc decoupling
+;p1 : f1 channel -  high power pulse
+;d1 : relaxation delay; 1-5 * T1
+;d12: delay for power switching                      [20 usec]
+;NS: 1 * n, total number of scans: NS * TD0
+# 88 "/opt/topspin3.1/exp/stan/nmr/lists/pp/pulsecal"
+;$Id: pulsecal,v 1.3.6.4 2011/08/08 17:05:20 ber Exp $

@@ -1,0 +1,18 @@
+run1 - probe and sample in chamber 1
+run2 - probe and sample in chamber 1 (sample mixed up)
+run3 - chamber 1
+run4 - chamber 1 (re-collect)
+run5 - probe and sample are in chamber 1 (weird)
+run6 - chamber 1
+run7 - chamber 1 (weird)
+run8 - chamber 1
+all above data sets start from T~>15C, highly variable results
+collect low temp data
+
+low temp data
+one out of 9 or 10 is weird, look at replicates
+run9 - chamber 1 (low T)
+run10 - chamber 1 (poor fit quality)
+run11 - chamber 1
+run12 - chamber 1
+run13 - chamber 1

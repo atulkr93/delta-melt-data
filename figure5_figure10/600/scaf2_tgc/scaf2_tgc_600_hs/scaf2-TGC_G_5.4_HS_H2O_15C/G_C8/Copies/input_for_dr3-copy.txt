@@ -1,0 +1,17 @@
+
+# Choose peak number from your peak fitting
+PeakNum 1
+
+# '1d' or '2d' for 1D (normal) or pseudo-2D
+FitType 2d
+
+# Range of data folders to process
+#  Lowest number folder must contain processed fid.com file
+DataFolders 1400-1499
+
+# Directory to output fits
+OutputFolder R1rho_2D
+
+# Do not reprocess data, just re-read fits and re-do error estimation.
+Read No
+

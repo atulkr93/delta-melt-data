@@ -1,0 +1,8 @@
+Fit #1
+G7C8_pH5.3HS_25C Pars,Fit Value,Error
+pB (%),0.300,0.300
+dwB (ppm),1.01,0.10
+kexAB (s^-1),1551,275
+R1 (s^-1),1.55,0.07
+R2 (s^-1),30.46,0.11
+Red. Chi-sq,0.99

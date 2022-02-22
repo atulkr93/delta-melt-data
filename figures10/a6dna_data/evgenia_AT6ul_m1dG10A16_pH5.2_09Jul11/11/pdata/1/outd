@@ -1,0 +1,15 @@
+##TITLE= Parameter file, XWIN-NMR		Version 3.6
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##ORIGIN= UXNMR, Bruker Analytische Messtechnik GmbH
+##OWNER= demo
+$$ Sun Nov  8 13:10:47 2009 EST (UT-5h)  hashimi@bloch600.biop.lsa.umich.edu
+$$ /opt/xwinnmr/data/hashimi/nmr/evgenia_AT6ul_junctions_07Oct09/11/pdata/1/outd
+##$CURPLOT= <hpdj-5550>
+##$CURPRIN= <$screen>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/2D_inv.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##$SURQMSG= 1
+##END=

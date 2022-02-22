@@ -1,0 +1,3 @@
+Execute get_ft2.sh to process the NMR data
+then use python files to generate the images
+of the spectra

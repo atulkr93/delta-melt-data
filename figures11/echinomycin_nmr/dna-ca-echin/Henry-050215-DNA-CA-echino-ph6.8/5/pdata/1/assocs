@@ -1,0 +1,11 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 6	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2015-05-03 12:31:35.232 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/Henry-050215-DNA-CA-echino/5/pdata/1/assocs
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$MULTDISP= <C:/Bruker/TopSpin3.2/hashimi/Henry-042715-DNA-CA/5/pdata/1>
+##END=

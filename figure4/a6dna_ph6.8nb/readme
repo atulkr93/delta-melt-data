@@ -1,0 +1,17 @@
+from 20201228_melting2.csv
+- values similar to dick! 
+buffer is okay!!!
+
+#run2 - 20200110_melting.csv
+#- stock from Honglue base opening box
+#- chamber 2
+
+run3 - 20210112_atul_testing.csv
+- stock from honglue base open box
+- probe in pos6, sample in pos 2
+- this means that this sample is okay, and buffer too, 
+- so deviations seen when using the sample in chamber 2, probe1 in chamber 1 are real
+
+run4 - new stock - chambr 1 (weird probe, exclude)
+run5 - new stock - chambr 1 (rerun)
+run6 - new stock - chamber 1

@@ -1,0 +1,3418 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 0 0 612 792
+%
+% PostScript initialization file for Sparky, version 1.08 and above.
+%
+%%ColorUsage: Color
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       Start of user-definable section                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Flags that can be changed - use "true" or "false".
+%
+/bottomAxisScale?	true	def	% If the bottom axis is shown
+/topAxisScale?		true	def	% If the top axis is shown
+/leftAxisScale?		true	def	% If the left axis is shown
+/rightAxisScale?	true	def	% If the right axis is shown
+
+/leftAxisLabel?		true	def	% If the left axis label is shown
+/bottomAxisLabel?	true	def	% If the bottom axis label is shown
+
+/bottomTick?		true	def	% If the bottom ticks are shown
+/topTick?		true	def	% If the top ticks are shown
+/leftTick?		true	def	% If the left ticks are shown
+/rightTick?		true	def	% If the right ticks are shown
+
+/showBanner?		true	def	% If the banner is to be shown
+/shadowUnderBanner?	true	def	% Place shadow box under banner
+/planeBanner?		true	def	% In N-D spectra, shows current plane
+
+/useGray?		true	def	% On B/W printer use gray scale?
+
+
+%
+% Sizes that can be changed.
+%
+/MajorTickInset		0	def	% Amount major tick goes inside panel
+/MajorTickOutset	12	def	% Amount major tick goes outside panel
+/MajorTickThickness	4	def	% Thickness of major tick
+/MinorTickInset		0	def	% Amount minor tick goes inside panel
+/MinorTickOutset	8	def	% Amount minor tick goes outside panel
+/MinorTickThickness	1	def	% Thickness of minor tick
+/EdgeLineWidth		4	def	% Thickness of border around panels
+/LeftLabelPad		32	def	% Pad between left axis labels & label
+/BottomLabelPad		32	def	% Pad between bottom axis labels & label
+/AxisPad		8	def	% Pad between ticks and labels
+
+
+%
+% Fonts that can be changed
+%
+/AxisFont		/Helvetica	def	% Font used for X/Y axis
+/AxisFontSize		12		def	%   and its size
+/BannerFont		/Helvetica	def	% Font used for the banner
+/BannerFontSize		12 		def	%   and its size
+/LabelFont		/Courier	def	% Font used for peak labels
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       End of user-definable section                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Check whether color is available
+/has_color false def
+% the following is for Display PostScript and PostScript Level 2
+/deviceinfo where {
+	pop deviceinfo /Colors known {
+		deviceinfo /Colors get exec
+		1 ne {
+			/has_color true def
+		} if
+	} if
+} if
+% the following is for PostScript Level 1 printers
+statusdict /processcolors known {
+	statusdict /processcolors get exec
+	1 ne {
+		/has_color true def
+	} if
+} if
+
+
+%
+% Color printer check. If true, the /4color variable is set to be true.
+%
+has_color {
+	/4color true def
+	1.0 setlinewidth
+}{
+	/4color false def
+	0.25 setlinewidth
+} ifelse
+
+
+%
+% Small dictionary used by the axis label routines
+%
+/plot_dict 2 dict begin
+	/subdis 0.0 def
+	/len 0.0 def
+	currentdict
+end def
+
+%
+%
+%
+/SCALE	1 def
+/SC	{ SCALE div } def
+/EdgePad {
+	EdgeLineWidth MajorTickOutset add AxisPad add
+} def
+/setAxisFont {
+	AxisFont findfont AxisFontSize SC scalefont setfont
+} def
+/LeftMostAxisPos EdgePad neg def
+/BottomMostAxisPos EdgePad neg def
+
+
+%
+% Low level defines
+%
+/bdef { bind def } bind def
+/ldef { load def } bdef
+/xdef { exch def } bdef
+/x { 0 rlineto } bdef
+/y { 0 exch rlineto } bdef
+/I {72 mul} bdef
+/L /lineto ldef
+/r /rmoveto ldef
+/s /gsave ldef
+/T /grestore ldef
+/M /moveto ldef
+/L /lineto ldef
+/C /closepath ldef
+
+%
+% Return the min or max of two numbers
+%
+/max { 2 copy lt {exch} {} ifelse pop } def
+/min { 2 copy gt {exch} {} ifelse pop } def
+
+
+/WHITE	1 def
+/BLACK	0 def
+/CLEAR	-1 def
+/DASH	4   def
+/TF	{ 0 ne {true}{false} ifelse } def
+
+%
+% A case/switch statement.  Takes a key for the case and an array.
+% Generally the array is executable to avoid evaluating the array
+% each time case is called:
+%	obj {
+%	    key1	{proc1}
+%	    key2 key3	{proc2}
+%	    key4	{proc3}
+%	    /Default	{proc4}
+%	} case
+%
+/case where { pop } {
+  /case {			%  v { k {} k k {} .... /Default {} }  CASE  -
+    false exch {				% v bool k|{}
+	exch {					% v k|{}
+	    dup xcheck {exit} {pop true} ifelse	% v bool|{}
+	} {
+	    2 copy eq exch /Default eq or	% v bool
+	} ifelse
+    } forall					% v bool|{}
+    dup xcheck {exch pop exec} {pop pop} ifelse
+  } bind def
+} ifelse
+
+
+%
+% String justification routines
+%
+/rshow { dup stringwidth exch neg exch rmoveto show } def
+/cshow { dup stringwidth pop -.5 mul 0 rmoveto show } bdef
+/stringsize {
+	gsave
+	newpath
+	0 0 moveto				% str
+	false charpath pathbbox			% x1 y1 x2 y2
+	4 2 roll pop pop			% x2 y2
+	grestore
+} def
+/stringcenter {	% str -> cx cy
+	stringsize
+	.5 mul exch .5 mul exch			% cx cy
+} def
+/tickrshow {	% str x y -> -
+	moveto					% str
+	MajorTickOutset neg 0 rlineto s stroke T	% str
+	dup stringsize				% str w h
+	-.5 mul exch pop 0 exch			% str 0 dy
+	rmoveto rshow
+} def
+
+%
+% Set the dash pattern for either color or B&W printing
+%
+/set_dash {	% bwdash colordash
+	4color {
+		0 setdash pop
+	}{
+		pop 0 setdash
+	} ifelse
+} def
+
+
+%
+% Set the color for either color printing or black for B&W printing
+%
+/contour_color {	% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		dashpatterns level get aload pop set_dash
+		pop 0 setgray
+	} ifelse
+} def
+
+/set_stroke {
+	levelcolor contour_color
+} bdef
+
+%
+% Set the stroke color and perform the stroke
+%
+/S {set_stroke stroke} bdef
+
+%
+% Set the color from the color index, whether RBG or B&W
+%
+/setpixel {		% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		useGray? {
+			colors exch get aload pop
+			pop pop pop setgray
+		}{
+			WHITE eq { 1 } { 0 } ifelse setgray
+		} ifelse
+	} ifelse
+} bdef
+
+%
+% Add a rectangular path to the current path at the current point
+%
+/rect {			% w h => -
+    dup 0 exch rlineto 
+    exch 0 rlineto 
+    neg 0 exch rlineto 
+    closepath 
+} bdef
+
+%
+% Compute the rectangle that is inset by <delta> from the input
+% rectangle <x> <y> <w> <h>
+%
+/insetrect { 		% delta x y w h => x' y' w' h'
+    3 index 5 index add		% delta x y w h x'
+    3 index 6 index add		% delta x y w h x' y'
+    3 index 7 index 2 mul sub	% delta x y w h x' y' w'
+    3 index 8 index 2 mul sub	% delta x y w h x' y' w' h'
+    mark 10 5 roll cleartomark
+} bdef
+
+%
+% Add a rectangular path to the current path
+%
+/rectpath { 		% x y w h  =>  - 
+    4 2 roll moveto rect
+} def
+
+%
+% Given x y w h coordinates, create a shadow box offset down and right
+% of this box
+%
+/shadowbox {		% x y w h dx dy => -
+	%
+	% Draw dark box
+	%
+	gsave
+		neg translate
+		4 copy rectpath
+		0 setgray fill
+	grestore
+
+	%
+	% Fill white box then stroke dark border
+	%
+	rectpath
+	gsave
+		1 setgray fill
+	grestore
+	0 setgray stroke
+} def
+
+
+
+/Xshow /show ldef
+/Xs /show ldef
+
+%
+% Switch fonts
+%
+/XfR {
+	/Times-Roman findfont setfont
+} def
+/XfS {
+	/Symbol findfont setfont
+} def
+
+
+%
+% Attach a font to a variable name if the font exists. This should
+% check if the font exists before trying the bind, but the code
+% that has been "%%"ed out below fails on SPARCprinters!
+%
+/bindFont {	% variable fontname	=> -
+%%	dup FontDirectory exch known {			% var name t|f
+		[ exch findfont /setfont load ] cvx	% var proc
+		store					% -
+%%	}{
+%%		pop pop					% -
+%%	} ifelse
+} def
+
+%
+% For filled objects, if the fill is white or nil, and the border is
+% white or nil, replace the border with black
+%
+/FixFill {	% bo bg
+	0 index dup 0 lt exch		% bo bg bool bg
+	WHITE eq or {			% bo bg
+		1 index dup 0 lt exch	% bo bg bool bo
+		WHITE eq or {		% bo bg
+			exch pop
+			BLACK exch
+		} if
+	} if
+} def
+
+
+%
+% Draw the pointer in colors <bo> <bg> in the 3 point area <x1, y1>,
+% <x2, y2>, <x3, y3>
+%
+/PaintPointer {		% bo bg x1 y1 x2 y2 x3 y3 => -
+	moveto				% bo bg x1 y1 x2 y2
+	lineto				% bo bg x1 y1
+	lineto				% bo bg
+	closepath			% bo bg
+
+	FixFill				% bo' bg
+
+	%
+	% First the fill
+	%
+	dup 0 ge {
+		setpixel
+		gsave fill grestore
+	}{
+		pop
+	} ifelse
+
+	%
+	% Now stroke the edge, unless it is white or nil.
+	%
+	dup WHITE eq {
+		pop
+	}{
+		dup 0 ge {
+			setpixel
+			stroke
+		}{
+			pop
+		} ifelse
+	} ifelse
+} def
+
+%
+% Paint a grid line from <x,y> size <w,h> in color <bg>
+%
+/PG {		% bg x y w h => -
+	4 2 roll				% bg w h x y
+	moveto					% bg w h 
+	rlineto					% bg
+	stroke					% bg
+	pop					% -
+} def
+
+%
+% Place a border around the peak (this doesn't do much except handle
+% the above-plane, below-plane pointer for printing)
+%
+/BorderPeak {	% x y w h sel {-1 | 0 | 1 }  => x y w h
+	dup 0 ne {
+		6 copy exch pop			% x y w h {above|below}
+
+		0 ge {
+			4 2 roll moveto rmoveto	% x y w h sel {u/d}
+			2 index .5 mul dup .5 mul
+		}{
+			4 2 roll moveto exch pop 0 exch rmoveto
+			2 index .5 mul neg dup -.5 mul
+		} ifelse
+		2 copy rlineto
+		exch neg exch rlineto
+		closepath
+		BLACK setpixel stroke
+	} if
+	pop				% x y w h sel
+	pop				% x y w h
+} bdef
+
+%
+% Paint a Peak from <x,y> with size <w,h> in border color <bo> and
+% background color <bg>. If <bg> is -1, the peak is not printed at all.
+% For Peaks, the border color is currently ignored because the peak is
+% drawn as an "X".  The selected state <sel> is also ignored but show
+% a flag on the edge if the peak is above or below this plane.
+%
+/PP {		% bo bg x y w h sel { -1 | 0 | 1 } => -
+	BorderPeak 				% bo bg x y w h
+	5 -1 roll dup 0 lt {			% bo x y w h bg
+		pop pop pop pop pop		% bo
+	}{
+		dup WHITE eq {			% bo x y w h bg|WHITE
+			pop BLACK		% bo x y w h bg|BLACK
+		} if				% bo x y w h bg|BLACK
+		setpixel			% bo x y w h
+		4 2 roll moveto			% bo w h
+		2 copy rlineto			% bo w h
+		1 index neg 0 rmoveto		% bo w h
+		neg rlineto			% bo 
+		stroke				% bo
+	} ifelse
+} def
+
+/PaintBox {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	6 -2 roll			% x y w h bo bg
+	FixFill				% x y w h bo' bg
+	exch 6 1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+/PaintBox2 {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	5 -1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+
+%
+% Paint a crosspeak
+%
+/PX {	% bo bg x y w h => -
+	PaintBox			% x y w h
+	4 {pop} repeat			% -
+} def
+
+
+%
+% Resonance information
+%
+/PaintResBY {		% labelpos => matrix
+	15 SC exch moveto			% -
+	matrix currentmatrix			% CTM
+	resScale dup scale			% CTM
+} def
+/PaintResBX {		% labelpos => matrix
+	matrix currentmatrix exch		% CTM labelpos
+	15 SC					% CTM labelpos x
+	exch translate				% CTM
+	resScale dup scale			% CTM
+	0 0 moveto				% CTM
+} def
+
+/PaintResA {		% matrix shift ypos => -
+	3 -1 roll
+	setmatrix		% shift ypos
+	0 exch moveto		% shift
+	3 SC 0 rlineto
+	8 SC exch rlineto	% -
+	3 SC 0 rlineto
+	stroke
+} def
+/PaintResB null def
+
+%
+% Paint a resonance
+%
+/PaintRes {	% pos shift {labelproc} bot => -
+	PaintResB			% pos shift {labelproc} matrix
+	4 1 roll			% matrix pos shift {labelproc}
+	exec				% matrix pos shift
+	exch PaintResA			% -
+} def
+
+
+%
+% Produce a linepath with an arrow at the appropriate end.
+% Arrows are at 1 (x, facing left), 3 (y, facing down),
+% 2 (x + w, facing right), 4 (y + h, facing up).
+%
+%
+/LEX	{ LineEndSizeX } def
+/LEY	{ LineEndSizeY } def
+/ArrowX	{ h .3535 mul } def
+/ArrowY	{ w .3535 mul } def
+/w	0 def
+/h	0 def
+/LinePath {	% ends x y w h => - (builds path)
+	5 -1 roll {				% x y w h
+	    1 {	%  at left end
+		%
+		%   +- 7 ---------------+	+
+		%   | /| <LEY 			|
+		%    / 6----------------5	|
+		%   1                   |	h
+		%    \ 3----------------4	|
+		%   | \| <LEY			|
+		%   +--2 ---------------+	+
+		% x,y ^ArrowX
+		%
+		%   +----------w--------+
+
+		/h exch store			% x y w
+		/w exch store			% x y w
+
+		h .5 mul add moveto		% 1)
+		ArrowX h -.5 mul rlineto	% 2)
+		0 LEY rlineto			% 3)
+		w ArrowX sub dup 0 rlineto	% w' 4)
+		0 h LEY dup add sub rlineto	% w' 5)
+		neg 0 rlineto			% 6)
+		0 LEY rlineto			% 7)
+		closepath
+	    }
+
+	    2 {	% at right end
+		%
+		%   +----------------5--+	+
+		%        	LEY> |\ |	|
+		%   7----------------6 \	|
+		%   |                   4 	h
+		%   1----------------2 /	|
+		%        	LEY> |/ |	|
+		%   +----------------3--+	+
+		% x,y           ArrowX^
+		%
+		%   +---------w---------+
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		LEY add moveto			% 1)
+		w ArrowX sub dup 0 rlineto	% w' 2)
+		0 LEY neg rlineto		% w' 3)
+		ArrowX h .5 mul rlineto		% w' 4)
+		ArrowX neg h .5 mul rlineto	% w' 5)
+		0 LEY neg rlineto		% w' 6)
+		neg 0 rlineto			% 7)
+		closepath
+	    }
+
+	    4 {
+		%         
+		%   +--5-4--+  		+
+		%      | |		|
+		%  LEX^| |^LEX		|
+		%      | |  		|
+		%   7--6-3--2		h
+		%    \     /		|
+		%   | \   / | <ArrowY	|
+		%   |  \ /  |		|
+		%   +---1---+		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		exch w .5 mul add exch moveto	% 1)
+		w .5 mul ArrowY rlineto		% 2)
+		LEX neg 0 rlineto		% 3)
+		0 h ArrowY sub rlineto		% 4)
+		w LEX dup add sub neg 0 rlineto	% 5)
+		0 ArrowY h sub rlineto		% 6)
+		LEX neg 0 rlineto		% 7)
+		closepath
+	    }
+
+	    5 {	% at top
+		%         
+		%   +---7---+		+
+		%   |  / \  |		|
+		%   | /   \ | <ArrowY	|
+		%    /     \		|
+		%   1--2-5--6		h
+		%    ^ | | ^ 		|
+		%   LEX| |LEX		|
+		%      | |   		|
+		%   +--3-4--+  		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		h ArrowY sub add moveto		% 1)
+		LEX 0 rlineto			% 2)
+		0 ArrowY h sub rlineto		% 3)
+		w LEX dup add sub 0 rlineto	% 4)
+		0 h ArrowY sub rlineto		% 5)
+		LEX 0 rlineto			% 6)
+		w -.5 mul ArrowY rlineto	% 7)
+		closepath
+	    }
+	    /Default { rectpath }
+	} case
+} bdef
+
+%
+% Paint a line
+%
+/PL {	% ends bo bg x y w h => -
+
+	%
+	% CLEAR or WHITE border WHITE background becomes 
+	% CLEAR border BLACK background
+	%
+	7 -1 roll 5 1 roll		% bo bg ends x y w h
+	LinePath 			% bo bg
+	dup WHITE eq {
+		1 index 0 lt
+		2 index WHITE eq or {
+			pop pop
+			-1 BLACK	% x y w h CLEAR BLACK
+		} if
+	} if
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	dup 0 ge {			% bo bg
+		gsave			% bo bg
+		  setpixel		% bo
+		  fill			% bo
+		grestore		% bo
+	}{
+		pop			% bo
+	} ifelse			
+
+	%
+	% If the border color is positive, edge it.
+	%
+	dup 0 ge {			% bo
+		setpixel		% -
+		stroke			% -
+	}{
+		pop			% -
+	} ifelse
+} bdef
+
+/PA {	% {} {} bo bg x y w h => -
+	PaintBox2 			% {} {} x y w h
+	5 -1 roll exec			% {} x y w h
+	pop pop moveto
+	matrix currentmatrix		% {} CTM
+	exch				% CTM {}
+	exec				% CTM
+	setmatrix			% -
+} bdef
+
+
+% xlabel : labels the graph with ppm scale.
+% On stack: labels label_count ylength incr_distance
+/xlabel {
+  gsave plot_dict begin
+    /subdis exch store
+    /len exch store
+    {
+	gsave
+	    bottomAxisScale? {
+		gsave
+			0 1 index stringsize exch pop EdgePad add neg r
+
+			%
+			% Find the bottom-most axis label position, for
+			% positioning the horizontal axis label
+			%
+			currentpoint exch pop	% label y
+			dup BottomMostAxisPos lt {
+				/BottomMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+
+			dup cshow
+		grestore
+	    } if
+	    topAxisScale? {
+		0 len EdgePad add r dup cshow
+	    }if
+	    pop
+	grestore
+	subdis 0 r
+    } repeat
+  end grestore
+} bdef
+
+% ylabel : labels the graph with ppm scale.
+/ylabel {
+  s
+  plot_dict begin
+	/subdis exch store
+	/len exch store
+	{
+		dup stringsize			% str w h
+		-.5 mul exch neg exch		% str dx dy
+		s 2 copy r 2 index
+		leftAxisScale? {
+			EdgePad neg 0 r		% label
+
+			%
+			% Find the left-most axis label position, for
+			% positioning the vertical axis label
+			%
+			currentpoint pop	% label x
+			dup LeftMostAxisPos lt {
+				/LeftMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+			show			% -
+		}{
+			pop			% -
+		} ifelse T
+		s exch pop 0 exch r len 0 r
+		rightAxisScale? { EdgePad 0 r show } { pop } ifelse T
+		0 subdis r
+	} repeat
+  end T
+} bdef
+
+% grid : draws grid of dashed lines on plot.  The major increment has
+% a solid line rather than a dashed line.
+% On stack : incr_index num_incrs yheight incr end
+/grid
+{
+  s
+  [DASH] 0 setdash
+  0 6 1 roll 0
+  {
+    dup 2 index le		% while not at end of scale
+    {
+      6 index 6 index sub	% check if major increment
+      5 index mod 0 ne
+      {				% No so draw dashed line.
+      	dup 0 M
+      	3 index y stroke
+      }
+      {				% Yes so set to solid line
+      	[] 0 setdash
+      	dup -5 M
+      	3 index 10 add y stroke
+	[DASH] 0 setdash
+      } ifelse
+      2 index add		% increment position
+      7 -1 roll 1 add		% increment counter
+      7 1 roll
+    }
+    { exit } ifelse
+  } loop
+  7 { pop } repeat
+  T
+} bdef
+
+% tick : draws tick marks on axes.
+% On stack : [ yposition ... ] i longAt inc end
+% On stack : [ [ yposition direction ] ... ] i longAt inc end
+/tick
+{
+	s
+	10 dict begin
+	    /xend	exch def
+	    /xinc	exch def
+	    /longAtI	exch def
+	    /istart	exch def
+	    /heights	exch def
+
+	    /xpos	0 def
+	    /ipos	0 def
+	    /tickin	null def
+	    /tickout	null def
+	    /direction	1 def
+	    {
+		xpos xend ge { exit } if
+
+		ipos istart sub longAtI mod 0 eq {
+			MajorTickThickness setlinewidth
+			MajorTickInset MajorTickOutset	% long ticks
+		}{
+			MinorTickThickness setlinewidth
+			MinorTickInset MinorTickOutset	% short ticks
+		} ifelse
+		/tickout exch EdgeLineWidth add store
+		/tickin exch store
+
+		heights {
+			dup type /arraytype eq {
+				aload pop
+				/direction exch store
+			} if
+								% ypos
+			xpos exch M				% -
+			0 tickin direction mul r		% -
+			0 tickin tickout add neg direction mul y% -
+			stroke
+		} forall
+
+		/xpos xpos xinc add store	% increment position
+		/ipos ipos 1 add store		% increment counter
+	    } loop
+	end
+	T
+} bdef
+
+/xTick {		% [ yposition ... ] i longAt inc end
+	5 -1 roll
+	bottomTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	topTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/yTick {
+	5 -1 roll
+	leftTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	rightTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/getScale {	% sz, maxSz
+	dup 0 gt 2 index 2 index gt and {
+		div				% scale
+	}{
+		1				% scale==1
+	} ifelse
+} def
+
+/displayOneLine {	% proc []
+	aload length 1 add -1 roll load exec	% -
+} def
+
+/displayLines {		% [[(...) .. ] ... ] fontht proc => -
+    3 dict begin
+	/proc exch def
+	/height exch def
+	/y 0 def
+	{
+		newpath
+		0 y moveto			% x1  y1  x2  y2 []		
+		proc exch displayOneLine	% x y
+		/y y height sub 2 sub store
+	} forall
+   end
+} def
+
+%
+% Return the box that fits around all the input strings
+%
+/getBoundingBox {	% [[(...)] ...] fontht proc => x1 y1 x2 y2
+    9 dict begin
+	/bbox_x1 0 def
+	/bbox_y1 0 def
+	/bbox_x2 0 def
+	/bbox_y2 0 def
+
+	%
+	% Determine the largest limits of these positions and the positions
+	% stored in the dictionary elements (of getBoundingBox) of bbox_x1 ...
+	% bbox_y2.
+	%
+	/combineBBox {		% x1 y1 x2 y2 => -
+		bbox_y2 max /bbox_y2 exch store		% x1 y1 x2
+		bbox_x2 max /bbox_x2 exch store		% x1 y1
+		bbox_y1 min /bbox_y1 exch store		% x1
+		bbox_x1 min /bbox_x1 exch store		% -
+	} def
+
+
+	%
+	% Xshow produces a bounding box which is the union of the input
+	% bounding box and the bounding box of this <string>. We iterate
+	% through the <string> because of charpath limits imposed by
+	% some PostScript interpreters. Otherwise we could have used:
+	%	{ false charpath pathbbox combineBBox }
+	%
+	/Xshow {	% string => -
+	    3 dict begin
+		dup /str exch def
+		length 1 sub 0 1 3 -1 roll {
+			str exch 1 getinterval
+			false charpath
+			currentpoint /y exch def /x exch def
+			pathbbox combineBBox
+			newpath x y moveto
+		} for
+	    end
+	} def
+	/proc exch def
+	/height exch def
+	/y 0 def
+
+	%
+	% Iterate over the string arrays, computing the bounding box
+	%
+	gsave
+	    {
+		newpath
+		0 y moveto			% []		
+		proc exch displayOneLine	% -
+		pathbbox combineBBox		% -
+		/y y height sub 2 sub store	% -
+	    } forall
+	grestore
+
+	%
+	% And return the bounding box
+	%
+	bbox_x1 bbox_y1 bbox_x2 bbox_y2
+    end
+} def
+
+/CurrFontSize AxisFontSize def
+/FontSize { CurrFontSize SC } def
+
+/showOmega {
+	currentfont
+	/Symbol findfont CurrFontSize SC 1.25 mul scalefont setfont
+	(w) Xshow
+	setfont
+} def
+
+/showUnits {	% (units)
+	(  \() Xshow					% u
+	Xshow						% -
+	(\)) Xshow					% -
+} def
+
+/showAxisAtom {	% (atom) (axis) => -
+	showOmega
+	subscript Xshow unsubscript
+	( - ) Xshow					% u a
+	showAtom					% u
+} def
+
+/showAxis {	% (units) (atoms) (axis) => -
+	showAxisAtom
+	showUnits
+} def
+
+/doPlaneLine {		% (units) (atom) (axis) (offset)
+	3 1 roll
+	showAxisAtom
+	( :  ) Xshow
+	Xshow
+	showUnits
+} def
+
+/doBannerLine {
+	Xshow
+} def
+
+/setBannerFont { BannerFont findfont BannerFontSize scalefont setfont } def
+/planeBannerFont { BannerFont findfont BannerFontSize SC scalefont } def
+
+/banner {	% [() ...] => -
+  showBanner? {
+    gsave
+    7 dict begin
+	/oCurrFontSize CurrFontSize def
+	/CurrFontSize BannerFontSize store
+
+	setBannerFont
+	dup BannerFontSize /doBannerLine getBoundingBox	% [] x1 y1 x2 y2
+
+	%
+	%
+	/TRy exch BANNERWIDTHFUDGE add def
+	/TRx exch BANNERWIDTHFUDGE add def
+	/BLy exch BANNERWIDTHFUDGE sub def
+	/BLx exch BANNERWIDTHFUDGE sub def		% []
+	/xsize TRx BLx sub def
+	/ysize TRy BLy sub def
+
+
+	% Center the box
+	%
+	xsize -2 div 0 translate			% move to left edge
+
+	%
+	% Put down a shadow box
+	%
+	shadowUnderBanner? {
+		BLx BLy xsize ysize 2 2 shadowbox
+	} if
+
+	BannerFontSize /doBannerLine displayLines
+
+	/CurrFontSize oCurrFontSize store
+    end
+    grestore
+  }{
+	pop
+  } ifelse
+
+} bdef
+
+%
+% Place a small box that shows the plane of this view. Make sure the
+% box is completely visible, sizing it down for really skinny views.
+%
+%
+% The location of the box is within 5% of the left/top corner. The size
+% of the box is large enough to fit the text, but the box is never larger
+% than 90 of the width.
+%
+/BANNERWIDTHFUDGE	8 def
+/planebanner {		% [ [ (units) (atom) (axis) (offset) ] ... ] => -
+    planeBanner? not {
+	pop
+    }{
+	gsave
+	7 dict begin
+		%
+		% Set the "current font size" to the banner size. This
+		% is used globally by the routines that make the omegas
+		% and sub- and super-scripts.
+		%
+		/oCurrFontSize CurrFontSize def
+		/CurrFontSize BannerFontSize store
+
+		planeBannerFont setfont
+		dup BannerFontSize SC /doPlaneLine
+		getBoundingBox				 % [] x1 y1 x2 y2
+
+		/TRy exch BANNERWIDTHFUDGE add def
+		/TRx exch BANNERWIDTHFUDGE add def
+		/BLy exch BANNERWIDTHFUDGE sub def
+		/BLx exch BANNERWIDTHFUDGE sub def	% []
+		/xsize TRx BLx sub def
+		/ysize TRy BLy sub def
+
+
+		% Move to a few units from the top left corner
+		%
+		WIDTH .05 mul 30 min HEIGHT translate
+
+		% Limit the width/height to 90% of the view
+		%
+		xsize WIDTH  .90 mul div 1 max
+		ysize HEIGHT .90 mul div 1 max
+		max 1 exch div dup
+		scale
+
+		% Once scaled, move down to the bottom-left corner
+		%
+		0 ysize neg translate
+
+
+		% Put a box around the region
+		%
+		BLx BLy xsize ysize 2 SC 2 SC shadowbox		% []
+
+
+		% Display the lines from the bottom up.
+		%
+		0 0 moveto
+		BannerFontSize SC /doPlaneLine displayLines
+
+		%
+		% Restore the old "current font size"
+		%
+		/CurrFontSize oCurrFontSize store
+	end
+	grestore
+    } ifelse
+} bdef
+
+
+/subscript {
+	FontSize .05 mul FontSize -.3 mul r
+	.8 .8 scale
+} def
+
+/unsubscript {
+	1.25 1.25 scale
+	0 FontSize .3 mul r
+} def
+
+/superscript {
+	0 FontSize .4 mul r
+	.8 .8 scale
+} def
+
+/unsuperscript {
+	1.25 1.25 scale
+	0 FontSize -.4 mul r
+} def
+
+/isdigit {		% char => bool
+	dup 48 ge exch 57 le and
+} def
+
+%
+% Display the atom name with a superscripted atom weight
+%
+/showAtom {		% (atom) => -
+	%
+	% If (atom) starts with a digit, collect all digits and display them
+	% with a superscript, then display the rest of the thing normally.
+	%
+	dup length 0 gt {
+	    dup 0 get isdigit {
+		1				% (atom) digits
+		{
+			2 copy get		% (atom) digits dig
+			isdigit not {exit} if	% (atom) digits
+			1 add
+		} loop
+
+		% On stack are the string and the number of characters
+		% that are digits
+		%				% (atom) digits
+		1 index 0 2 index getinterval	% (atom) digits (substr)
+		superscript Xshow unsuperscript	% (atom) digits
+
+		% And get the remaining part of the string
+		%
+		1 index length			% (atom) digits length
+		1 index sub			% (atom) digits lengthLeft
+		getinterval			% (substr)
+	    } if
+	} if
+	Xshow
+} def
+
+%
+% Put the label (axis legend) along the X axis
+%
+/xaxislabel {		% (units) (atom) (axis) => -
+      bottomAxisLabel? {
+	xslice_pos M					% u a x
+	WIDTH 2 div					% u a x midx
+	BottomMostAxisPos BottomLabelPad sub r		% u a x
+
+	%
+	% Do the bounding box to find the true ascender (y2) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move down the amount of the ascender
+	%
+	0 exch neg r					% u a x x1 y1 x2
+	exch pop					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+      }{
+	pop pop pop
+      } ifelse
+
+} bdef
+
+%
+% Put the label (axis legend) along the X axis
+%
+/yaxislabel {		% (units) (atom) (axis) => -
+  leftAxisLabel? {
+    gsave
+	90 rotate
+	HEIGHT 2 div
+	LeftLabelPad LeftMostAxisPos sub M
+
+	%
+	% Do the bounding box to find the true descender (y1) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move up the amount of the descender
+	%
+	pop exch					% u a x x1 x2 y1
+	0 exch neg r					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+    grestore
+  }{
+    pop pop pop
+  } ifelse
+
+} bdef
+
+
+%
+% Stroke an "x y w h" box with linewidth "lw". The inside of the box is
+% exactly "x y w h" and the thick border falls along the outside edge.
+%
+/strokeThickBox {		% x y w h lw => -
+	6 dict begin
+		dup /lw exch def
+		2 div /lwBy2 exch def
+		/h exch def
+		/w exch def
+		/y exch def
+		/x exch def
+
+		currentlinewidth		% clw
+		lw setlinewidth
+
+		x lwBy2 sub			% x'
+		y lwBy2 sub			% x' y'
+		w lw add			% x' y' w'
+		h lw add			% x' y' w' h'
+		rectpath stroke
+
+		setlinewidth
+	end
+} def
+
+%
+% Draw an edge around the data area, the slice boxes and resonance boxes.
+%
+/edgeview {
+	newpath
+	0 setgray
+
+	%
+	% Edge the data area
+	%
+	0 0 WIDTH HEIGHT EdgeLineWidth strokeThickBox
+
+	%
+	% Edge the slice areas
+	%
+	userdict /SLICE known {
+		xslice_init
+		0 0 WIDTH SLICE EdgeLineWidth strokeThickBox
+		xslice_done
+
+		yslice_init
+		0 0 HEIGHT SLICE EdgeLineWidth strokeThickBox
+		yslice_done
+	} if
+
+	%
+	% Edge the resonance areas
+	%
+	userdict /RESONANCE known {
+		xres_init
+		0 0 RESONANCE WIDTH EdgeLineWidth strokeThickBox
+		xres_done
+
+		yres_init
+		0 0 RESONANCE HEIGHT EdgeLineWidth strokeThickBox
+		yres_done
+	} if
+} bdef
+
+%
+% Print a set of full width half max between the
+%
+/showhalfmax {		% [ [str xmin xmax yp] ... ] width => -
+	/wid exch def
+	/toright true def
+	/limit 0 def
+	{
+		aload pop				% str xmin xmax yp
+		dup 3 1 roll				% str xmin yp xmax yp
+
+		%
+		% See if can still be on the right
+		%
+		toright {
+			1 index limit max 15 add	% starting pos
+			5 index stringwidth pop add	% ending pos
+			wid ge {			% too big?
+				/toright false store	% do on left
+				/limit wid store
+			} if
+		} if
+
+		%
+		% str xmin yp xmax yp
+		%
+		toright {
+			4 2 roll
+			moveto 2 copy lineto		% str x yp
+
+			pop limit max			% str x'
+			SLICE .15 mul 2 copy lineto	% str x' y
+			exch 10 add exch		% str x' y
+			2 copy lineto stroke		% str x' y
+			exch 5 add exch
+			2 copy moveto
+			pop 1 index stringwidth pop add	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			show
+		}{
+			moveto 2 copy lineto		% str tox yp
+
+			pop limit min			% str x'
+			SLICE .30 mul 2 copy lineto	% str x' y
+			exch 10 sub exch
+			2 copy lineto stroke		% str x' y'
+			exch 5 sub exch
+			2 copy moveto
+			pop 1 index stringwidth pop sub	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			rshow
+		} ifelse
+	} forall
+} bdef
+
+/slice_pad { 24 } def
+
+/xres_pos {
+	0 0
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add sub
+	} if
+} def
+/xslice_pos {
+	xres_pos
+	userdict /SLICE known {
+		SLICE slice_pad add sub
+	} if
+} def
+/xslice_y {
+	xslice_pos exch pop
+} def
+
+/xslice_init {
+	gsave
+	xslice_pos translate
+} def
+/xslice_done {
+	grestore
+} def
+/xres_init {
+	/PaintResB { PaintResBX } store
+	gsave
+	xres_pos translate
+	-90 rotate
+	RESONANCE neg 0 translate
+} def
+/xres_done {
+	grestore
+} def
+
+/yres_pos {
+	WIDTH
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add add
+	} if
+	0
+} def
+/yslice_pos {
+	yres_pos
+	userdict /SLICE known {
+		exch SLICE slice_pad add add exch
+	} if
+} def
+/yslice_x {
+	yslice_pos pop
+} def
+/yslice_init {
+	gsave
+	yslice_pos translate
+	90 rotate
+} def
+/yslice_done {
+	grestore
+} def
+/yres_init {
+	/PaintResB { PaintResBY } store
+	gsave
+	yres_pos translate
+	RESONANCE neg 0 translate
+} def
+/yres_done {
+	grestore
+} def
+/SparkyMajorVersion 3 def
+/SparkyMinorVersion 115 def
+/SCALE 0.240000 def
+/PEAKLINEWIDTH 5 def
+/colors [
+[0.00 0.00 0.00 0.00]
+[1.00 1.00 1.00 1.00]
+[0.75 0.75 0.75 0.75]
+[0.30 1.00 0.00 0.00]
+[0.58 0.00 1.00 0.00]
+[0.11 0.00 0.00 1.00]
+[0.89 1.00 1.00 0.00]
+[0.42 1.00 0.00 1.00]
+[0.70 0.00 1.00 1.00]
+[0.80 0.68 0.85 0.90]
+[0.78 0.56 0.93 0.56]
+[0.99 1.00 1.00 0.88]
+[0.79 1.00 0.84 0.00]
+[0.68 1.00 0.65 0.00]
+[0.83 1.00 0.75 0.80]
+[0.95 0.96 0.96 0.86]
+[0.68 0.25 0.88 0.82]
+[0.63 1.00 0.50 0.31]
+[0.36 0.69 0.19 0.38]
+[0.37 0.63 0.13 0.94]
+[0.56 1.00 0.39 0.28]
+[0.62 1.00 0.55 0.00]
+[0.73 0.50 1.00 0.00]
+[0.64 0.00 1.00 0.50]
+[0.55 0.00 0.75 1.00]
+] def
+/PositiveLevels 30 def
+/NegativeLevels 30 def
+/strokecolors [
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+] def
+/fillcolors [
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+] def
+/dashpatterns [
+[[] []]
+[[DASH] []]
+] def
+%%EndProlog
+
+%%Page: 1 1
+/WIDTH 1950 def
+/HEIGHT 1995 def
+gsave
+1.00 I 1.30 I translate
+SCALE dup scale
+setAxisFont 0 setgray
+gsave
+135.213033 xslice_y translate 0 0 moveto
+(6.8)
+(7.0)
+(7.2)
+(7.4)
+(7.6)
+(7.8)
+6 HEIGHT xslice_y sub 325.814536 xlabel
+grestore
+(ppm) (1H) (2) xaxislabel
+gsave
+53.759398 0 translate
+[[xslice_y 1] [0 1] [HEIGHT -1]] 1 4 81.453634 WIDTH 53.759398 sub xTick
+grestore
+gsave
+0 162.907293
+ translate 0 0 moveto
+(152)
+(153)
+(154)
+(155)
+(156)
+5 yslice_x 407.268232 ylabel
+grestore
+(ppm) (13C) (1) yaxislabel
+gsave
+-90 rotate -1 1 scale 0.000000 0 translate
+[[0 1] [WIDTH -1] [yslice_x -1]] 2 5 81.453646 HEIGHT 0.000000 sub yTick
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+/level 0 def
+/levelcolor 3 def
+203 1842 M
+206 1840 L
+209 1840 L
+211 1843 L
+209 1845 L
+206 1847 L
+203 1847 L
+202 1843 L
+203 1842 L
+S
+/level 0 def
+/levelcolor 3 def
+419 1879 M
+420 1876 L
+422 1874 L
+425 1872 L
+428 1875 L
+429 1876 L
+429 1882 L
+428 1885 L
+427 1888 L
+425 1892 L
+422 1893 L
+422 1893 L
+422 1893 L
+419 1890 L
+418 1888 L
+418 1882 L
+419 1879 L
+S
+/level 0 def
+/levelcolor 3 def
+542 1854 M
+546 1853 L
+546 1854 L
+546 1855 L
+542 1855 L
+542 1854 L
+542 1854 L
+S
+/level 0 def
+/levelcolor 3 def
+647 1835 M
+650 1833 L
+654 1834 L
+656 1837 L
+657 1839 L
+658 1843 L
+660 1848 L
+660 1849 L
+661 1854 L
+661 1860 L
+660 1860 L
+657 1860 L
+656 1860 L
+654 1858 L
+650 1855 L
+649 1854 L
+647 1850 L
+646 1849 L
+645 1843 L
+646 1837 L
+647 1835 L
+S
+/level 0 def
+/levelcolor 3 def
+768 956 M
+765 958 L
+765 958 L
+762 960 L
+758 961 L
+755 963 L
+755 963 L
+752 965 L
+749 966 L
+746 967 L
+743 969 L
+743 969 L
+739 970 L
+736 971 L
+733 972 L
+730 973 L
+727 974 L
+727 975 L
+723 976 L
+720 979 L
+719 980 L
+717 982 L
+715 985 L
+714 987 L
+712 991 L
+711 995 L
+710 997 L
+709 1002 L
+708 1008 L
+708 1008 L
+707 1013 L
+705 1019 L
+706 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 959 M
+765 960 L
+762 962 L
+760 963 L
+758 964 L
+755 966 L
+752 967 L
+749 969 L
+749 969 L
+746 970 L
+743 972 L
+739 973 L
+737 974 L
+736 975 L
+733 976 L
+730 978 L
+727 979 L
+726 980 L
+723 982 L
+720 985 L
+720 985 L
+717 991 L
+717 991 L
+715 997 L
+715 1002 L
+715 1008 L
+717 1012 L
+718 1013 L
+720 1016 L
+723 1019 L
+723 1020 L
+727 1023 L
+727 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 962 M
+766 963 L
+765 964 L
+762 965 L
+758 967 L
+755 969 L
+755 969 L
+752 971 L
+749 972 L
+746 974 L
+745 974 L
+743 976 L
+739 977 L
+736 979 L
+735 980 L
+733 981 L
+730 984 L
+728 985 L
+727 987 L
+724 991 L
+723 993 L
+723 997 L
+723 1002 L
+723 1003 L
+725 1008 L
+727 1011 L
+728 1013 L
+730 1016 L
+731 1019 L
+733 1022 L
+734 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 965 M
+765 967 L
+762 969 L
+762 969 L
+758 971 L
+755 972 L
+752 974 L
+752 974 L
+749 976 L
+746 978 L
+743 980 L
+743 981 L
+739 983 L
+737 985 L
+736 986 L
+733 990 L
+733 991 L
+731 997 L
+731 1002 L
+733 1008 L
+733 1009 L
+735 1013 L
+736 1017 L
+737 1019 L
+739 1023 L
+740 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 969 M
+765 971 L
+762 973 L
+759 974 L
+758 975 L
+755 977 L
+752 979 L
+751 980 L
+749 981 L
+746 984 L
+744 985 L
+743 988 L
+740 991 L
+739 993 L
+738 997 L
+738 1002 L
+739 1008 L
+739 1010 L
+740 1013 L
+743 1018 L
+743 1019 L
+746 1023 L
+747 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 974 M
+767 974 L
+765 976 L
+762 978 L
+758 980 L
+758 980 L
+755 982 L
+752 985 L
+752 985 L
+749 989 L
+747 991 L
+746 994 L
+745 997 L
+744 1002 L
+745 1008 L
+746 1011 L
+747 1013 L
+749 1017 L
+750 1019 L
+752 1022 L
+755 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 979 M
+767 980 L
+765 981 L
+762 984 L
+760 985 L
+758 987 L
+755 991 L
+755 991 L
+752 997 L
+752 997 L
+751 1002 L
+752 1008 L
+752 1009 L
+754 1013 L
+755 1015 L
+758 1019 L
+758 1020 L
+762 1023 L
+763 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 986 M
+765 990 L
+764 991 L
+762 995 L
+760 997 L
+759 1002 L
+760 1008 L
+762 1012 L
+762 1013 L
+765 1017 L
+766 1019 L
+768 1021 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1063 M
+765 1060 L
+762 1058 L
+762 1057 L
+758 1055 L
+755 1052 L
+755 1052 L
+752 1051 L
+749 1049 L
+746 1047 L
+744 1047 L
+743 1046 L
+739 1044 L
+736 1042 L
+735 1041 L
+733 1039 L
+730 1036 L
+729 1036 L
+727 1033 L
+723 1030 L
+723 1030 L
+720 1028 L
+717 1027 L
+714 1026 L
+711 1026 L
+708 1025 L
+706 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1057 M
+765 1055 L
+762 1052 L
+761 1052 L
+758 1050 L
+755 1048 L
+753 1047 L
+752 1046 L
+749 1044 L
+746 1043 L
+743 1041 L
+743 1041 L
+739 1038 L
+736 1036 L
+736 1035 L
+733 1032 L
+732 1030 L
+730 1027 L
+727 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1052 M
+765 1050 L
+762 1047 L
+761 1047 L
+758 1045 L
+755 1043 L
+752 1041 L
+752 1041 L
+749 1039 L
+746 1037 L
+744 1036 L
+743 1035 L
+739 1031 L
+738 1030 L
+736 1027 L
+734 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1047 M
+768 1047 L
+765 1045 L
+762 1042 L
+760 1041 L
+758 1040 L
+755 1038 L
+752 1036 L
+752 1036 L
+749 1033 L
+746 1031 L
+745 1030 L
+743 1027 L
+740 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1041 M
+768 1041 L
+765 1039 L
+762 1037 L
+760 1036 L
+758 1034 L
+755 1032 L
+753 1030 L
+752 1029 L
+749 1026 L
+747 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1036 M
+768 1036 L
+765 1033 L
+762 1030 L
+761 1030 L
+758 1028 L
+755 1025 L
+755 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1029 M
+765 1026 L
+763 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+706 1993 M
+708 1992 L
+711 1990 L
+714 1989 L
+717 1988 L
+717 1988 L
+720 1988 L
+722 1988 L
+723 1988 L
+727 1990 L
+730 1992 L
+731 1993 L
+S
+/level 0 def
+/levelcolor 3 def
+768 956 M
+771 954 L
+774 953 L
+775 952 L
+777 951 L
+781 949 L
+784 948 L
+787 948 L
+790 948 L
+793 948 L
+797 948 L
+800 948 L
+803 948 L
+806 947 L
+806 946 L
+809 944 L
+812 942 L
+814 941 L
+816 940 L
+819 938 L
+822 937 L
+825 937 L
+828 937 L
+831 939 L
+834 941 L
+835 941 L
+838 945 L
+839 946 L
+841 950 L
+842 952 L
+844 956 L
+845 958 L
+847 963 L
+847 963 L
+850 969 L
+851 971 L
+852 974 L
+854 978 L
+855 980 L
+857 984 L
+858 985 L
+860 990 L
+861 991 L
+863 996 L
+863 997 L
+866 1002 L
+866 1003 L
+869 1008 L
+870 1008 L
+S
+/level 0 def
+/levelcolor 3 def
+768 959 M
+770 958 L
+771 957 L
+774 956 L
+777 954 L
+781 954 L
+784 953 L
+787 953 L
+790 953 L
+793 954 L
+797 954 L
+800 954 L
+803 953 L
+806 952 L
+807 952 L
+809 950 L
+812 948 L
+815 946 L
+816 946 L
+819 944 L
+822 942 L
+825 942 L
+828 942 L
+831 943 L
+835 946 L
+835 946 L
+838 949 L
+840 952 L
+841 954 L
+843 958 L
+844 960 L
+845 963 L
+847 967 L
+848 969 L
+850 974 L
+851 975 L
+853 980 L
+854 981 L
+856 985 L
+857 988 L
+859 991 L
+860 994 L
+861 997 L
+863 1001 L
+864 1002 L
+866 1008 L
+866 1008 L
+869 1013 L
+870 1014 L
+S
+/level 0 def
+/levelcolor 3 def
+768 962 M
+771 960 L
+774 959 L
+777 958 L
+780 958 L
+781 958 L
+784 957 L
+787 957 L
+790 958 L
+790 958 L
+793 958 L
+797 958 L
+800 958 L
+803 958 L
+804 958 L
+806 957 L
+809 955 L
+812 953 L
+815 952 L
+816 951 L
+819 949 L
+822 948 L
+825 947 L
+828 947 L
+831 948 L
+835 950 L
+836 952 L
+838 954 L
+840 958 L
+841 959 L
+843 963 L
+844 965 L
+846 969 L
+847 972 L
+849 974 L
+851 979 L
+851 980 L
+854 985 L
+854 985 L
+856 991 L
+857 992 L
+859 997 L
+860 1000 L
+861 1002 L
+863 1008 L
+863 1008 L
+866 1013 L
+866 1015 L
+868 1019 L
+870 1022 L
+S
+/level 0 def
+/levelcolor 3 def
+768 965 M
+771 964 L
+773 963 L
+774 963 L
+777 962 L
+781 961 L
+784 961 L
+787 961 L
+790 961 L
+793 962 L
+797 962 L
+800 962 L
+803 961 L
+806 961 L
+809 959 L
+812 958 L
+813 958 L
+816 956 L
+819 954 L
+822 953 L
+825 952 L
+825 952 L
+828 952 L
+829 952 L
+831 953 L
+835 955 L
+837 958 L
+838 959 L
+841 963 L
+841 964 L
+844 969 L
+844 970 L
+846 974 L
+847 976 L
+849 980 L
+851 983 L
+852 985 L
+854 990 L
+854 991 L
+857 997 L
+857 998 L
+859 1002 L
+860 1006 L
+861 1008 L
+862 1013 L
+863 1017 L
+864 1019 L
+865 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 969 M
+769 969 L
+771 968 L
+774 967 L
+777 966 L
+781 965 L
+784 965 L
+787 965 L
+790 965 L
+793 965 L
+797 966 L
+800 965 L
+803 965 L
+806 964 L
+809 964 L
+810 963 L
+812 962 L
+816 961 L
+819 959 L
+822 958 L
+823 958 L
+825 957 L
+828 957 L
+830 958 L
+831 958 L
+835 960 L
+837 963 L
+838 964 L
+841 969 L
+841 969 L
+844 974 L
+844 975 L
+847 980 L
+847 981 L
+849 985 L
+851 988 L
+852 991 L
+854 996 L
+854 997 L
+856 1002 L
+857 1005 L
+858 1008 L
+859 1013 L
+860 1018 L
+860 1019 L
+861 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 974 M
+771 972 L
+774 971 L
+777 970 L
+781 969 L
+784 969 L
+787 969 L
+790 969 L
+793 969 L
+797 969 L
+800 969 L
+803 969 L
+803 969 L
+806 968 L
+809 967 L
+812 966 L
+816 965 L
+819 964 L
+821 963 L
+822 963 L
+825 962 L
+828 962 L
+830 963 L
+831 964 L
+835 966 L
+837 969 L
+838 970 L
+841 974 L
+841 975 L
+844 980 L
+844 980 L
+847 985 L
+847 987 L
+849 991 L
+851 994 L
+852 997 L
+854 1002 L
+854 1003 L
+855 1008 L
+856 1013 L
+857 1018 L
+857 1019 L
+857 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 979 M
+771 977 L
+774 976 L
+777 975 L
+779 974 L
+781 974 L
+784 974 L
+787 973 L
+790 973 L
+793 973 L
+797 973 L
+800 973 L
+803 972 L
+806 972 L
+809 971 L
+812 970 L
+816 969 L
+817 969 L
+819 968 L
+822 968 L
+825 967 L
+828 968 L
+830 969 L
+831 969 L
+835 972 L
+837 974 L
+838 975 L
+841 980 L
+841 980 L
+844 985 L
+844 986 L
+847 991 L
+847 993 L
+849 997 L
+851 1001 L
+851 1002 L
+852 1008 L
+853 1013 L
+854 1016 L
+854 1019 L
+854 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 986 M
+769 985 L
+771 984 L
+774 982 L
+777 980 L
+779 980 L
+781 979 L
+784 979 L
+787 978 L
+790 978 L
+793 977 L
+797 977 L
+800 977 L
+803 976 L
+806 976 L
+809 975 L
+812 974 L
+812 974 L
+816 973 L
+819 973 L
+822 972 L
+825 972 L
+828 973 L
+830 974 L
+831 975 L
+835 978 L
+837 980 L
+838 981 L
+840 985 L
+841 986 L
+843 991 L
+844 993 L
+846 997 L
+847 1001 L
+848 1002 L
+849 1008 L
+850 1013 L
+851 1015 L
+851 1019 L
+851 1024 L
+S
+768 1021 M
+771 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+779 1024 M
+777 1023 L
+774 1019 L
+774 1019 L
+771 1014 L
+771 1013 L
+769 1008 L
+768 1002 L
+770 997 L
+771 994 L
+773 991 L
+774 990 L
+777 988 L
+781 986 L
+781 985 L
+784 984 L
+787 983 L
+790 983 L
+793 982 L
+797 982 L
+800 981 L
+803 980 L
+806 980 L
+806 980 L
+809 979 L
+812 978 L
+816 978 L
+819 977 L
+822 977 L
+825 978 L
+828 979 L
+830 980 L
+831 981 L
+835 984 L
+836 985 L
+838 988 L
+840 991 L
+841 993 L
+843 997 L
+844 1001 L
+845 1002 L
+846 1008 L
+847 1013 L
+847 1014 L
+848 1019 L
+848 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+788 1024 M
+787 1023 L
+784 1020 L
+783 1019 L
+781 1015 L
+779 1013 L
+778 1008 L
+778 1002 L
+780 997 L
+781 996 L
+784 993 L
+786 991 L
+787 990 L
+790 989 L
+793 988 L
+797 987 L
+800 986 L
+802 985 L
+803 985 L
+806 984 L
+809 984 L
+812 983 L
+816 983 L
+819 982 L
+822 982 L
+825 983 L
+828 985 L
+830 985 L
+831 987 L
+835 990 L
+835 991 L
+838 995 L
+839 997 L
+841 1002 L
+841 1002 L
+843 1008 L
+844 1013 L
+844 1017 L
+844 1019 L
+844 1021 L
+844 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+796 1024 M
+793 1021 L
+792 1019 L
+790 1016 L
+789 1013 L
+787 1008 L
+788 1002 L
+790 999 L
+793 997 L
+793 996 L
+797 994 L
+800 992 L
+803 991 L
+803 991 L
+806 990 L
+809 989 L
+812 988 L
+816 988 L
+819 988 L
+822 988 L
+825 989 L
+828 991 L
+828 991 L
+831 994 L
+834 997 L
+835 998 L
+837 1002 L
+838 1004 L
+839 1008 L
+840 1013 L
+840 1019 L
+840 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+804 1024 M
+803 1023 L
+800 1019 L
+800 1017 L
+798 1013 L
+798 1008 L
+800 1003 L
+800 1002 L
+803 1000 L
+806 997 L
+807 997 L
+809 996 L
+812 995 L
+816 994 L
+819 994 L
+822 995 L
+825 996 L
+826 997 L
+828 999 L
+831 1002 L
+831 1002 L
+834 1008 L
+835 1010 L
+835 1013 L
+836 1019 L
+835 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+813 1024 M
+812 1023 L
+809 1019 L
+809 1018 L
+808 1013 L
+809 1008 L
+809 1008 L
+812 1005 L
+816 1004 L
+819 1003 L
+822 1004 L
+825 1007 L
+826 1008 L
+828 1012 L
+829 1013 L
+829 1019 L
+828 1022 L
+827 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1056 M
+867 1058 L
+866 1058 L
+863 1061 L
+860 1063 L
+860 1063 L
+857 1067 L
+854 1069 L
+854 1070 L
+851 1073 L
+848 1075 L
+847 1076 L
+844 1078 L
+842 1080 L
+841 1081 L
+838 1083 L
+835 1085 L
+833 1086 L
+831 1087 L
+828 1088 L
+825 1087 L
+823 1086 L
+822 1085 L
+819 1081 L
+818 1080 L
+816 1078 L
+813 1075 L
+812 1074 L
+809 1071 L
+807 1069 L
+806 1069 L
+803 1067 L
+800 1065 L
+797 1064 L
+795 1063 L
+793 1063 L
+790 1063 L
+787 1063 L
+785 1063 L
+784 1064 L
+781 1064 L
+777 1065 L
+774 1065 L
+771 1064 L
+770 1063 L
+768 1063 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1051 M
+867 1052 L
+866 1053 L
+863 1056 L
+861 1058 L
+860 1059 L
+857 1062 L
+856 1063 L
+854 1065 L
+851 1068 L
+850 1069 L
+847 1071 L
+844 1074 L
+843 1075 L
+841 1076 L
+838 1078 L
+835 1079 L
+831 1080 L
+828 1080 L
+825 1080 L
+822 1078 L
+819 1076 L
+818 1075 L
+816 1073 L
+812 1071 L
+810 1069 L
+809 1068 L
+806 1066 L
+803 1064 L
+802 1063 L
+800 1062 L
+797 1061 L
+793 1061 L
+790 1060 L
+787 1060 L
+784 1060 L
+781 1061 L
+777 1061 L
+774 1060 L
+771 1059 L
+769 1058 L
+768 1057 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1043 M
+866 1046 L
+866 1047 L
+863 1049 L
+861 1052 L
+860 1053 L
+857 1057 L
+856 1058 L
+854 1061 L
+851 1063 L
+851 1064 L
+847 1067 L
+845 1069 L
+844 1069 L
+841 1072 L
+838 1073 L
+835 1074 L
+833 1075 L
+831 1075 L
+828 1075 L
+826 1075 L
+825 1074 L
+822 1073 L
+819 1072 L
+816 1070 L
+815 1069 L
+812 1068 L
+809 1066 L
+806 1063 L
+806 1063 L
+803 1062 L
+800 1060 L
+797 1059 L
+794 1058 L
+793 1058 L
+790 1057 L
+787 1057 L
+784 1057 L
+781 1057 L
+777 1056 L
+774 1056 L
+771 1054 L
+768 1052 L
+768 1052 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1047 M
+771 1049 L
+774 1051 L
+777 1052 L
+781 1052 L
+781 1052 L
+784 1053 L
+787 1053 L
+790 1054 L
+793 1055 L
+797 1056 L
+800 1057 L
+801 1058 L
+803 1059 L
+806 1061 L
+809 1063 L
+811 1063 L
+812 1065 L
+816 1067 L
+819 1068 L
+821 1069 L
+822 1069 L
+825 1071 L
+828 1071 L
+831 1071 L
+835 1070 L
+838 1069 L
+838 1069 L
+841 1067 L
+844 1065 L
+846 1063 L
+847 1062 L
+851 1059 L
+852 1058 L
+854 1055 L
+856 1052 L
+857 1051 L
+860 1047 L
+860 1046 L
+863 1041 L
+863 1040 L
+865 1036 L
+866 1030 L
+865 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1041 M
+771 1044 L
+774 1045 L
+777 1047 L
+777 1047 L
+781 1048 L
+784 1049 L
+787 1050 L
+790 1051 L
+793 1052 L
+795 1052 L
+797 1053 L
+800 1054 L
+803 1056 L
+806 1058 L
+806 1058 L
+809 1060 L
+812 1062 L
+816 1063 L
+816 1063 L
+819 1065 L
+822 1066 L
+825 1067 L
+828 1067 L
+831 1067 L
+835 1066 L
+838 1065 L
+840 1063 L
+841 1063 L
+844 1061 L
+847 1058 L
+847 1058 L
+851 1054 L
+852 1052 L
+854 1049 L
+855 1047 L
+857 1043 L
+858 1041 L
+860 1036 L
+860 1034 L
+861 1030 L
+861 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1036 M
+771 1038 L
+774 1040 L
+776 1041 L
+777 1042 L
+781 1043 L
+784 1045 L
+787 1046 L
+790 1047 L
+790 1047 L
+793 1048 L
+797 1050 L
+800 1051 L
+802 1052 L
+803 1053 L
+806 1055 L
+809 1057 L
+811 1058 L
+812 1059 L
+816 1060 L
+819 1062 L
+822 1063 L
+825 1063 L
+828 1063 L
+831 1063 L
+835 1062 L
+838 1061 L
+841 1059 L
+842 1058 L
+844 1056 L
+847 1052 L
+847 1052 L
+851 1048 L
+851 1047 L
+854 1041 L
+854 1041 L
+856 1036 L
+857 1030 L
+857 1029 L
+857 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+768 1029 M
+769 1030 L
+771 1032 L
+774 1034 L
+776 1036 L
+777 1037 L
+781 1038 L
+784 1040 L
+787 1041 L
+787 1041 L
+790 1043 L
+793 1044 L
+797 1046 L
+798 1047 L
+800 1048 L
+803 1050 L
+806 1052 L
+807 1052 L
+809 1054 L
+812 1055 L
+816 1057 L
+818 1058 L
+819 1058 L
+822 1059 L
+825 1060 L
+828 1060 L
+831 1059 L
+835 1058 L
+835 1058 L
+838 1057 L
+841 1054 L
+843 1052 L
+844 1051 L
+847 1047 L
+847 1046 L
+850 1041 L
+851 1040 L
+852 1036 L
+853 1030 L
+854 1027 L
+854 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+771 1024 M
+771 1025 L
+774 1028 L
+777 1030 L
+777 1030 L
+781 1033 L
+784 1035 L
+785 1036 L
+787 1036 L
+790 1038 L
+793 1040 L
+795 1041 L
+797 1042 L
+800 1044 L
+803 1046 L
+804 1047 L
+806 1048 L
+809 1050 L
+812 1052 L
+813 1052 L
+816 1054 L
+819 1055 L
+822 1056 L
+825 1056 L
+828 1056 L
+831 1055 L
+835 1054 L
+837 1052 L
+838 1052 L
+841 1049 L
+843 1047 L
+844 1045 L
+846 1041 L
+847 1039 L
+849 1036 L
+850 1030 L
+851 1026 L
+851 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+779 1024 M
+781 1026 L
+784 1028 L
+786 1030 L
+787 1031 L
+790 1033 L
+793 1035 L
+794 1036 L
+797 1038 L
+800 1040 L
+801 1041 L
+803 1042 L
+806 1044 L
+809 1046 L
+810 1047 L
+812 1048 L
+816 1050 L
+819 1051 L
+822 1052 L
+825 1052 L
+828 1052 L
+831 1051 L
+835 1049 L
+838 1047 L
+838 1047 L
+841 1043 L
+842 1041 L
+844 1037 L
+845 1036 L
+847 1030 L
+847 1025 L
+848 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+788 1024 M
+790 1026 L
+793 1029 L
+794 1030 L
+797 1032 L
+800 1035 L
+801 1036 L
+803 1037 L
+806 1040 L
+808 1041 L
+809 1042 L
+812 1044 L
+816 1046 L
+818 1047 L
+819 1047 L
+822 1048 L
+825 1048 L
+828 1047 L
+830 1047 L
+831 1046 L
+835 1044 L
+837 1041 L
+838 1041 L
+841 1036 L
+841 1035 L
+843 1030 L
+844 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+796 1024 M
+797 1025 L
+800 1028 L
+801 1030 L
+803 1032 L
+806 1035 L
+807 1036 L
+809 1037 L
+812 1039 L
+816 1041 L
+816 1041 L
+819 1042 L
+822 1043 L
+825 1043 L
+828 1042 L
+830 1041 L
+831 1040 L
+835 1037 L
+836 1036 L
+838 1032 L
+839 1030 L
+840 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+804 1024 M
+806 1027 L
+809 1030 L
+809 1031 L
+812 1033 L
+816 1035 L
+817 1036 L
+819 1036 L
+822 1037 L
+825 1037 L
+828 1036 L
+828 1035 L
+831 1032 L
+833 1030 L
+835 1026 L
+835 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+813 1024 M
+816 1026 L
+819 1028 L
+822 1028 L
+825 1027 L
+827 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1008 M
+873 1012 L
+874 1013 L
+876 1015 L
+879 1018 L
+881 1019 L
+882 1020 L
+885 1022 L
+888 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1014 M
+873 1018 L
+874 1019 L
+876 1021 L
+879 1024 L
+880 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1022 M
+871 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1056 M
+873 1055 L
+876 1053 L
+878 1052 L
+879 1052 L
+882 1050 L
+885 1048 L
+886 1047 L
+889 1043 L
+890 1041 L
+891 1036 L
+891 1030 L
+889 1026 L
+888 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1051 M
+873 1049 L
+876 1047 L
+877 1047 L
+879 1045 L
+882 1043 L
+884 1041 L
+885 1036 L
+886 1036 L
+885 1035 L
+884 1030 L
+882 1027 L
+880 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+870 1043 M
+872 1041 L
+873 1039 L
+875 1036 L
+874 1030 L
+873 1028 L
+871 1024 L
+S
+/level 0 def
+/levelcolor 3 def
+1000 1149 M
+1001 1147 L
+1003 1144 L
+1006 1141 L
+1006 1141 L
+1009 1139 L
+1013 1137 L
+1016 1137 L
+1019 1137 L
+1022 1140 L
+1024 1141 L
+1025 1143 L
+1028 1147 L
+1028 1147 L
+1032 1151 L
+1034 1153 L
+1035 1154 L
+1038 1156 L
+1040 1158 L
+1041 1159 L
+1044 1162 L
+1046 1164 L
+1047 1169 L
+1045 1175 L
+1044 1176 L
+1041 1178 L
+1039 1180 L
+1038 1181 L
+1035 1183 L
+1032 1186 L
+1032 1186 L
+1028 1188 L
+1025 1191 L
+1024 1192 L
+1022 1192 L
+1019 1193 L
+1016 1193 L
+1013 1193 L
+1010 1192 L
+1009 1191 L
+1006 1187 L
+1005 1186 L
+1003 1182 L
+1002 1180 L
+1000 1175 L
+1000 1173 L
+999 1169 L
+998 1164 L
+997 1158 L
+998 1153 L
+1000 1149 L
+S
+/level 0 def
+/levelcolor 3 def
+1003 1162 M
+1003 1158 L
+1006 1153 L
+1006 1152 L
+1009 1149 L
+1012 1147 L
+1013 1147 L
+1016 1147 L
+1016 1147 L
+1019 1148 L
+1022 1150 L
+1024 1153 L
+1025 1154 L
+1028 1157 L
+1029 1158 L
+1032 1161 L
+1033 1164 L
+1035 1168 L
+1035 1169 L
+1035 1171 L
+1034 1175 L
+1032 1178 L
+1030 1180 L
+1028 1181 L
+1025 1184 L
+1023 1186 L
+1022 1186 L
+1019 1187 L
+1016 1187 L
+1013 1186 L
+1012 1186 L
+1009 1183 L
+1007 1180 L
+1006 1178 L
+1005 1175 L
+1003 1169 L
+1003 1165 L
+1003 1164 L
+1003 1162 L
+S
+/level 0 def
+/levelcolor 3 def
+1013 1166 M
+1013 1164 L
+1016 1163 L
+1019 1164 L
+1019 1164 L
+1021 1169 L
+1019 1175 L
+1019 1175 L
+1016 1175 L
+1015 1175 L
+1013 1170 L
+1012 1169 L
+1013 1166 L
+S
+/level 0 def
+/levelcolor 3 def
+1098 1839 M
+1100 1837 L
+1101 1837 L
+1105 1836 L
+1107 1837 L
+1108 1838 L
+1110 1843 L
+1110 1849 L
+1108 1852 L
+1105 1854 L
+1101 1853 L
+1098 1851 L
+1097 1849 L
+1096 1843 L
+1098 1839 L
+S
+/level 0 def
+/levelcolor 3 def
+1416 98 M
+1418 94 L
+1419 94 L
+1422 94 L
+1423 94 L
+1425 98 L
+1426 100 L
+1425 102 L
+1424 106 L
+1422 107 L
+1419 107 L
+1417 106 L
+1416 104 L
+1415 100 L
+1416 98 L
+S
+/level 0 def
+/levelcolor 3 def
+1807 1849 M
+1807 1849 L
+1810 1843 L
+1810 1843 L
+1813 1840 L
+1816 1838 L
+1819 1838 L
+1823 1838 L
+1826 1840 L
+1829 1842 L
+1830 1843 L
+1831 1849 L
+1829 1854 L
+1829 1854 L
+1826 1858 L
+1824 1860 L
+1823 1861 L
+1819 1863 L
+1816 1865 L
+1816 1865 L
+1813 1866 L
+1810 1866 L
+1808 1865 L
+1807 1864 L
+1805 1860 L
+1805 1854 L
+1807 1849 L
+S
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+gsave 0 setlinewidth 0 setgray
+gsave PEAKLINEWIDTH setlinewidth
+1 1 1013 1165 7 7 0 0 PP
+1 1 816 1012 7 7 0 0 PP
+1 1 782 1008 7 7 0 0 PP
+1 1 994 1027 7 7 0 0 PP
+1 1 979 961 7 7 0 0 PP
+1 1 1160 863 7 7 0 0 PP
+grestore
+gsave PEAKLINEWIDTH setlinewidth
+grestore
+/LineEndSizeX 11.137308 def
+/LineEndSizeY 0.696082 def
+LabelFont findfont setfont
+currentfont 678.807191 (Standard Width) stringwidth pop div scalefont setfont
+{gsave -169.701798 -18.648549 rmoveto 1 1 scale 0 setpixel (A5C2-H2) show grestore} {0 0 1076.356 1262.431 1019.390 1173.340 1053.082 1262.431 PaintPointer} -1 -1 1160 1303 339 67 PA
+{gsave -169.701798 -18.648549 rmoveto 1 1 scale 0 setpixel (A1C2-H2) show grestore} {0 0 987.291 825.631 823.914 1010.840 964.018 825.631 PaintPointer} -1 -1 1126 785 339 67 PA
+{gsave -169.701798 -18.648549 rmoveto 1 1 scale 0 setpixel (A9C2-H2) show grestore} {0 0 654.692 842.739 780.594 1006.360 631.419 842.739 PaintPointer} -1 -1 489 802 339 67 PA
+grestore
+grestore
+edgeview
+grestore
+gsave
+4.25 I 7.95 1.75 add I translate
+[
+[(Spectrum:  out:3)]
+[(User:  HenryXu     Date:  Sat Jul  4 23:35:49 2015)]
+[(Positive contours: low 9.00e+05  levels 30  factor 1.20)]
+[(Negative contours: low -1.03e+08  levels 30  factor 1.20)]
+] banner
+grestore
+showpage

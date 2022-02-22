@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 5	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2017-10-31 14:21:37.040 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/hs_20171031_A6DNAm1A16_T6lb_HSQC_10C/5/acqu2
+$$ process /opt/topspin3.1/prog/mod/dataserver
+##$ACQT0= 0
+##$BF1= 70.948117
+##$FnMODE= 5
+##$NUC1= <15N>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 10927.96
+##$SFO1= 70.95904496
+##$SW= 25.9916182631075
+##$SW_h= 1844.340408915
+##$TD= 128
+##END=

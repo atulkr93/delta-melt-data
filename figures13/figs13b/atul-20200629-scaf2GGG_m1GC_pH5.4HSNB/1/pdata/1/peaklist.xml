@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2020-06-30T08:04:44">
+  <PeakList1D>
+    <PeakList1DHeader creator="hashimi" date="2020-06-30T08:04:44" expNo="1" name="atul-20200629-scaf2GGG_m1GC_pH5.4HSNB" owner="" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails>F1=4.822ppm, F2=4.795ppm, MI=14.02cm, MAXI=15.00cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+  </PeakList1D>
+  <PeakList1D>
+    <PeakList1DHeader creator="hashimi" date="2020-06-30T08:04:44" expNo="1" name="atul-20200629-scaf2GGG_m1GC_pH5.4HSNB" owner="" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails>F1=4.795ppm, F2=4.658ppm, MI=11.98cm, MAXI=17.40cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="4.7523" intensity="15.00" type="0"/>
+  </PeakList1D>
+</PeakList>

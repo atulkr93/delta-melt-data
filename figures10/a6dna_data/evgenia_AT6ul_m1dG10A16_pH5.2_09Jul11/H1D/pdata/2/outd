@@ -1,0 +1,15 @@
+##TITLE= Parameter file, XWIN-NMR		Version 3.6
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##ORIGIN= UXNMR, Bruker Analytische Messtechnik GmbH
+##OWNER= root
+$$ Thu Oct  6 17:06:25 2005 EDT (UT-4h)  nmrsu@bloch600
+$$ /opt/xwinnmr/exp/stan/nmr/par/standard1D///outd
+##$CURPLOT= <hpdj-5550>
+##$CURPRIN= <$hpdj-5550>
+##$DFORMAT= <normdp>
+##$LAYOUT= <+/1D_H.xwp>
+##$LFORMAT= <normlp>
+##$PFORMAT= <normpl>
+##$SURQMSG= 1
+##END=

@@ -1,0 +1,8057 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 0 0 612 792
+%
+% PostScript initialization file for Sparky, version 1.08 and above.
+%
+%%ColorUsage: Color
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       Start of user-definable section                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Flags that can be changed - use "true" or "false".
+%
+/bottomAxisScale?	true	def	% If the bottom axis is shown
+/topAxisScale?		true	def	% If the top axis is shown
+/leftAxisScale?		true	def	% If the left axis is shown
+/rightAxisScale?	true	def	% If the right axis is shown
+
+/leftAxisLabel?		true	def	% If the left axis label is shown
+/bottomAxisLabel?	true	def	% If the bottom axis label is shown
+
+/bottomTick?		true	def	% If the bottom ticks are shown
+/topTick?		true	def	% If the top ticks are shown
+/leftTick?		true	def	% If the left ticks are shown
+/rightTick?		true	def	% If the right ticks are shown
+
+/showBanner?		true	def	% If the banner is to be shown
+/shadowUnderBanner?	true	def	% Place shadow box under banner
+/planeBanner?		true	def	% In N-D spectra, shows current plane
+
+/useGray?		true	def	% On B/W printer use gray scale?
+
+
+%
+% Sizes that can be changed.
+%
+/MajorTickInset		0	def	% Amount major tick goes inside panel
+/MajorTickOutset	12	def	% Amount major tick goes outside panel
+/MajorTickThickness	4	def	% Thickness of major tick
+/MinorTickInset		0	def	% Amount minor tick goes inside panel
+/MinorTickOutset	8	def	% Amount minor tick goes outside panel
+/MinorTickThickness	1	def	% Thickness of minor tick
+/EdgeLineWidth		4	def	% Thickness of border around panels
+/LeftLabelPad		32	def	% Pad between left axis labels & label
+/BottomLabelPad		32	def	% Pad between bottom axis labels & label
+/AxisPad		8	def	% Pad between ticks and labels
+
+
+%
+% Fonts that can be changed
+%
+/AxisFont		/Helvetica	def	% Font used for X/Y axis
+/AxisFontSize		12		def	%   and its size
+/BannerFont		/Helvetica	def	% Font used for the banner
+/BannerFontSize		12 		def	%   and its size
+/LabelFont		/Courier	def	% Font used for peak labels
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                       End of user-definable section                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Check whether color is available
+/has_color false def
+% the following is for Display PostScript and PostScript Level 2
+/deviceinfo where {
+	pop deviceinfo /Colors known {
+		deviceinfo /Colors get exec
+		1 ne {
+			/has_color true def
+		} if
+	} if
+} if
+% the following is for PostScript Level 1 printers
+statusdict /processcolors known {
+	statusdict /processcolors get exec
+	1 ne {
+		/has_color true def
+	} if
+} if
+
+
+%
+% Color printer check. If true, the /4color variable is set to be true.
+%
+has_color {
+	/4color true def
+	1.0 setlinewidth
+}{
+	/4color false def
+	0.25 setlinewidth
+} ifelse
+
+
+%
+% Small dictionary used by the axis label routines
+%
+/plot_dict 2 dict begin
+	/subdis 0.0 def
+	/len 0.0 def
+	currentdict
+end def
+
+%
+%
+%
+/SCALE	1 def
+/SC	{ SCALE div } def
+/EdgePad {
+	EdgeLineWidth MajorTickOutset add AxisPad add
+} def
+/setAxisFont {
+	AxisFont findfont AxisFontSize SC scalefont setfont
+} def
+/LeftMostAxisPos EdgePad neg def
+/BottomMostAxisPos EdgePad neg def
+
+
+%
+% Low level defines
+%
+/bdef { bind def } bind def
+/ldef { load def } bdef
+/xdef { exch def } bdef
+/x { 0 rlineto } bdef
+/y { 0 exch rlineto } bdef
+/I {72 mul} bdef
+/L /lineto ldef
+/r /rmoveto ldef
+/s /gsave ldef
+/T /grestore ldef
+/M /moveto ldef
+/L /lineto ldef
+/C /closepath ldef
+
+%
+% Return the min or max of two numbers
+%
+/max { 2 copy lt {exch} {} ifelse pop } def
+/min { 2 copy gt {exch} {} ifelse pop } def
+
+
+/WHITE	1 def
+/BLACK	0 def
+/CLEAR	-1 def
+/DASH	4   def
+/TF	{ 0 ne {true}{false} ifelse } def
+
+%
+% A case/switch statement.  Takes a key for the case and an array.
+% Generally the array is executable to avoid evaluating the array
+% each time case is called:
+%	obj {
+%	    key1	{proc1}
+%	    key2 key3	{proc2}
+%	    key4	{proc3}
+%	    /Default	{proc4}
+%	} case
+%
+/case where { pop } {
+  /case {			%  v { k {} k k {} .... /Default {} }  CASE  -
+    false exch {				% v bool k|{}
+	exch {					% v k|{}
+	    dup xcheck {exit} {pop true} ifelse	% v bool|{}
+	} {
+	    2 copy eq exch /Default eq or	% v bool
+	} ifelse
+    } forall					% v bool|{}
+    dup xcheck {exch pop exec} {pop pop} ifelse
+  } bind def
+} ifelse
+
+
+%
+% String justification routines
+%
+/rshow { dup stringwidth exch neg exch rmoveto show } def
+/cshow { dup stringwidth pop -.5 mul 0 rmoveto show } bdef
+/stringsize {
+	gsave
+	newpath
+	0 0 moveto				% str
+	false charpath pathbbox			% x1 y1 x2 y2
+	4 2 roll pop pop			% x2 y2
+	grestore
+} def
+/stringcenter {	% str -> cx cy
+	stringsize
+	.5 mul exch .5 mul exch			% cx cy
+} def
+/tickrshow {	% str x y -> -
+	moveto					% str
+	MajorTickOutset neg 0 rlineto s stroke T	% str
+	dup stringsize				% str w h
+	-.5 mul exch pop 0 exch			% str 0 dy
+	rmoveto rshow
+} def
+
+%
+% Set the dash pattern for either color or B&W printing
+%
+/set_dash {	% bwdash colordash
+	4color {
+		0 setdash pop
+	}{
+		pop 0 setdash
+	} ifelse
+} def
+
+
+%
+% Set the color for either color printing or black for B&W printing
+%
+/contour_color {	% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		dashpatterns level get aload pop set_dash
+		pop 0 setgray
+	} ifelse
+} def
+
+/set_stroke {
+	levelcolor contour_color
+} bdef
+
+%
+% Set the stroke color and perform the stroke
+%
+/S {set_stroke stroke} bdef
+
+%
+% Set the color from the color index, whether RBG or B&W
+%
+/setpixel {		% color_index => -
+	4color {
+		colors exch get aload pop
+		setrgbcolor pop
+	}{
+		useGray? {
+			colors exch get aload pop
+			pop pop pop setgray
+		}{
+			WHITE eq { 1 } { 0 } ifelse setgray
+		} ifelse
+	} ifelse
+} bdef
+
+%
+% Add a rectangular path to the current path at the current point
+%
+/rect {			% w h => -
+    dup 0 exch rlineto 
+    exch 0 rlineto 
+    neg 0 exch rlineto 
+    closepath 
+} bdef
+
+%
+% Compute the rectangle that is inset by <delta> from the input
+% rectangle <x> <y> <w> <h>
+%
+/insetrect { 		% delta x y w h => x' y' w' h'
+    3 index 5 index add		% delta x y w h x'
+    3 index 6 index add		% delta x y w h x' y'
+    3 index 7 index 2 mul sub	% delta x y w h x' y' w'
+    3 index 8 index 2 mul sub	% delta x y w h x' y' w' h'
+    mark 10 5 roll cleartomark
+} bdef
+
+%
+% Add a rectangular path to the current path
+%
+/rectpath { 		% x y w h  =>  - 
+    4 2 roll moveto rect
+} def
+
+%
+% Given x y w h coordinates, create a shadow box offset down and right
+% of this box
+%
+/shadowbox {		% x y w h dx dy => -
+	%
+	% Draw dark box
+	%
+	gsave
+		neg translate
+		4 copy rectpath
+		0 setgray fill
+	grestore
+
+	%
+	% Fill white box then stroke dark border
+	%
+	rectpath
+	gsave
+		1 setgray fill
+	grestore
+	0 setgray stroke
+} def
+
+
+
+/Xshow /show ldef
+/Xs /show ldef
+
+%
+% Switch fonts
+%
+/XfR {
+	/Times-Roman findfont setfont
+} def
+/XfS {
+	/Symbol findfont setfont
+} def
+
+
+%
+% Attach a font to a variable name if the font exists. This should
+% check if the font exists before trying the bind, but the code
+% that has been "%%"ed out below fails on SPARCprinters!
+%
+/bindFont {	% variable fontname	=> -
+%%	dup FontDirectory exch known {			% var name t|f
+		[ exch findfont /setfont load ] cvx	% var proc
+		store					% -
+%%	}{
+%%		pop pop					% -
+%%	} ifelse
+} def
+
+%
+% For filled objects, if the fill is white or nil, and the border is
+% white or nil, replace the border with black
+%
+/FixFill {	% bo bg
+	0 index dup 0 lt exch		% bo bg bool bg
+	WHITE eq or {			% bo bg
+		1 index dup 0 lt exch	% bo bg bool bo
+		WHITE eq or {		% bo bg
+			exch pop
+			BLACK exch
+		} if
+	} if
+} def
+
+
+%
+% Draw the pointer in colors <bo> <bg> in the 3 point area <x1, y1>,
+% <x2, y2>, <x3, y3>
+%
+/PaintPointer {		% bo bg x1 y1 x2 y2 x3 y3 => -
+	moveto				% bo bg x1 y1 x2 y2
+	lineto				% bo bg x1 y1
+	lineto				% bo bg
+	closepath			% bo bg
+
+	FixFill				% bo' bg
+
+	%
+	% First the fill
+	%
+	dup 0 ge {
+		setpixel
+		gsave fill grestore
+	}{
+		pop
+	} ifelse
+
+	%
+	% Now stroke the edge, unless it is white or nil.
+	%
+	dup WHITE eq {
+		pop
+	}{
+		dup 0 ge {
+			setpixel
+			stroke
+		}{
+			pop
+		} ifelse
+	} ifelse
+} def
+
+%
+% Paint a grid line from <x,y> size <w,h> in color <bg>
+%
+/PG {		% bg x y w h => -
+	4 2 roll				% bg w h x y
+	moveto					% bg w h 
+	rlineto					% bg
+	stroke					% bg
+	pop					% -
+} def
+
+%
+% Place a border around the peak (this doesn't do much except handle
+% the above-plane, below-plane pointer for printing)
+%
+/BorderPeak {	% x y w h sel {-1 | 0 | 1 }  => x y w h
+	dup 0 ne {
+		6 copy exch pop			% x y w h {above|below}
+
+		0 ge {
+			4 2 roll moveto rmoveto	% x y w h sel {u/d}
+			2 index .5 mul dup .5 mul
+		}{
+			4 2 roll moveto exch pop 0 exch rmoveto
+			2 index .5 mul neg dup -.5 mul
+		} ifelse
+		2 copy rlineto
+		exch neg exch rlineto
+		closepath
+		BLACK setpixel stroke
+	} if
+	pop				% x y w h sel
+	pop				% x y w h
+} bdef
+
+%
+% Paint a Peak from <x,y> with size <w,h> in border color <bo> and
+% background color <bg>. If <bg> is -1, the peak is not printed at all.
+% For Peaks, the border color is currently ignored because the peak is
+% drawn as an "X".  The selected state <sel> is also ignored but show
+% a flag on the edge if the peak is above or below this plane.
+%
+/PP {		% bo bg x y w h sel { -1 | 0 | 1 } => -
+	BorderPeak 				% bo bg x y w h
+	5 -1 roll dup 0 lt {			% bo x y w h bg
+		pop pop pop pop pop		% bo
+	}{
+		dup WHITE eq {			% bo x y w h bg|WHITE
+			pop BLACK		% bo x y w h bg|BLACK
+		} if				% bo x y w h bg|BLACK
+		setpixel			% bo x y w h
+		4 2 roll moveto			% bo w h
+		2 copy rlineto			% bo w h
+		1 index neg 0 rmoveto		% bo w h
+		neg rlineto			% bo 
+		stroke				% bo
+	} ifelse
+} def
+
+/PaintBox {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	6 -2 roll			% x y w h bo bg
+	FixFill				% x y w h bo' bg
+	exch 6 1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+/PaintBox2 {	% bo bg x y w h => x y w h
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	5 -1 roll			% bo' x y w h bg
+	dup 0 ge {			% bo x y w h bg
+		setpixel
+		4 copy rectpath fill	% bo x y w h
+	}{
+		pop
+	} ifelse
+
+	%
+	% If the border color is positive, edge it.
+	%
+	5 -1 roll dup 0 ge {		% x y w h bo
+		setpixel		% x y w h
+		4 copy rectpath stroke	% x y w h
+	}{
+		pop			% x y w h
+	} ifelse
+} def
+
+
+%
+% Paint a crosspeak
+%
+/PX {	% bo bg x y w h => -
+	PaintBox			% x y w h
+	4 {pop} repeat			% -
+} def
+
+
+%
+% Resonance information
+%
+/PaintResBY {		% labelpos => matrix
+	15 SC exch moveto			% -
+	matrix currentmatrix			% CTM
+	resScale dup scale			% CTM
+} def
+/PaintResBX {		% labelpos => matrix
+	matrix currentmatrix exch		% CTM labelpos
+	15 SC					% CTM labelpos x
+	exch translate				% CTM
+	resScale dup scale			% CTM
+	0 0 moveto				% CTM
+} def
+
+/PaintResA {		% matrix shift ypos => -
+	3 -1 roll
+	setmatrix		% shift ypos
+	0 exch moveto		% shift
+	3 SC 0 rlineto
+	8 SC exch rlineto	% -
+	3 SC 0 rlineto
+	stroke
+} def
+/PaintResB null def
+
+%
+% Paint a resonance
+%
+/PaintRes {	% pos shift {labelproc} bot => -
+	PaintResB			% pos shift {labelproc} matrix
+	4 1 roll			% matrix pos shift {labelproc}
+	exec				% matrix pos shift
+	exch PaintResA			% -
+} def
+
+
+%
+% Produce a linepath with an arrow at the appropriate end.
+% Arrows are at 1 (x, facing left), 3 (y, facing down),
+% 2 (x + w, facing right), 4 (y + h, facing up).
+%
+%
+/LEX	{ LineEndSizeX } def
+/LEY	{ LineEndSizeY } def
+/ArrowX	{ h .3535 mul } def
+/ArrowY	{ w .3535 mul } def
+/w	0 def
+/h	0 def
+/LinePath {	% ends x y w h => - (builds path)
+	5 -1 roll {				% x y w h
+	    1 {	%  at left end
+		%
+		%   +- 7 ---------------+	+
+		%   | /| <LEY 			|
+		%    / 6----------------5	|
+		%   1                   |	h
+		%    \ 3----------------4	|
+		%   | \| <LEY			|
+		%   +--2 ---------------+	+
+		% x,y ^ArrowX
+		%
+		%   +----------w--------+
+
+		/h exch store			% x y w
+		/w exch store			% x y w
+
+		h .5 mul add moveto		% 1)
+		ArrowX h -.5 mul rlineto	% 2)
+		0 LEY rlineto			% 3)
+		w ArrowX sub dup 0 rlineto	% w' 4)
+		0 h LEY dup add sub rlineto	% w' 5)
+		neg 0 rlineto			% 6)
+		0 LEY rlineto			% 7)
+		closepath
+	    }
+
+	    2 {	% at right end
+		%
+		%   +----------------5--+	+
+		%        	LEY> |\ |	|
+		%   7----------------6 \	|
+		%   |                   4 	h
+		%   1----------------2 /	|
+		%        	LEY> |/ |	|
+		%   +----------------3--+	+
+		% x,y           ArrowX^
+		%
+		%   +---------w---------+
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		LEY add moveto			% 1)
+		w ArrowX sub dup 0 rlineto	% w' 2)
+		0 LEY neg rlineto		% w' 3)
+		ArrowX h .5 mul rlineto		% w' 4)
+		ArrowX neg h .5 mul rlineto	% w' 5)
+		0 LEY neg rlineto		% w' 6)
+		neg 0 rlineto			% 7)
+		closepath
+	    }
+
+	    4 {
+		%         
+		%   +--5-4--+  		+
+		%      | |		|
+		%  LEX^| |^LEX		|
+		%      | |  		|
+		%   7--6-3--2		h
+		%    \     /		|
+		%   | \   / | <ArrowY	|
+		%   |  \ /  |		|
+		%   +---1---+		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		exch w .5 mul add exch moveto	% 1)
+		w .5 mul ArrowY rlineto		% 2)
+		LEX neg 0 rlineto		% 3)
+		0 h ArrowY sub rlineto		% 4)
+		w LEX dup add sub neg 0 rlineto	% 5)
+		0 ArrowY h sub rlineto		% 6)
+		LEX neg 0 rlineto		% 7)
+		closepath
+	    }
+
+	    5 {	% at top
+		%         
+		%   +---7---+		+
+		%   |  / \  |		|
+		%   | /   \ | <ArrowY	|
+		%    /     \		|
+		%   1--2-5--6		h
+		%    ^ | | ^ 		|
+		%   LEX| |LEX		|
+		%      | |   		|
+		%   +--3-4--+  		+
+		% x,y
+		%
+		%   +---w---+
+		%
+		/h exch store			% x y w
+		/w exch store			% x y
+
+		h ArrowY sub add moveto		% 1)
+		LEX 0 rlineto			% 2)
+		0 ArrowY h sub rlineto		% 3)
+		w LEX dup add sub 0 rlineto	% 4)
+		0 h ArrowY sub rlineto		% 5)
+		LEX 0 rlineto			% 6)
+		w -.5 mul ArrowY rlineto	% 7)
+		closepath
+	    }
+	    /Default { rectpath }
+	} case
+} bdef
+
+%
+% Paint a line
+%
+/PL {	% ends bo bg x y w h => -
+
+	%
+	% CLEAR or WHITE border WHITE background becomes 
+	% CLEAR border BLACK background
+	%
+	7 -1 roll 5 1 roll		% bo bg ends x y w h
+	LinePath 			% bo bg
+	dup WHITE eq {
+		1 index 0 lt
+		2 index WHITE eq or {
+			pop pop
+			-1 BLACK	% x y w h CLEAR BLACK
+		} if
+	} if
+
+	%
+	% If the fill color is positive, fill it.
+	%
+	dup 0 ge {			% bo bg
+		gsave			% bo bg
+		  setpixel		% bo
+		  fill			% bo
+		grestore		% bo
+	}{
+		pop			% bo
+	} ifelse			
+
+	%
+	% If the border color is positive, edge it.
+	%
+	dup 0 ge {			% bo
+		setpixel		% -
+		stroke			% -
+	}{
+		pop			% -
+	} ifelse
+} bdef
+
+/PA {	% {} {} bo bg x y w h => -
+	PaintBox2 			% {} {} x y w h
+	5 -1 roll exec			% {} x y w h
+	pop pop moveto
+	matrix currentmatrix		% {} CTM
+	exch				% CTM {}
+	exec				% CTM
+	setmatrix			% -
+} bdef
+
+
+% xlabel : labels the graph with ppm scale.
+% On stack: labels label_count ylength incr_distance
+/xlabel {
+  gsave plot_dict begin
+    /subdis exch store
+    /len exch store
+    {
+	gsave
+	    bottomAxisScale? {
+		gsave
+			0 1 index stringsize exch pop EdgePad add neg r
+
+			%
+			% Find the bottom-most axis label position, for
+			% positioning the horizontal axis label
+			%
+			currentpoint exch pop	% label y
+			dup BottomMostAxisPos lt {
+				/BottomMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+
+			dup cshow
+		grestore
+	    } if
+	    topAxisScale? {
+		0 len EdgePad add r dup cshow
+	    }if
+	    pop
+	grestore
+	subdis 0 r
+    } repeat
+  end grestore
+} bdef
+
+% ylabel : labels the graph with ppm scale.
+/ylabel {
+  s
+  plot_dict begin
+	/subdis exch store
+	/len exch store
+	{
+		dup stringsize			% str w h
+		-.5 mul exch neg exch		% str dx dy
+		s 2 copy r 2 index
+		leftAxisScale? {
+			EdgePad neg 0 r		% label
+
+			%
+			% Find the left-most axis label position, for
+			% positioning the vertical axis label
+			%
+			currentpoint pop	% label x
+			dup LeftMostAxisPos lt {
+				/LeftMostAxisPos exch store
+			}{
+				pop
+			} ifelse
+			show			% -
+		}{
+			pop			% -
+		} ifelse T
+		s exch pop 0 exch r len 0 r
+		rightAxisScale? { EdgePad 0 r show } { pop } ifelse T
+		0 subdis r
+	} repeat
+  end T
+} bdef
+
+% grid : draws grid of dashed lines on plot.  The major increment has
+% a solid line rather than a dashed line.
+% On stack : incr_index num_incrs yheight incr end
+/grid
+{
+  s
+  [DASH] 0 setdash
+  0 6 1 roll 0
+  {
+    dup 2 index le		% while not at end of scale
+    {
+      6 index 6 index sub	% check if major increment
+      5 index mod 0 ne
+      {				% No so draw dashed line.
+      	dup 0 M
+      	3 index y stroke
+      }
+      {				% Yes so set to solid line
+      	[] 0 setdash
+      	dup -5 M
+      	3 index 10 add y stroke
+	[DASH] 0 setdash
+      } ifelse
+      2 index add		% increment position
+      7 -1 roll 1 add		% increment counter
+      7 1 roll
+    }
+    { exit } ifelse
+  } loop
+  7 { pop } repeat
+  T
+} bdef
+
+% tick : draws tick marks on axes.
+% On stack : [ yposition ... ] i longAt inc end
+% On stack : [ [ yposition direction ] ... ] i longAt inc end
+/tick
+{
+	s
+	10 dict begin
+	    /xend	exch def
+	    /xinc	exch def
+	    /longAtI	exch def
+	    /istart	exch def
+	    /heights	exch def
+
+	    /xpos	0 def
+	    /ipos	0 def
+	    /tickin	null def
+	    /tickout	null def
+	    /direction	1 def
+	    {
+		xpos xend ge { exit } if
+
+		ipos istart sub longAtI mod 0 eq {
+			MajorTickThickness setlinewidth
+			MajorTickInset MajorTickOutset	% long ticks
+		}{
+			MinorTickThickness setlinewidth
+			MinorTickInset MinorTickOutset	% short ticks
+		} ifelse
+		/tickout exch EdgeLineWidth add store
+		/tickin exch store
+
+		heights {
+			dup type /arraytype eq {
+				aload pop
+				/direction exch store
+			} if
+								% ypos
+			xpos exch M				% -
+			0 tickin direction mul r		% -
+			0 tickin tickout add neg direction mul y% -
+			stroke
+		} forall
+
+		/xpos xpos xinc add store	% increment position
+		/ipos ipos 1 add store		% increment counter
+	    } loop
+	end
+	T
+} bdef
+
+/xTick {		% [ yposition ... ] i longAt inc end
+	5 -1 roll
+	bottomTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	topTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/yTick {
+	5 -1 roll
+	leftTick? not {
+		dup length 1 sub 1 getinterval
+	} if
+	rightTick? not {
+		0 1 getinterval
+	} if
+	5 1 roll
+	tick
+} def
+
+/getScale {	% sz, maxSz
+	dup 0 gt 2 index 2 index gt and {
+		div				% scale
+	}{
+		1				% scale==1
+	} ifelse
+} def
+
+/displayOneLine {	% proc []
+	aload length 1 add -1 roll load exec	% -
+} def
+
+/displayLines {		% [[(...) .. ] ... ] fontht proc => -
+    3 dict begin
+	/proc exch def
+	/height exch def
+	/y 0 def
+	{
+		newpath
+		0 y moveto			% x1  y1  x2  y2 []		
+		proc exch displayOneLine	% x y
+		/y y height sub 2 sub store
+	} forall
+   end
+} def
+
+%
+% Return the box that fits around all the input strings
+%
+/getBoundingBox {	% [[(...)] ...] fontht proc => x1 y1 x2 y2
+    9 dict begin
+	/bbox_x1 0 def
+	/bbox_y1 0 def
+	/bbox_x2 0 def
+	/bbox_y2 0 def
+
+	%
+	% Determine the largest limits of these positions and the positions
+	% stored in the dictionary elements (of getBoundingBox) of bbox_x1 ...
+	% bbox_y2.
+	%
+	/combineBBox {		% x1 y1 x2 y2 => -
+		bbox_y2 max /bbox_y2 exch store		% x1 y1 x2
+		bbox_x2 max /bbox_x2 exch store		% x1 y1
+		bbox_y1 min /bbox_y1 exch store		% x1
+		bbox_x1 min /bbox_x1 exch store		% -
+	} def
+
+
+	%
+	% Xshow produces a bounding box which is the union of the input
+	% bounding box and the bounding box of this <string>. We iterate
+	% through the <string> because of charpath limits imposed by
+	% some PostScript interpreters. Otherwise we could have used:
+	%	{ false charpath pathbbox combineBBox }
+	%
+	/Xshow {	% string => -
+	    3 dict begin
+		dup /str exch def
+		length 1 sub 0 1 3 -1 roll {
+			str exch 1 getinterval
+			false charpath
+			currentpoint /y exch def /x exch def
+			pathbbox combineBBox
+			newpath x y moveto
+		} for
+	    end
+	} def
+	/proc exch def
+	/height exch def
+	/y 0 def
+
+	%
+	% Iterate over the string arrays, computing the bounding box
+	%
+	gsave
+	    {
+		newpath
+		0 y moveto			% []		
+		proc exch displayOneLine	% -
+		pathbbox combineBBox		% -
+		/y y height sub 2 sub store	% -
+	    } forall
+	grestore
+
+	%
+	% And return the bounding box
+	%
+	bbox_x1 bbox_y1 bbox_x2 bbox_y2
+    end
+} def
+
+/CurrFontSize AxisFontSize def
+/FontSize { CurrFontSize SC } def
+
+/showOmega {
+	currentfont
+	/Symbol findfont CurrFontSize SC 1.25 mul scalefont setfont
+	(w) Xshow
+	setfont
+} def
+
+/showUnits {	% (units)
+	(  \() Xshow					% u
+	Xshow						% -
+	(\)) Xshow					% -
+} def
+
+/showAxisAtom {	% (atom) (axis) => -
+	showOmega
+	subscript Xshow unsubscript
+	( - ) Xshow					% u a
+	showAtom					% u
+} def
+
+/showAxis {	% (units) (atoms) (axis) => -
+	showAxisAtom
+	showUnits
+} def
+
+/doPlaneLine {		% (units) (atom) (axis) (offset)
+	3 1 roll
+	showAxisAtom
+	( :  ) Xshow
+	Xshow
+	showUnits
+} def
+
+/doBannerLine {
+	Xshow
+} def
+
+/setBannerFont { BannerFont findfont BannerFontSize scalefont setfont } def
+/planeBannerFont { BannerFont findfont BannerFontSize SC scalefont } def
+
+/banner {	% [() ...] => -
+  showBanner? {
+    gsave
+    7 dict begin
+	/oCurrFontSize CurrFontSize def
+	/CurrFontSize BannerFontSize store
+
+	setBannerFont
+	dup BannerFontSize /doBannerLine getBoundingBox	% [] x1 y1 x2 y2
+
+	%
+	%
+	/TRy exch BANNERWIDTHFUDGE add def
+	/TRx exch BANNERWIDTHFUDGE add def
+	/BLy exch BANNERWIDTHFUDGE sub def
+	/BLx exch BANNERWIDTHFUDGE sub def		% []
+	/xsize TRx BLx sub def
+	/ysize TRy BLy sub def
+
+
+	% Center the box
+	%
+	xsize -2 div 0 translate			% move to left edge
+
+	%
+	% Put down a shadow box
+	%
+	shadowUnderBanner? {
+		BLx BLy xsize ysize 2 2 shadowbox
+	} if
+
+	BannerFontSize /doBannerLine displayLines
+
+	/CurrFontSize oCurrFontSize store
+    end
+    grestore
+  }{
+	pop
+  } ifelse
+
+} bdef
+
+%
+% Place a small box that shows the plane of this view. Make sure the
+% box is completely visible, sizing it down for really skinny views.
+%
+%
+% The location of the box is within 5% of the left/top corner. The size
+% of the box is large enough to fit the text, but the box is never larger
+% than 90 of the width.
+%
+/BANNERWIDTHFUDGE	8 def
+/planebanner {		% [ [ (units) (atom) (axis) (offset) ] ... ] => -
+    planeBanner? not {
+	pop
+    }{
+	gsave
+	7 dict begin
+		%
+		% Set the "current font size" to the banner size. This
+		% is used globally by the routines that make the omegas
+		% and sub- and super-scripts.
+		%
+		/oCurrFontSize CurrFontSize def
+		/CurrFontSize BannerFontSize store
+
+		planeBannerFont setfont
+		dup BannerFontSize SC /doPlaneLine
+		getBoundingBox				 % [] x1 y1 x2 y2
+
+		/TRy exch BANNERWIDTHFUDGE add def
+		/TRx exch BANNERWIDTHFUDGE add def
+		/BLy exch BANNERWIDTHFUDGE sub def
+		/BLx exch BANNERWIDTHFUDGE sub def	% []
+		/xsize TRx BLx sub def
+		/ysize TRy BLy sub def
+
+
+		% Move to a few units from the top left corner
+		%
+		WIDTH .05 mul 30 min HEIGHT translate
+
+		% Limit the width/height to 90% of the view
+		%
+		xsize WIDTH  .90 mul div 1 max
+		ysize HEIGHT .90 mul div 1 max
+		max 1 exch div dup
+		scale
+
+		% Once scaled, move down to the bottom-left corner
+		%
+		0 ysize neg translate
+
+
+		% Put a box around the region
+		%
+		BLx BLy xsize ysize 2 SC 2 SC shadowbox		% []
+
+
+		% Display the lines from the bottom up.
+		%
+		0 0 moveto
+		BannerFontSize SC /doPlaneLine displayLines
+
+		%
+		% Restore the old "current font size"
+		%
+		/CurrFontSize oCurrFontSize store
+	end
+	grestore
+    } ifelse
+} bdef
+
+
+/subscript {
+	FontSize .05 mul FontSize -.3 mul r
+	.8 .8 scale
+} def
+
+/unsubscript {
+	1.25 1.25 scale
+	0 FontSize .3 mul r
+} def
+
+/superscript {
+	0 FontSize .4 mul r
+	.8 .8 scale
+} def
+
+/unsuperscript {
+	1.25 1.25 scale
+	0 FontSize -.4 mul r
+} def
+
+/isdigit {		% char => bool
+	dup 48 ge exch 57 le and
+} def
+
+%
+% Display the atom name with a superscripted atom weight
+%
+/showAtom {		% (atom) => -
+	%
+	% If (atom) starts with a digit, collect all digits and display them
+	% with a superscript, then display the rest of the thing normally.
+	%
+	dup length 0 gt {
+	    dup 0 get isdigit {
+		1				% (atom) digits
+		{
+			2 copy get		% (atom) digits dig
+			isdigit not {exit} if	% (atom) digits
+			1 add
+		} loop
+
+		% On stack are the string and the number of characters
+		% that are digits
+		%				% (atom) digits
+		1 index 0 2 index getinterval	% (atom) digits (substr)
+		superscript Xshow unsuperscript	% (atom) digits
+
+		% And get the remaining part of the string
+		%
+		1 index length			% (atom) digits length
+		1 index sub			% (atom) digits lengthLeft
+		getinterval			% (substr)
+	    } if
+	} if
+	Xshow
+} def
+
+%
+% Put the label (axis legend) along the X axis
+%
+/xaxislabel {		% (units) (atom) (axis) => -
+      bottomAxisLabel? {
+	xslice_pos M					% u a x
+	WIDTH 2 div					% u a x midx
+	BottomMostAxisPos BottomLabelPad sub r		% u a x
+
+	%
+	% Do the bounding box to find the true ascender (y2) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move down the amount of the ascender
+	%
+	0 exch neg r					% u a x x1 y1 x2
+	exch pop					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+      }{
+	pop pop pop
+      } ifelse
+
+} bdef
+
+%
+% Put the label (axis legend) along the X axis
+%
+/yaxislabel {		% (units) (atom) (axis) => -
+  leftAxisLabel? {
+    gsave
+	90 rotate
+	HEIGHT 2 div
+	LeftLabelPad LeftMostAxisPos sub M
+
+	%
+	% Do the bounding box to find the true descender (y1) and
+	% width (x2 - x1) and center using this width.
+	%
+	[ [ 4 index 4 index 4 index ] ]			% u a x [ [u a x] ]
+		0 /showAxis getBoundingBox		% u a x x1 y1 x2 y2
+
+	%
+	% Move up the amount of the descender
+	%
+	pop exch					% u a x x1 x2 y1
+	0 exch neg r					% u a x x1 x2
+
+	%
+	% Move left half the width
+	%
+	sub 2 div 0 r					% u a x
+	showAxis 					% -
+    grestore
+  }{
+    pop pop pop
+  } ifelse
+
+} bdef
+
+
+%
+% Stroke an "x y w h" box with linewidth "lw". The inside of the box is
+% exactly "x y w h" and the thick border falls along the outside edge.
+%
+/strokeThickBox {		% x y w h lw => -
+	6 dict begin
+		dup /lw exch def
+		2 div /lwBy2 exch def
+		/h exch def
+		/w exch def
+		/y exch def
+		/x exch def
+
+		currentlinewidth		% clw
+		lw setlinewidth
+
+		x lwBy2 sub			% x'
+		y lwBy2 sub			% x' y'
+		w lw add			% x' y' w'
+		h lw add			% x' y' w' h'
+		rectpath stroke
+
+		setlinewidth
+	end
+} def
+
+%
+% Draw an edge around the data area, the slice boxes and resonance boxes.
+%
+/edgeview {
+	newpath
+	0 setgray
+
+	%
+	% Edge the data area
+	%
+	0 0 WIDTH HEIGHT EdgeLineWidth strokeThickBox
+
+	%
+	% Edge the slice areas
+	%
+	userdict /SLICE known {
+		xslice_init
+		0 0 WIDTH SLICE EdgeLineWidth strokeThickBox
+		xslice_done
+
+		yslice_init
+		0 0 HEIGHT SLICE EdgeLineWidth strokeThickBox
+		yslice_done
+	} if
+
+	%
+	% Edge the resonance areas
+	%
+	userdict /RESONANCE known {
+		xres_init
+		0 0 RESONANCE WIDTH EdgeLineWidth strokeThickBox
+		xres_done
+
+		yres_init
+		0 0 RESONANCE HEIGHT EdgeLineWidth strokeThickBox
+		yres_done
+	} if
+} bdef
+
+%
+% Print a set of full width half max between the
+%
+/showhalfmax {		% [ [str xmin xmax yp] ... ] width => -
+	/wid exch def
+	/toright true def
+	/limit 0 def
+	{
+		aload pop				% str xmin xmax yp
+		dup 3 1 roll				% str xmin yp xmax yp
+
+		%
+		% See if can still be on the right
+		%
+		toright {
+			1 index limit max 15 add	% starting pos
+			5 index stringwidth pop add	% ending pos
+			wid ge {			% too big?
+				/toright false store	% do on left
+				/limit wid store
+			} if
+		} if
+
+		%
+		% str xmin yp xmax yp
+		%
+		toright {
+			4 2 roll
+			moveto 2 copy lineto		% str x yp
+
+			pop limit max			% str x'
+			SLICE .15 mul 2 copy lineto	% str x' y
+			exch 10 add exch		% str x' y
+			2 copy lineto stroke		% str x' y
+			exch 5 add exch
+			2 copy moveto
+			pop 1 index stringwidth pop add	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			show
+		}{
+			moveto 2 copy lineto		% str tox yp
+
+			pop limit min			% str x'
+			SLICE .30 mul 2 copy lineto	% str x' y
+			exch 10 sub exch
+			2 copy lineto stroke		% str x' y'
+			exch 5 sub exch
+			2 copy moveto
+			pop 1 index stringwidth pop sub	% str x''
+			/limit exch store		% str
+			0 -20 rmoveto
+			rshow
+		} ifelse
+	} forall
+} bdef
+
+/slice_pad { 24 } def
+
+/xres_pos {
+	0 0
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add sub
+	} if
+} def
+/xslice_pos {
+	xres_pos
+	userdict /SLICE known {
+		SLICE slice_pad add sub
+	} if
+} def
+/xslice_y {
+	xslice_pos exch pop
+} def
+
+/xslice_init {
+	gsave
+	xslice_pos translate
+} def
+/xslice_done {
+	grestore
+} def
+/xres_init {
+	/PaintResB { PaintResBX } store
+	gsave
+	xres_pos translate
+	-90 rotate
+	RESONANCE neg 0 translate
+} def
+/xres_done {
+	grestore
+} def
+
+/yres_pos {
+	WIDTH
+	userdict /RESONANCE known {
+		RESONANCE slice_pad add add
+	} if
+	0
+} def
+/yslice_pos {
+	yres_pos
+	userdict /SLICE known {
+		exch SLICE slice_pad add add exch
+	} if
+} def
+/yslice_x {
+	yslice_pos pop
+} def
+/yslice_init {
+	gsave
+	yslice_pos translate
+	90 rotate
+} def
+/yslice_done {
+	grestore
+} def
+/yres_init {
+	/PaintResB { PaintResBY } store
+	gsave
+	yres_pos translate
+	RESONANCE neg 0 translate
+} def
+/yres_done {
+	grestore
+} def
+/SparkyMajorVersion 3 def
+/SparkyMinorVersion 115 def
+/SCALE 0.240000 def
+/PEAKLINEWIDTH 5 def
+/colors [
+[0.00 0.00 0.00 0.00]
+[1.00 1.00 1.00 1.00]
+[0.75 0.75 0.75 0.75]
+[0.30 1.00 0.00 0.00]
+[0.58 0.00 1.00 0.00]
+[0.11 0.00 0.00 1.00]
+[0.89 1.00 1.00 0.00]
+[0.42 1.00 0.00 1.00]
+[0.70 0.00 1.00 1.00]
+[0.80 0.68 0.85 0.90]
+[0.78 0.56 0.93 0.56]
+[0.99 1.00 1.00 0.88]
+[0.79 1.00 0.84 0.00]
+[0.68 1.00 0.65 0.00]
+[0.83 1.00 0.75 0.80]
+[0.95 0.96 0.96 0.86]
+[0.68 0.25 0.88 0.82]
+[0.63 1.00 0.50 0.31]
+[0.36 0.69 0.19 0.38]
+[0.37 0.63 0.13 0.94]
+[0.56 1.00 0.39 0.28]
+[0.62 1.00 0.55 0.00]
+[0.73 0.50 1.00 0.00]
+[0.64 0.00 1.00 0.50]
+[0.55 0.00 0.75 1.00]
+] def
+/PositiveLevels 30 def
+/NegativeLevels 30 def
+/strokecolors [
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+[0 0 1 0]
+] def
+/fillcolors [
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+null
+] def
+/dashpatterns [
+[[] []]
+[[DASH] []]
+] def
+%%EndProlog
+
+%%Page: 1 1
+/WIDTH 1950 def
+/HEIGHT 1986 def
+gsave
+1.00 I 1.31 I translate
+SCALE dup scale
+setAxisFont 0 setgray
+gsave
+49.185099 xslice_y translate 0 0 moveto
+(6.5)
+(7.0)
+(7.5)
+(8.0)
+(8.5)
+(9.0)
+6 HEIGHT xslice_y sub 378.346915 xlabel
+grestore
+(ppm) (1H) (2) xaxislabel
+gsave
+49.185099 0 translate
+[[xslice_y 1] [0 1] [HEIGHT -1]] 0 5 75.669383 WIDTH 49.185099 sub xTick
+grestore
+gsave
+0 75.669394
+ translate 0 0 moveto
+(134)
+(136)
+(138)
+(140)
+(142)
+(144)
+6 yslice_x 378.346972 ylabel
+grestore
+(ppm) (13C) (1) yaxislabel
+gsave
+-90 rotate -1 1 scale 75.669394 0 translate
+[[0 1] [WIDTH -1] [yslice_x -1]] 0 4 94.586743 HEIGHT 75.669394 sub yTick
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+/level 0 def
+/levelcolor 3 def
+779 956 M
+777 957 L
+776 958 L
+776 958 L
+775 958 L
+773 959 L
+772 960 L
+770 960 L
+769 961 L
+769 961 L
+767 961 L
+766 962 L
+764 962 L
+763 963 L
+762 963 L
+761 964 L
+760 965 L
+758 966 L
+758 966 L
+757 967 L
+755 968 L
+755 968 L
+754 969 L
+752 970 L
+751 971 L
+751 971 L
+749 972 L
+748 973 L
+748 973 L
+747 975 L
+745 976 L
+745 976 L
+744 979 L
+744 981 L
+745 984 L
+745 985 L
+746 986 L
+747 988 L
+747 989 L
+748 992 L
+748 992 L
+749 994 L
+749 996 L
+750 997 L
+751 999 L
+751 999 L
+752 1002 L
+752 1002 L
+754 1004 L
+754 1004 L
+755 1005 L
+757 1006 L
+758 1007 L
+760 1007 L
+761 1007 L
+763 1007 L
+764 1007 L
+764 1007 L
+766 1007 L
+767 1008 L
+769 1009 L
+770 1010 L
+770 1010 L
+772 1011 L
+773 1012 L
+773 1012 L
+775 1013 L
+776 1014 L
+777 1015 L
+777 1015 L
+779 1016 L
+S
+/level 0 def
+/levelcolor 3 def
+779 958 M
+777 959 L
+776 960 L
+775 961 L
+775 961 L
+773 962 L
+772 962 L
+770 963 L
+769 963 L
+769 963 L
+767 964 L
+766 964 L
+764 965 L
+763 965 L
+762 966 L
+761 966 L
+760 967 L
+758 968 L
+758 968 L
+757 969 L
+755 971 L
+755 971 L
+754 972 L
+752 973 L
+752 973 L
+751 975 L
+750 976 L
+749 977 L
+749 979 L
+748 981 L
+748 984 L
+749 986 L
+749 989 L
+749 990 L
+750 992 L
+751 994 L
+751 994 L
+752 997 L
+752 998 L
+753 999 L
+754 1000 L
+755 1002 L
+755 1002 L
+757 1003 L
+758 1004 L
+760 1004 L
+761 1004 L
+761 1005 L
+763 1005 L
+764 1005 L
+766 1005 L
+767 1006 L
+769 1007 L
+769 1007 L
+770 1008 L
+772 1009 L
+772 1010 L
+773 1010 L
+775 1011 L
+776 1012 L
+776 1012 L
+777 1013 L
+779 1014 L
+S
+/level 0 def
+/levelcolor 3 def
+779 960 M
+778 961 L
+777 961 L
+776 962 L
+775 963 L
+775 963 L
+773 964 L
+772 965 L
+770 965 L
+769 966 L
+769 966 L
+767 966 L
+766 967 L
+764 968 L
+763 968 L
+763 968 L
+761 969 L
+760 970 L
+759 971 L
+758 971 L
+757 973 L
+756 973 L
+755 974 L
+754 976 L
+754 976 L
+752 978 L
+752 979 L
+751 981 L
+751 984 L
+751 986 L
+752 989 L
+752 992 L
+752 992 L
+753 994 L
+754 995 L
+755 997 L
+755 998 L
+757 999 L
+757 1000 L
+758 1001 L
+760 1001 L
+761 1002 L
+762 1002 L
+763 1002 L
+764 1003 L
+766 1003 L
+767 1004 L
+768 1004 L
+769 1005 L
+770 1006 L
+772 1007 L
+772 1007 L
+773 1008 L
+775 1009 L
+775 1010 L
+776 1011 L
+777 1011 L
+779 1012 L
+S
+/level 0 def
+/levelcolor 3 def
+779 962 M
+778 963 L
+777 963 L
+776 965 L
+775 966 L
+774 966 L
+773 967 L
+772 967 L
+770 968 L
+770 968 L
+769 969 L
+767 969 L
+766 970 L
+764 971 L
+764 971 L
+763 972 L
+761 973 L
+761 973 L
+760 974 L
+758 976 L
+758 976 L
+757 977 L
+756 979 L
+755 980 L
+755 981 L
+754 984 L
+754 986 L
+754 989 L
+755 992 L
+755 992 L
+757 994 L
+757 994 L
+758 996 L
+759 997 L
+760 997 L
+761 998 L
+763 999 L
+763 999 L
+764 1000 L
+766 1001 L
+767 1001 L
+768 1002 L
+769 1003 L
+770 1004 L
+771 1004 L
+772 1005 L
+773 1006 L
+774 1007 L
+775 1008 L
+776 1009 L
+777 1010 L
+777 1010 L
+779 1011 L
+S
+/level 0 def
+/levelcolor 3 def
+779 965 M
+778 966 L
+777 966 L
+776 967 L
+775 968 L
+774 968 L
+773 969 L
+772 970 L
+771 971 L
+770 971 L
+769 972 L
+767 973 L
+767 973 L
+766 974 L
+764 975 L
+763 976 L
+763 977 L
+761 978 L
+761 979 L
+760 980 L
+759 981 L
+758 983 L
+758 984 L
+758 986 L
+758 988 L
+759 989 L
+760 992 L
+760 992 L
+761 993 L
+762 994 L
+763 995 L
+764 996 L
+765 997 L
+766 997 L
+767 998 L
+768 999 L
+769 1000 L
+770 1001 L
+771 1002 L
+772 1003 L
+773 1004 L
+773 1004 L
+775 1006 L
+776 1007 L
+776 1007 L
+777 1008 L
+779 1009 L
+S
+/level 0 def
+/levelcolor 3 def
+779 967 M
+778 968 L
+777 968 L
+776 970 L
+775 971 L
+775 971 L
+773 972 L
+772 973 L
+772 974 L
+770 975 L
+769 976 L
+769 976 L
+767 978 L
+767 979 L
+766 980 L
+765 981 L
+764 984 L
+764 984 L
+764 986 L
+764 988 L
+764 989 L
+766 992 L
+766 992 L
+767 994 L
+767 994 L
+769 996 L
+769 997 L
+770 998 L
+771 999 L
+772 1000 L
+773 1002 L
+773 1002 L
+775 1003 L
+776 1004 L
+776 1005 L
+777 1006 L
+779 1007 L
+S
+/level 0 def
+/levelcolor 3 def
+779 970 M
+778 971 L
+777 971 L
+776 973 L
+775 973 L
+775 974 L
+773 976 L
+773 976 L
+772 978 L
+771 979 L
+770 980 L
+769 981 L
+769 984 L
+769 984 L
+768 986 L
+768 989 L
+769 989 L
+769 992 L
+770 994 L
+770 994 L
+772 997 L
+772 997 L
+773 999 L
+773 999 L
+775 1001 L
+776 1002 L
+776 1002 L
+777 1004 L
+779 1004 L
+779 1005 L
+S
+/level 0 def
+/levelcolor 3 def
+779 973 M
+778 973 L
+777 974 L
+776 976 L
+776 976 L
+775 978 L
+774 979 L
+773 981 L
+773 981 L
+772 984 L
+772 985 L
+771 986 L
+771 989 L
+772 990 L
+772 992 L
+773 994 L
+773 995 L
+774 997 L
+775 997 L
+776 999 L
+776 999 L
+777 1001 L
+778 1002 L
+779 1002 L
+S
+/level 0 def
+/levelcolor 3 def
+779 976 M
+777 978 L
+777 979 L
+776 981 L
+776 981 L
+775 984 L
+775 985 L
+774 986 L
+774 989 L
+775 991 L
+775 992 L
+775 994 L
+776 995 L
+777 997 L
+777 998 L
+779 999 L
+779 999 L
+S
+/level 0 def
+/levelcolor 3 def
+779 981 M
+778 984 L
+777 985 L
+777 986 L
+777 989 L
+777 992 L
+777 992 L
+778 994 L
+779 995 L
+S
+/level 0 def
+/levelcolor 3 def
+779 956 M
+779 955 L
+780 954 L
+782 953 L
+783 953 L
+783 952 L
+785 951 L
+786 951 L
+787 950 L
+788 950 L
+789 949 L
+791 949 L
+792 949 L
+794 949 L
+795 949 L
+797 949 L
+798 950 L
+798 950 L
+800 951 L
+801 951 L
+803 952 L
+804 952 L
+806 952 L
+806 953 L
+807 953 L
+808 954 L
+810 955 L
+811 955 L
+811 956 L
+813 957 L
+814 958 L
+814 959 L
+816 961 L
+816 961 L
+817 963 L
+817 963 L
+819 965 L
+819 966 L
+820 967 L
+821 968 L
+822 969 L
+823 971 L
+823 972 L
+824 973 L
+825 976 L
+825 977 L
+825 979 L
+826 981 L
+826 982 L
+S
+826 1007 M
+825 1009 L
+824 1010 L
+823 1010 L
+822 1012 L
+821 1012 L
+820 1013 L
+819 1015 L
+819 1015 L
+817 1016 L
+816 1017 L
+816 1017 L
+814 1019 L
+813 1020 L
+S
+779 1016 M
+780 1016 L
+782 1017 L
+783 1017 L
+785 1017 L
+785 1017 L
+786 1018 L
+788 1018 L
+789 1018 L
+791 1017 L
+791 1017 L
+792 1017 L
+794 1017 L
+795 1017 L
+797 1017 L
+797 1017 L
+798 1018 L
+800 1019 L
+801 1020 L
+801 1020 L
+S
+/level 0 def
+/levelcolor 3 def
+779 958 M
+779 958 L
+780 957 L
+782 956 L
+782 955 L
+783 955 L
+785 954 L
+786 953 L
+787 953 L
+788 952 L
+789 952 L
+791 951 L
+792 951 L
+794 951 L
+795 951 L
+797 952 L
+798 952 L
+799 953 L
+800 953 L
+801 953 L
+803 954 L
+804 954 L
+806 955 L
+807 955 L
+807 955 L
+808 956 L
+810 957 L
+811 958 L
+811 959 L
+813 960 L
+813 961 L
+814 962 L
+815 963 L
+816 964 L
+817 966 L
+817 966 L
+819 968 L
+819 968 L
+820 970 L
+821 971 L
+822 973 L
+822 973 L
+823 976 L
+823 976 L
+824 979 L
+825 981 L
+825 981 L
+825 984 L
+826 986 L
+826 988 L
+S
+826 1003 M
+826 1004 L
+825 1006 L
+824 1007 L
+823 1008 L
+822 1010 L
+822 1010 L
+820 1011 L
+819 1012 L
+819 1013 L
+817 1014 L
+817 1015 L
+816 1016 L
+814 1017 L
+814 1017 L
+813 1018 L
+811 1019 L
+810 1020 L
+810 1020 L
+S
+779 1014 M
+780 1014 L
+782 1015 L
+782 1015 L
+783 1015 L
+785 1016 L
+786 1016 L
+788 1016 L
+789 1016 L
+791 1015 L
+792 1015 L
+794 1015 L
+795 1015 L
+797 1016 L
+798 1016 L
+800 1017 L
+801 1017 L
+801 1017 L
+803 1019 L
+804 1019 L
+805 1020 L
+S
+/level 0 def
+/levelcolor 3 def
+779 960 M
+780 959 L
+782 958 L
+782 958 L
+783 957 L
+785 956 L
+786 955 L
+786 955 L
+788 954 L
+789 954 L
+791 954 L
+792 954 L
+794 954 L
+795 954 L
+797 954 L
+798 955 L
+800 955 L
+801 955 L
+801 955 L
+803 956 L
+804 956 L
+806 957 L
+807 958 L
+807 958 L
+808 959 L
+810 960 L
+810 961 L
+811 962 L
+812 963 L
+813 964 L
+814 966 L
+814 966 L
+816 967 L
+817 968 L
+817 969 L
+819 971 L
+819 971 L
+820 973 L
+820 974 L
+822 976 L
+822 977 L
+823 979 L
+823 981 L
+823 981 L
+824 984 L
+825 986 L
+825 987 L
+825 989 L
+825 992 L
+826 994 L
+826 997 L
+826 999 L
+825 1002 L
+825 1002 L
+824 1004 L
+823 1005 L
+822 1007 L
+822 1008 L
+820 1009 L
+820 1010 L
+819 1011 L
+818 1012 L
+817 1013 L
+816 1014 L
+815 1015 L
+814 1015 L
+813 1016 L
+811 1017 L
+811 1017 L
+810 1018 L
+808 1018 L
+807 1018 L
+806 1018 L
+805 1017 L
+804 1017 L
+803 1016 L
+801 1016 L
+800 1015 L
+800 1015 L
+798 1014 L
+797 1014 L
+795 1014 L
+794 1013 L
+792 1014 L
+791 1014 L
+789 1014 L
+788 1014 L
+786 1014 L
+785 1014 L
+783 1014 L
+782 1013 L
+780 1013 L
+779 1012 L
+779 1012 L
+S
+/level 0 def
+/levelcolor 3 def
+779 962 M
+780 961 L
+781 961 L
+782 960 L
+783 959 L
+785 958 L
+785 958 L
+786 957 L
+788 957 L
+789 956 L
+791 956 L
+792 956 L
+794 956 L
+795 956 L
+797 956 L
+798 957 L
+800 957 L
+801 958 L
+802 958 L
+803 958 L
+804 959 L
+806 960 L
+807 961 L
+807 961 L
+808 962 L
+809 963 L
+810 964 L
+811 965 L
+812 966 L
+813 967 L
+814 968 L
+814 969 L
+816 970 L
+816 971 L
+817 972 L
+818 973 L
+819 974 L
+820 976 L
+820 977 L
+821 979 L
+822 981 L
+822 981 L
+823 984 L
+823 986 L
+823 987 L
+824 989 L
+824 992 L
+824 994 L
+824 997 L
+824 999 L
+823 1002 L
+823 1002 L
+822 1004 L
+822 1005 L
+820 1007 L
+820 1007 L
+819 1009 L
+818 1010 L
+817 1011 L
+816 1012 L
+816 1012 L
+814 1013 L
+813 1014 L
+812 1015 L
+811 1015 L
+810 1016 L
+808 1016 L
+807 1016 L
+806 1016 L
+804 1015 L
+804 1015 L
+803 1014 L
+801 1014 L
+800 1013 L
+798 1012 L
+797 1012 L
+797 1012 L
+795 1012 L
+794 1012 L
+792 1012 L
+791 1012 L
+789 1012 L
+788 1012 L
+786 1012 L
+785 1012 L
+783 1012 L
+782 1012 L
+780 1011 L
+779 1011 L
+S
+/level 0 def
+/levelcolor 3 def
+779 965 M
+780 963 L
+781 963 L
+782 962 L
+783 961 L
+784 961 L
+785 960 L
+786 959 L
+788 959 L
+789 958 L
+791 958 L
+792 958 L
+794 958 L
+795 958 L
+797 959 L
+798 959 L
+800 959 L
+801 960 L
+802 961 L
+803 961 L
+804 962 L
+806 963 L
+806 963 L
+807 964 L
+808 965 L
+809 966 L
+810 967 L
+811 968 L
+812 968 L
+813 970 L
+814 971 L
+814 971 L
+816 973 L
+816 973 L
+817 975 L
+818 976 L
+819 978 L
+819 979 L
+820 981 L
+820 981 L
+821 984 L
+822 986 L
+822 986 L
+822 989 L
+823 992 L
+823 994 L
+823 997 L
+822 999 L
+822 1001 L
+822 1002 L
+820 1004 L
+820 1004 L
+819 1007 L
+819 1007 L
+817 1009 L
+816 1010 L
+816 1010 L
+814 1011 L
+813 1012 L
+813 1012 L
+811 1013 L
+810 1014 L
+808 1014 L
+807 1014 L
+806 1014 L
+804 1013 L
+803 1013 L
+802 1012 L
+801 1012 L
+800 1011 L
+798 1011 L
+797 1010 L
+795 1010 L
+794 1010 L
+792 1010 L
+791 1010 L
+789 1010 L
+788 1010 L
+786 1011 L
+785 1010 L
+783 1010 L
+782 1010 L
+781 1010 L
+780 1009 L
+779 1009 L
+S
+/level 0 def
+/levelcolor 3 def
+779 967 M
+780 966 L
+781 966 L
+782 965 L
+783 963 L
+784 963 L
+785 962 L
+786 962 L
+788 961 L
+789 961 L
+790 961 L
+791 960 L
+792 960 L
+794 960 L
+795 961 L
+795 961 L
+797 961 L
+798 961 L
+800 962 L
+801 962 L
+802 963 L
+803 963 L
+804 964 L
+806 965 L
+806 966 L
+807 966 L
+808 968 L
+809 968 L
+810 969 L
+811 971 L
+811 971 L
+813 972 L
+814 973 L
+814 974 L
+816 976 L
+816 976 L
+817 978 L
+818 979 L
+819 981 L
+819 981 L
+820 984 L
+820 986 L
+821 986 L
+821 989 L
+821 992 L
+821 994 L
+821 997 L
+821 999 L
+820 1001 L
+820 1002 L
+819 1004 L
+819 1004 L
+817 1006 L
+817 1007 L
+816 1008 L
+814 1009 L
+814 1010 L
+813 1010 L
+811 1011 L
+810 1012 L
+808 1012 L
+807 1012 L
+806 1012 L
+804 1011 L
+803 1011 L
+801 1010 L
+800 1010 L
+800 1010 L
+798 1009 L
+797 1009 L
+795 1008 L
+794 1008 L
+792 1008 L
+791 1008 L
+789 1009 L
+788 1009 L
+786 1009 L
+785 1009 L
+783 1008 L
+782 1008 L
+780 1008 L
+779 1007 L
+779 1007 L
+S
+/level 0 def
+/levelcolor 3 def
+779 970 M
+780 968 L
+781 968 L
+782 967 L
+783 966 L
+784 966 L
+785 965 L
+786 964 L
+788 963 L
+789 963 L
+789 963 L
+791 963 L
+792 962 L
+794 963 L
+795 963 L
+796 963 L
+797 963 L
+798 964 L
+800 964 L
+801 965 L
+802 966 L
+803 966 L
+804 967 L
+806 968 L
+806 968 L
+807 969 L
+808 971 L
+809 971 L
+810 972 L
+811 973 L
+811 973 L
+813 975 L
+814 976 L
+814 977 L
+816 979 L
+816 979 L
+817 981 L
+817 981 L
+818 984 L
+819 985 L
+819 986 L
+820 989 L
+820 992 L
+820 994 L
+820 997 L
+819 999 L
+819 1000 L
+818 1002 L
+817 1004 L
+817 1004 L
+816 1006 L
+815 1007 L
+814 1007 L
+813 1008 L
+811 1009 L
+810 1010 L
+810 1010 L
+808 1010 L
+807 1010 L
+806 1010 L
+804 1010 L
+804 1010 L
+803 1009 L
+801 1009 L
+800 1008 L
+798 1007 L
+797 1007 L
+797 1007 L
+795 1007 L
+794 1006 L
+792 1006 L
+791 1006 L
+789 1007 L
+788 1007 L
+786 1007 L
+785 1007 L
+783 1006 L
+782 1006 L
+780 1006 L
+779 1005 L
+S
+/level 0 def
+/levelcolor 3 def
+779 973 M
+780 971 L
+781 971 L
+782 970 L
+783 969 L
+784 968 L
+785 967 L
+786 966 L
+788 966 L
+788 966 L
+789 965 L
+791 965 L
+792 965 L
+794 965 L
+795 965 L
+797 966 L
+797 966 L
+798 966 L
+800 967 L
+801 968 L
+802 968 L
+803 969 L
+804 970 L
+806 971 L
+806 971 L
+807 972 L
+808 973 L
+809 973 L
+810 974 L
+811 976 L
+811 976 L
+813 978 L
+814 979 L
+814 980 L
+815 981 L
+816 982 L
+817 984 L
+817 986 L
+818 986 L
+818 989 L
+818 992 L
+818 994 L
+818 997 L
+818 999 L
+817 1000 L
+816 1002 L
+816 1003 L
+815 1004 L
+814 1005 L
+813 1006 L
+811 1007 L
+811 1007 L
+810 1008 L
+808 1008 L
+807 1008 L
+806 1008 L
+804 1008 L
+803 1007 L
+802 1007 L
+801 1007 L
+800 1006 L
+798 1005 L
+797 1005 L
+795 1005 L
+795 1004 L
+794 1004 L
+792 1004 L
+791 1004 L
+789 1004 L
+789 1004 L
+788 1005 L
+786 1005 L
+785 1005 L
+784 1004 L
+783 1004 L
+782 1004 L
+780 1003 L
+779 1002 L
+S
+/level 0 def
+/levelcolor 3 def
+779 976 M
+779 976 L
+780 975 L
+782 973 L
+782 973 L
+783 972 L
+784 971 L
+785 970 L
+786 969 L
+788 969 L
+789 968 L
+789 968 L
+791 968 L
+792 968 L
+794 968 L
+795 968 L
+796 968 L
+797 968 L
+798 969 L
+800 970 L
+801 971 L
+802 971 L
+803 971 L
+804 972 L
+805 973 L
+806 974 L
+807 975 L
+808 976 L
+809 976 L
+810 977 L
+811 979 L
+811 979 L
+813 981 L
+813 981 L
+814 983 L
+815 984 L
+816 986 L
+816 986 L
+817 989 L
+817 992 L
+817 994 L
+816 997 L
+816 999 L
+816 999 L
+814 1002 L
+814 1002 L
+813 1004 L
+812 1004 L
+811 1005 L
+810 1005 L
+808 1006 L
+807 1006 L
+806 1006 L
+804 1006 L
+803 1005 L
+801 1004 L
+801 1004 L
+800 1004 L
+798 1003 L
+797 1003 L
+795 1002 L
+794 1002 L
+792 1002 L
+791 1002 L
+789 1002 L
+788 1002 L
+786 1002 L
+785 1002 L
+784 1002 L
+783 1002 L
+782 1001 L
+780 1000 L
+779 999 L
+S
+/level 0 def
+/levelcolor 3 def
+779 981 M
+779 981 L
+780 979 L
+781 979 L
+782 977 L
+783 976 L
+783 975 L
+785 974 L
+786 973 L
+786 973 L
+788 972 L
+789 971 L
+791 971 L
+791 971 L
+792 971 L
+794 971 L
+794 971 L
+795 971 L
+797 972 L
+798 972 L
+800 973 L
+801 973 L
+801 974 L
+803 975 L
+804 976 L
+805 976 L
+806 977 L
+807 978 L
+808 979 L
+808 979 L
+810 980 L
+811 981 L
+811 982 L
+813 984 L
+813 984 L
+814 986 L
+814 988 L
+815 989 L
+815 992 L
+815 994 L
+815 997 L
+814 997 L
+813 999 L
+813 1000 L
+811 1002 L
+811 1002 L
+810 1003 L
+808 1003 L
+807 1004 L
+806 1004 L
+804 1003 L
+803 1003 L
+801 1002 L
+801 1002 L
+800 1001 L
+798 1001 L
+797 1000 L
+795 1000 L
+794 999 L
+794 999 L
+792 999 L
+791 999 L
+789 999 L
+788 999 L
+788 999 L
+786 999 L
+786 999 L
+785 999 L
+783 999 L
+782 998 L
+780 997 L
+780 997 L
+779 995 L
+S
+/level 0 def
+/levelcolor 3 def
+782 984 M
+783 981 L
+783 981 L
+785 979 L
+785 979 L
+786 978 L
+788 976 L
+788 976 L
+789 976 L
+791 975 L
+792 975 L
+794 975 L
+795 975 L
+797 976 L
+798 976 L
+798 976 L
+800 977 L
+801 977 L
+803 978 L
+803 979 L
+804 979 L
+806 980 L
+807 981 L
+807 981 L
+808 982 L
+810 984 L
+810 984 L
+811 986 L
+811 986 L
+812 989 L
+813 992 L
+813 994 L
+812 997 L
+811 998 L
+810 999 L
+810 999 L
+808 1000 L
+807 1001 L
+806 1001 L
+804 1000 L
+803 1000 L
+802 999 L
+801 999 L
+800 998 L
+798 997 L
+797 997 L
+797 997 L
+795 996 L
+794 996 L
+792 995 L
+791 995 L
+789 995 L
+788 995 L
+786 995 L
+785 995 L
+784 994 L
+783 994 L
+782 992 L
+782 992 L
+781 989 L
+781 986 L
+782 984 L
+782 984 L
+S
+/level 0 def
+/levelcolor 3 def
+791 984 M
+792 983 L
+794 982 L
+795 982 L
+797 982 L
+798 982 L
+800 982 L
+801 983 L
+803 983 L
+804 984 L
+804 984 L
+806 985 L
+807 986 L
+808 986 L
+808 988 L
+809 989 L
+810 992 L
+809 994 L
+808 995 L
+807 996 L
+806 997 L
+804 996 L
+803 995 L
+801 995 L
+800 994 L
+800 993 L
+798 992 L
+797 992 L
+797 991 L
+795 990 L
+794 989 L
+794 989 L
+792 988 L
+791 987 L
+790 986 L
+791 984 L
+791 984 L
+S
+/level 0 def
+/levelcolor 3 def
+801 1020 M
+803 1021 L
+804 1022 L
+805 1023 L
+806 1023 L
+807 1023 L
+808 1023 L
+809 1023 L
+810 1022 L
+811 1021 L
+813 1020 L
+813 1020 L
+S
+/level 0 def
+/levelcolor 3 def
+805 1020 M
+806 1020 L
+807 1020 L
+808 1020 L
+810 1020 L
+S
+/level 0 def
+/levelcolor 3 def
+826 982 M
+827 984 L
+827 986 L
+828 989 L
+828 989 L
+828 992 L
+829 994 L
+829 997 L
+829 999 L
+829 999 L
+829 999 L
+829 1002 L
+828 1004 L
+828 1005 L
+826 1007 L
+826 1007 L
+S
+/level 0 def
+/levelcolor 3 def
+826 988 M
+826 989 L
+827 992 L
+827 994 L
+827 997 L
+827 999 L
+827 1002 L
+826 1003 L
+S
+/level 0 def
+/levelcolor 3 def
+968 244 M
+966 243 L
+965 243 L
+963 244 L
+963 244 L
+962 244 L
+960 245 L
+959 246 L
+958 247 L
+958 247 L
+956 248 L
+955 249 L
+954 249 L
+953 250 L
+952 250 L
+950 250 L
+949 250 L
+947 250 L
+946 250 L
+944 250 L
+943 250 L
+941 250 L
+940 251 L
+938 251 L
+937 252 L
+937 252 L
+935 253 L
+935 254 L
+934 256 L
+933 257 L
+933 260 L
+933 262 L
+934 264 L
+934 265 L
+935 266 L
+936 267 L
+937 268 L
+938 269 L
+939 270 L
+940 271 L
+941 272 L
+942 272 L
+943 273 L
+944 274 L
+945 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 246 M
+966 246 L
+965 245 L
+963 246 L
+962 246 L
+962 247 L
+960 247 L
+959 248 L
+958 249 L
+957 249 L
+956 250 L
+955 251 L
+953 251 L
+952 252 L
+952 252 L
+950 252 L
+949 253 L
+947 253 L
+946 253 L
+944 253 L
+943 253 L
+941 253 L
+940 254 L
+939 254 L
+938 255 L
+937 257 L
+937 257 L
+936 260 L
+937 262 L
+937 263 L
+938 265 L
+938 265 L
+940 267 L
+940 267 L
+941 269 L
+942 270 L
+943 270 L
+944 272 L
+945 272 L
+946 273 L
+947 275 L
+948 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 248 M
+966 248 L
+965 248 L
+963 248 L
+962 249 L
+961 249 L
+960 249 L
+959 250 L
+958 251 L
+956 252 L
+956 252 L
+955 253 L
+953 253 L
+952 254 L
+951 254 L
+950 255 L
+949 255 L
+947 256 L
+946 256 L
+944 257 L
+943 257 L
+943 257 L
+941 259 L
+941 260 L
+941 262 L
+941 263 L
+942 265 L
+943 266 L
+944 267 L
+944 268 L
+946 270 L
+946 270 L
+947 272 L
+948 272 L
+949 274 L
+950 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 250 M
+966 250 L
+965 250 L
+963 250 L
+962 251 L
+960 252 L
+960 252 L
+959 252 L
+958 253 L
+956 254 L
+956 254 L
+955 255 L
+953 256 L
+952 257 L
+951 257 L
+950 258 L
+949 259 L
+948 260 L
+947 260 L
+946 262 L
+946 265 L
+947 267 L
+947 267 L
+949 270 L
+949 270 L
+950 272 L
+950 272 L
+952 274 L
+952 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 253 M
+966 253 L
+965 253 L
+963 253 L
+962 253 L
+960 254 L
+960 254 L
+959 255 L
+958 256 L
+956 257 L
+956 257 L
+955 258 L
+953 259 L
+953 260 L
+952 261 L
+951 262 L
+950 264 L
+950 265 L
+950 266 L
+950 267 L
+951 270 L
+952 270 L
+953 272 L
+953 273 L
+955 274 L
+955 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 256 M
+966 256 L
+965 256 L
+963 256 L
+962 256 L
+961 257 L
+960 257 L
+959 258 L
+958 259 L
+957 260 L
+956 260 L
+955 262 L
+955 262 L
+954 265 L
+954 267 L
+954 270 L
+955 270 L
+956 272 L
+956 272 L
+958 274 L
+959 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 261 M
+966 260 L
+965 260 L
+963 260 L
+962 260 L
+960 261 L
+959 262 L
+959 262 L
+958 265 L
+958 266 L
+957 267 L
+958 267 L
+958 270 L
+959 271 L
+960 272 L
+961 272 L
+962 273 L
+963 274 L
+965 274 L
+966 274 L
+968 273 L
+S
+/level 0 def
+/levelcolor 3 def
+968 299 M
+966 298 L
+966 298 L
+965 297 L
+964 296 L
+963 295 L
+963 293 L
+962 292 L
+961 291 L
+960 289 L
+959 288 L
+959 288 L
+958 286 L
+957 285 L
+956 285 L
+955 284 L
+954 283 L
+953 282 L
+952 281 L
+951 280 L
+950 280 L
+949 279 L
+948 278 L
+947 277 L
+946 276 L
+945 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 293 M
+967 293 L
+966 293 L
+965 291 L
+964 291 L
+963 289 L
+962 288 L
+962 288 L
+960 286 L
+959 285 L
+959 285 L
+958 284 L
+956 283 L
+956 283 L
+955 282 L
+953 280 L
+953 280 L
+952 279 L
+950 278 L
+950 278 L
+949 276 L
+948 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 289 M
+966 288 L
+966 288 L
+965 287 L
+963 286 L
+963 285 L
+962 285 L
+960 284 L
+959 283 L
+959 283 L
+958 282 L
+956 281 L
+956 280 L
+955 279 L
+953 278 L
+953 278 L
+952 277 L
+950 275 L
+950 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 285 M
+966 285 L
+965 284 L
+963 283 L
+963 283 L
+962 282 L
+960 282 L
+959 281 L
+959 280 L
+958 279 L
+956 278 L
+955 278 L
+955 277 L
+953 276 L
+952 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 282 M
+966 281 L
+965 281 L
+963 281 L
+963 280 L
+962 280 L
+960 279 L
+959 278 L
+958 278 L
+958 277 L
+956 276 L
+955 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 278 M
+966 278 L
+965 278 L
+964 278 L
+963 278 L
+962 277 L
+960 276 L
+959 275 L
+959 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 703 M
+966 704 L
+965 704 L
+963 704 L
+963 704 L
+962 705 L
+960 706 L
+959 707 L
+959 707 L
+958 709 L
+957 710 L
+956 711 L
+956 712 L
+955 715 L
+955 715 L
+954 717 L
+953 718 L
+952 720 L
+952 721 L
+951 723 L
+950 723 L
+949 725 L
+949 725 L
+947 727 L
+946 728 L
+946 728 L
+944 729 L
+943 730 L
+943 732 L
+942 733 L
+941 735 L
+941 738 L
+942 741 L
+943 743 L
+943 743 L
+944 746 L
+944 746 L
+946 748 L
+946 748 L
+947 750 L
+948 751 L
+949 751 L
+950 753 L
+951 754 L
+952 754 L
+953 755 L
+954 756 L
+955 756 L
+956 757 L
+958 758 L
+958 759 L
+959 760 L
+960 761 L
+961 761 L
+962 762 L
+963 764 L
+964 764 L
+965 765 L
+966 767 L
+966 767 L
+968 769 L
+S
+/level 0 def
+/levelcolor 3 def
+968 706 M
+966 706 L
+965 707 L
+964 707 L
+963 707 L
+962 708 L
+960 709 L
+960 710 L
+959 710 L
+958 712 L
+958 713 L
+956 715 L
+956 715 L
+955 717 L
+955 718 L
+954 720 L
+953 721 L
+952 723 L
+952 724 L
+951 725 L
+950 726 L
+949 728 L
+949 728 L
+947 729 L
+946 730 L
+946 732 L
+945 733 L
+944 735 L
+944 735 L
+944 738 L
+944 739 L
+944 741 L
+945 743 L
+946 744 L
+947 746 L
+947 747 L
+949 748 L
+949 749 L
+950 750 L
+951 751 L
+952 752 L
+953 753 L
+954 754 L
+955 754 L
+956 756 L
+957 756 L
+958 757 L
+959 758 L
+960 759 L
+960 759 L
+962 760 L
+963 761 L
+963 762 L
+965 763 L
+966 764 L
+966 765 L
+968 766 L
+S
+/level 0 def
+/levelcolor 3 def
+968 708 M
+966 709 L
+965 709 L
+964 710 L
+963 710 L
+962 711 L
+960 712 L
+960 712 L
+959 714 L
+958 715 L
+958 716 L
+957 717 L
+956 719 L
+956 720 L
+955 722 L
+954 723 L
+953 724 L
+953 725 L
+952 727 L
+951 728 L
+950 729 L
+949 730 L
+949 731 L
+948 733 L
+947 734 L
+947 735 L
+947 738 L
+947 741 L
+947 741 L
+948 743 L
+949 745 L
+949 746 L
+950 747 L
+951 748 L
+952 749 L
+953 751 L
+953 751 L
+955 752 L
+956 754 L
+956 754 L
+958 755 L
+959 756 L
+959 756 L
+960 757 L
+962 758 L
+962 759 L
+963 760 L
+965 761 L
+965 761 L
+966 763 L
+968 764 L
+968 764 L
+S
+/level 0 def
+/levelcolor 3 def
+968 710 M
+966 711 L
+965 712 L
+964 712 L
+963 713 L
+962 714 L
+961 715 L
+960 716 L
+959 717 L
+959 718 L
+958 720 L
+957 720 L
+956 723 L
+956 723 L
+955 725 L
+955 725 L
+953 728 L
+953 728 L
+952 730 L
+952 730 L
+950 733 L
+950 733 L
+949 735 L
+949 738 L
+949 741 L
+950 743 L
+950 743 L
+952 746 L
+952 746 L
+953 748 L
+954 748 L
+955 749 L
+956 751 L
+956 751 L
+958 752 L
+959 754 L
+959 754 L
+960 755 L
+962 756 L
+962 756 L
+963 758 L
+965 759 L
+965 759 L
+966 760 L
+967 761 L
+968 762 L
+S
+/level 0 def
+/levelcolor 3 def
+968 713 M
+966 714 L
+965 715 L
+965 715 L
+963 716 L
+962 717 L
+962 717 L
+960 719 L
+960 720 L
+959 721 L
+958 723 L
+958 724 L
+957 725 L
+956 727 L
+955 728 L
+955 729 L
+954 730 L
+953 733 L
+953 733 L
+952 735 L
+952 738 L
+952 741 L
+953 743 L
+953 743 L
+955 746 L
+955 746 L
+956 748 L
+956 748 L
+958 750 L
+959 751 L
+959 751 L
+960 752 L
+962 754 L
+962 754 L
+963 755 L
+964 756 L
+965 757 L
+966 758 L
+967 759 L
+968 759 L
+S
+/level 0 def
+/levelcolor 3 def
+968 716 M
+966 717 L
+966 717 L
+965 718 L
+963 720 L
+963 720 L
+962 721 L
+961 723 L
+960 723 L
+959 725 L
+959 726 L
+958 728 L
+958 729 L
+957 730 L
+956 732 L
+956 733 L
+955 735 L
+955 738 L
+955 741 L
+956 743 L
+956 743 L
+958 746 L
+958 746 L
+959 748 L
+960 748 L
+960 749 L
+962 751 L
+962 751 L
+963 753 L
+964 754 L
+965 754 L
+966 756 L
+967 756 L
+968 757 L
+S
+/level 0 def
+/levelcolor 3 def
+968 719 M
+967 720 L
+966 720 L
+965 722 L
+964 723 L
+963 724 L
+962 725 L
+962 726 L
+961 728 L
+960 729 L
+960 730 L
+959 733 L
+959 733 L
+958 735 L
+958 738 L
+959 741 L
+959 742 L
+959 743 L
+960 745 L
+961 746 L
+962 747 L
+963 748 L
+963 749 L
+965 751 L
+965 751 L
+966 753 L
+967 754 L
+968 754 L
+S
+/level 0 def
+/levelcolor 3 def
+968 723 M
+966 724 L
+966 725 L
+965 727 L
+964 728 L
+963 729 L
+963 730 L
+962 733 L
+962 734 L
+962 735 L
+962 738 L
+962 741 L
+962 741 L
+963 743 L
+963 745 L
+964 746 L
+965 747 L
+966 748 L
+966 749 L
+968 751 L
+968 751 L
+S
+/level 0 def
+/levelcolor 3 def
+968 727 M
+968 728 L
+966 730 L
+966 730 L
+965 733 L
+965 735 L
+965 738 L
+965 741 L
+966 743 L
+966 744 L
+967 746 L
+968 747 L
+S
+/level 0 def
+/levelcolor 3 def
+968 244 M
+968 244 L
+969 244 L
+971 245 L
+972 246 L
+973 247 L
+974 247 L
+975 248 L
+977 248 L
+978 249 L
+978 249 L
+980 250 L
+981 250 L
+983 251 L
+984 252 L
+984 252 L
+986 253 L
+987 254 L
+987 254 L
+988 256 L
+989 257 L
+990 258 L
+991 260 L
+991 260 L
+992 262 L
+993 265 L
+993 265 L
+993 267 L
+993 270 L
+993 272 L
+993 274 L
+993 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 246 M
+969 246 L
+970 247 L
+971 247 L
+972 248 L
+974 249 L
+974 249 L
+975 250 L
+977 251 L
+978 251 L
+979 252 L
+980 252 L
+981 253 L
+983 254 L
+984 254 L
+984 254 L
+986 256 L
+987 257 L
+987 257 L
+988 259 L
+989 260 L
+990 262 L
+990 262 L
+991 265 L
+991 267 L
+991 267 L
+992 270 L
+991 272 L
+991 273 L
+991 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 248 M
+969 249 L
+971 249 L
+971 249 L
+972 250 L
+974 251 L
+975 252 L
+975 252 L
+977 253 L
+978 254 L
+979 254 L
+980 255 L
+981 256 L
+983 257 L
+983 257 L
+984 258 L
+986 259 L
+986 260 L
+987 261 L
+988 262 L
+988 264 L
+989 265 L
+989 267 L
+990 270 L
+989 272 L
+989 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 250 M
+969 251 L
+971 252 L
+971 252 L
+972 253 L
+974 254 L
+975 254 L
+975 255 L
+977 256 L
+978 257 L
+978 257 L
+980 258 L
+981 259 L
+981 260 L
+983 261 L
+984 262 L
+984 262 L
+986 264 L
+986 265 L
+987 267 L
+987 270 L
+987 270 L
+987 270 L
+987 272 L
+986 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 253 M
+969 254 L
+970 254 L
+971 255 L
+972 256 L
+974 257 L
+974 257 L
+975 259 L
+976 260 L
+977 260 L
+978 262 L
+979 262 L
+980 263 L
+981 265 L
+981 265 L
+982 267 L
+983 268 L
+983 270 L
+983 271 L
+982 272 L
+981 274 L
+980 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 256 M
+969 257 L
+969 257 L
+971 258 L
+972 260 L
+972 260 L
+974 262 L
+974 262 L
+975 265 L
+975 265 L
+976 267 L
+976 270 L
+975 272 L
+975 272 L
+974 274 L
+973 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 261 M
+969 262 L
+969 262 L
+971 265 L
+971 265 L
+971 267 L
+971 270 L
+971 270 L
+969 272 L
+969 272 L
+968 273 L
+S
+/level 0 def
+/levelcolor 3 def
+968 299 M
+969 298 L
+969 298 L
+971 297 L
+972 296 L
+973 296 L
+974 295 L
+975 293 L
+975 293 L
+977 292 L
+978 291 L
+978 291 L
+980 290 L
+981 289 L
+983 288 L
+983 288 L
+984 287 L
+986 287 L
+987 286 L
+987 285 L
+988 284 L
+990 283 L
+990 283 L
+991 280 L
+991 280 L
+992 278 L
+993 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 293 M
+969 294 L
+971 293 L
+971 293 L
+972 292 L
+974 291 L
+974 291 L
+975 290 L
+977 289 L
+978 288 L
+978 288 L
+980 287 L
+981 286 L
+982 285 L
+983 285 L
+984 285 L
+986 284 L
+987 283 L
+987 282 L
+988 281 L
+989 280 L
+990 278 L
+990 278 L
+991 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 289 M
+969 289 L
+971 289 L
+972 288 L
+972 288 L
+974 287 L
+975 286 L
+977 285 L
+977 285 L
+978 285 L
+980 284 L
+981 283 L
+982 283 L
+983 282 L
+984 281 L
+986 280 L
+986 280 L
+987 279 L
+988 278 L
+988 276 L
+989 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 285 M
+969 285 L
+971 285 L
+972 284 L
+974 284 L
+975 283 L
+975 283 L
+977 282 L
+978 281 L
+980 280 L
+980 280 L
+981 280 L
+983 279 L
+984 278 L
+984 277 L
+986 276 L
+986 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 282 M
+969 281 L
+971 281 L
+972 280 L
+972 280 L
+974 280 L
+975 279 L
+977 278 L
+977 278 L
+978 277 L
+980 276 L
+980 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 278 M
+969 278 L
+969 278 L
+971 277 L
+972 276 L
+973 275 L
+S
+/level 0 def
+/levelcolor 3 def
+968 703 M
+969 703 L
+971 703 L
+972 702 L
+974 702 L
+974 702 L
+975 701 L
+977 701 L
+978 700 L
+979 699 L
+980 699 L
+981 698 L
+983 697 L
+984 697 L
+986 697 L
+987 697 L
+988 697 L
+990 698 L
+991 699 L
+991 700 L
+992 702 L
+993 703 L
+994 704 L
+994 705 L
+995 707 L
+996 708 L
+996 710 L
+997 712 L
+997 712 L
+998 715 L
+999 716 L
+999 717 L
+1000 720 L
+1000 721 L
+1001 723 L
+1001 725 L
+1001 728 L
+1001 730 L
+1001 733 L
+1001 735 L
+1000 738 L
+1000 738 L
+1000 741 L
+999 743 L
+999 744 L
+999 746 L
+998 748 L
+998 751 L
+997 753 L
+997 754 L
+997 756 L
+997 759 L
+996 761 L
+996 762 L
+995 764 L
+994 765 L
+993 767 L
+993 767 L
+991 768 L
+990 768 L
+989 769 L
+988 769 L
+987 770 L
+986 770 L
+984 771 L
+983 771 L
+982 772 L
+S
+968 769 M
+968 769 L
+969 770 L
+971 771 L
+972 772 L
+S
+/level 0 def
+/levelcolor 3 def
+968 706 M
+969 705 L
+971 705 L
+972 705 L
+972 704 L
+974 704 L
+975 703 L
+977 703 L
+978 702 L
+979 702 L
+980 702 L
+981 701 L
+983 701 L
+984 700 L
+986 700 L
+987 701 L
+988 701 L
+989 702 L
+990 703 L
+991 704 L
+992 704 L
+993 706 L
+993 707 L
+994 709 L
+995 710 L
+996 712 L
+996 712 L
+997 715 L
+997 715 L
+998 717 L
+999 720 L
+999 720 L
+1000 723 L
+1000 725 L
+1000 728 L
+1000 730 L
+1000 733 L
+1000 735 L
+999 738 L
+999 739 L
+999 741 L
+998 743 L
+997 746 L
+997 746 L
+997 748 L
+996 751 L
+996 753 L
+996 754 L
+995 756 L
+995 759 L
+994 759 L
+993 761 L
+993 762 L
+992 764 L
+991 764 L
+990 765 L
+988 766 L
+988 767 L
+987 767 L
+986 768 L
+984 768 L
+983 769 L
+982 769 L
+981 770 L
+980 770 L
+978 770 L
+977 771 L
+975 770 L
+974 770 L
+972 770 L
+971 769 L
+971 769 L
+969 768 L
+968 767 L
+968 766 L
+S
+/level 0 def
+/levelcolor 3 def
+968 708 M
+969 708 L
+971 707 L
+971 707 L
+972 707 L
+974 706 L
+975 705 L
+977 705 L
+978 705 L
+978 704 L
+980 704 L
+981 704 L
+983 703 L
+984 703 L
+986 703 L
+987 704 L
+988 704 L
+988 705 L
+990 706 L
+991 707 L
+991 707 L
+993 709 L
+993 710 L
+994 712 L
+995 712 L
+996 715 L
+996 715 L
+997 717 L
+997 719 L
+998 720 L
+998 723 L
+999 725 L
+999 727 L
+999 728 L
+999 730 L
+999 732 L
+999 733 L
+998 735 L
+998 738 L
+997 740 L
+997 741 L
+997 743 L
+996 746 L
+996 747 L
+996 748 L
+995 751 L
+994 753 L
+994 754 L
+994 756 L
+993 758 L
+992 759 L
+991 760 L
+991 761 L
+990 762 L
+988 764 L
+988 764 L
+987 765 L
+986 765 L
+984 766 L
+983 767 L
+983 767 L
+981 767 L
+980 768 L
+978 768 L
+977 768 L
+975 768 L
+974 768 L
+972 767 L
+971 767 L
+971 766 L
+969 765 L
+968 764 L
+S
+/level 0 def
+/levelcolor 3 def
+968 710 M
+969 710 L
+970 710 L
+971 709 L
+972 709 L
+974 708 L
+975 708 L
+977 707 L
+977 707 L
+978 707 L
+980 706 L
+981 706 L
+983 706 L
+984 706 L
+986 706 L
+987 707 L
+988 707 L
+988 708 L
+990 709 L
+991 710 L
+991 710 L
+993 712 L
+993 712 L
+994 715 L
+994 715 L
+995 717 L
+996 719 L
+996 720 L
+997 723 L
+997 725 L
+997 725 L
+998 728 L
+998 730 L
+997 733 L
+997 733 L
+997 735 L
+997 738 L
+996 741 L
+996 741 L
+995 743 L
+995 746 L
+994 748 L
+994 748 L
+994 751 L
+993 753 L
+993 754 L
+992 756 L
+991 757 L
+990 759 L
+990 759 L
+988 761 L
+988 761 L
+987 762 L
+986 763 L
+984 764 L
+984 764 L
+983 765 L
+981 765 L
+980 766 L
+978 766 L
+977 766 L
+975 766 L
+974 766 L
+972 765 L
+971 764 L
+971 764 L
+969 763 L
+968 762 L
+S
+/level 0 def
+/levelcolor 3 def
+968 713 M
+969 712 L
+970 712 L
+971 712 L
+972 711 L
+974 710 L
+975 710 L
+976 710 L
+977 709 L
+978 709 L
+980 709 L
+981 708 L
+983 708 L
+984 708 L
+986 709 L
+987 709 L
+987 710 L
+988 710 L
+990 712 L
+991 712 L
+991 713 L
+992 715 L
+993 716 L
+994 717 L
+994 719 L
+995 720 L
+995 723 L
+996 725 L
+996 725 L
+996 728 L
+996 730 L
+996 733 L
+996 734 L
+996 735 L
+995 738 L
+995 741 L
+994 742 L
+994 743 L
+994 746 L
+993 748 L
+993 748 L
+992 751 L
+991 753 L
+991 754 L
+990 756 L
+990 756 L
+988 758 L
+988 759 L
+987 760 L
+986 761 L
+985 761 L
+984 762 L
+983 762 L
+981 763 L
+980 763 L
+978 764 L
+977 764 L
+975 764 L
+974 763 L
+972 763 L
+971 762 L
+970 761 L
+969 761 L
+968 759 L
+S
+/level 0 def
+/levelcolor 3 def
+968 716 M
+969 715 L
+969 715 L
+971 714 L
+972 713 L
+974 713 L
+975 712 L
+975 712 L
+977 712 L
+978 711 L
+980 711 L
+981 711 L
+983 711 L
+984 711 L
+986 711 L
+987 712 L
+987 712 L
+988 713 L
+990 715 L
+990 715 L
+991 717 L
+992 717 L
+993 720 L
+993 720 L
+994 723 L
+994 725 L
+994 725 L
+995 728 L
+995 730 L
+995 733 L
+994 734 L
+994 735 L
+994 738 L
+993 741 L
+993 743 L
+993 743 L
+992 746 L
+991 748 L
+991 748 L
+990 751 L
+990 752 L
+989 754 L
+988 755 L
+988 756 L
+987 757 L
+986 758 L
+985 759 L
+984 759 L
+983 760 L
+981 761 L
+980 761 L
+979 761 L
+978 761 L
+977 762 L
+975 761 L
+975 761 L
+974 761 L
+972 760 L
+971 759 L
+970 759 L
+969 758 L
+968 757 L
+S
+/level 0 def
+/levelcolor 3 def
+968 719 M
+969 718 L
+970 717 L
+971 717 L
+972 716 L
+974 715 L
+974 715 L
+975 714 L
+977 714 L
+978 713 L
+980 713 L
+981 713 L
+983 713 L
+984 714 L
+986 714 L
+987 715 L
+987 715 L
+988 716 L
+989 717 L
+990 718 L
+991 720 L
+991 721 L
+992 723 L
+993 725 L
+993 727 L
+993 728 L
+993 730 L
+993 733 L
+993 734 L
+993 735 L
+992 738 L
+992 741 L
+991 743 L
+991 743 L
+991 746 L
+990 748 L
+990 748 L
+989 751 L
+988 751 L
+987 754 L
+987 754 L
+986 756 L
+985 756 L
+984 757 L
+983 758 L
+981 758 L
+980 759 L
+980 759 L
+978 759 L
+977 759 L
+975 759 L
+974 759 L
+974 759 L
+972 758 L
+971 757 L
+970 756 L
+969 756 L
+968 754 L
+S
+/level 0 def
+/levelcolor 3 def
+968 723 M
+968 723 L
+969 721 L
+971 720 L
+971 720 L
+972 719 L
+974 718 L
+975 717 L
+975 717 L
+977 716 L
+978 716 L
+980 716 L
+981 716 L
+983 716 L
+984 716 L
+986 717 L
+986 717 L
+987 718 L
+988 720 L
+988 720 L
+990 723 L
+990 723 L
+991 725 L
+991 728 L
+991 730 L
+991 733 L
+991 735 L
+991 738 L
+990 741 L
+990 742 L
+990 743 L
+989 746 L
+988 747 L
+988 748 L
+987 750 L
+987 751 L
+986 752 L
+985 754 L
+984 754 L
+983 755 L
+981 756 L
+980 756 L
+980 756 L
+978 757 L
+977 757 L
+975 756 L
+975 756 L
+974 756 L
+972 755 L
+971 754 L
+970 754 L
+969 753 L
+968 751 L
+S
+/level 0 def
+/levelcolor 3 def
+968 727 M
+969 725 L
+969 725 L
+971 724 L
+972 723 L
+972 722 L
+974 721 L
+975 720 L
+976 720 L
+977 719 L
+978 719 L
+980 719 L
+981 719 L
+983 719 L
+984 720 L
+984 720 L
+986 721 L
+987 723 L
+987 723 L
+988 725 L
+988 726 L
+989 728 L
+989 730 L
+989 733 L
+989 735 L
+989 738 L
+988 741 L
+988 741 L
+988 743 L
+987 746 L
+987 746 L
+986 748 L
+986 749 L
+984 751 L
+984 751 L
+983 752 L
+981 753 L
+980 754 L
+980 754 L
+978 754 L
+977 754 L
+975 754 L
+975 754 L
+974 753 L
+972 752 L
+971 751 L
+971 751 L
+969 749 L
+969 748 L
+968 747 L
+S
+/level 0 def
+/levelcolor 3 def
+969 732 M
+970 730 L
+971 729 L
+972 728 L
+972 727 L
+974 725 L
+974 725 L
+975 724 L
+977 723 L
+978 723 L
+979 723 L
+980 722 L
+981 723 L
+981 723 L
+983 723 L
+984 724 L
+985 725 L
+986 726 L
+986 728 L
+987 730 L
+987 732 L
+987 733 L
+987 735 L
+987 736 L
+987 738 L
+986 741 L
+986 743 L
+986 743 L
+984 746 L
+984 746 L
+983 748 L
+982 748 L
+981 749 L
+980 750 L
+978 751 L
+977 750 L
+975 750 L
+974 749 L
+973 748 L
+972 748 L
+971 746 L
+971 746 L
+969 743 L
+969 743 L
+969 741 L
+968 738 L
+968 735 L
+969 733 L
+969 732 L
+S
+/level 0 def
+/levelcolor 3 def
+974 732 M
+975 730 L
+975 730 L
+977 728 L
+978 728 L
+978 728 L
+980 727 L
+980 728 L
+981 728 L
+983 729 L
+983 730 L
+984 733 L
+984 735 L
+984 738 L
+983 741 L
+983 742 L
+982 743 L
+981 744 L
+980 745 L
+978 746 L
+978 746 L
+978 746 L
+977 746 L
+975 745 L
+974 743 L
+974 743 L
+973 741 L
+972 738 L
+973 735 L
+973 733 L
+974 732 L
+S
+/level 0 def
+/levelcolor 3 def
+972 772 M
+972 772 L
+974 772 L
+975 773 L
+977 773 L
+978 773 L
+980 773 L
+981 772 L
+982 772 L
+S
+972 804 M
+974 803 L
+974 803 L
+975 803 L
+976 803 L
+977 803 L
+978 805 L
+978 805 L
+978 806 L
+978 808 L
+977 809 L
+975 809 L
+974 809 L
+972 808 L
+972 807 L
+972 805 L
+972 804 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 405 M
+1109 404 L
+1108 402 L
+1107 402 L
+1107 400 L
+1106 399 L
+1105 399 L
+1104 397 L
+1103 397 L
+1102 395 L
+1101 394 L
+1100 394 L
+1099 393 L
+1098 392 L
+1097 391 L
+1096 391 L
+1095 390 L
+1093 390 L
+1092 389 L
+1091 389 L
+1090 389 L
+1089 389 L
+1087 389 L
+1086 389 L
+1086 389 L
+1084 389 L
+1083 390 L
+1081 391 L
+1080 391 L
+1080 391 L
+1078 392 L
+1077 393 L
+1076 394 L
+1075 394 L
+1074 394 L
+1073 395 L
+1071 396 L
+1071 397 L
+1070 398 L
+1068 399 L
+1068 399 L
+1067 402 L
+1067 402 L
+1065 404 L
+1065 405 L
+1065 407 L
+1065 410 L
+1064 412 L
+1064 415 L
+1065 417 L
+1065 420 L
+1065 422 L
+1065 423 L
+1065 425 L
+1066 428 L
+1067 429 L
+1067 430 L
+1068 432 L
+1069 433 L
+1070 434 L
+1071 435 L
+1071 436 L
+1073 437 L
+1073 438 L
+1074 439 L
+1076 440 L
+1076 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 407 M
+1108 405 L
+1108 404 L
+1107 403 L
+1106 402 L
+1105 401 L
+1104 399 L
+1104 399 L
+1102 397 L
+1101 397 L
+1101 396 L
+1099 395 L
+1098 394 L
+1098 394 L
+1096 393 L
+1095 392 L
+1093 391 L
+1093 391 L
+1092 391 L
+1090 391 L
+1089 391 L
+1087 391 L
+1086 391 L
+1085 391 L
+1084 392 L
+1083 392 L
+1081 393 L
+1080 393 L
+1079 394 L
+1078 394 L
+1077 395 L
+1076 396 L
+1075 397 L
+1074 397 L
+1073 398 L
+1071 399 L
+1071 399 L
+1070 401 L
+1069 402 L
+1068 404 L
+1068 404 L
+1067 407 L
+1067 410 L
+1067 410 L
+1067 412 L
+1067 415 L
+1067 417 L
+1067 417 L
+1067 420 L
+1067 422 L
+1068 425 L
+1068 426 L
+1069 428 L
+1070 430 L
+1070 430 L
+1071 432 L
+1071 433 L
+1073 434 L
+1073 435 L
+1074 436 L
+1076 438 L
+1076 438 L
+1077 439 L
+1078 440 L
+1079 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 409 M
+1108 407 L
+1108 407 L
+1107 405 L
+1106 404 L
+1105 403 L
+1104 402 L
+1104 401 L
+1102 400 L
+1102 399 L
+1101 398 L
+1099 397 L
+1099 397 L
+1098 396 L
+1096 395 L
+1095 394 L
+1095 394 L
+1093 393 L
+1092 393 L
+1090 393 L
+1089 393 L
+1087 393 L
+1086 393 L
+1084 394 L
+1083 394 L
+1083 394 L
+1081 395 L
+1080 396 L
+1078 397 L
+1078 397 L
+1077 397 L
+1076 399 L
+1075 399 L
+1074 400 L
+1073 401 L
+1072 402 L
+1071 403 L
+1070 404 L
+1070 406 L
+1069 407 L
+1069 410 L
+1069 412 L
+1069 415 L
+1069 417 L
+1069 420 L
+1069 422 L
+1070 423 L
+1070 425 L
+1071 428 L
+1071 428 L
+1072 430 L
+1073 431 L
+1074 433 L
+1074 433 L
+1076 435 L
+1076 435 L
+1077 437 L
+1078 438 L
+1078 438 L
+1080 439 L
+1081 441 L
+1082 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 411 M
+1108 410 L
+1108 409 L
+1107 407 L
+1106 407 L
+1105 405 L
+1104 404 L
+1104 404 L
+1102 402 L
+1102 402 L
+1101 400 L
+1099 399 L
+1099 399 L
+1098 398 L
+1096 397 L
+1096 397 L
+1095 396 L
+1093 395 L
+1092 395 L
+1090 395 L
+1089 395 L
+1087 395 L
+1086 395 L
+1084 396 L
+1083 396 L
+1083 397 L
+1081 397 L
+1080 398 L
+1078 399 L
+1078 399 L
+1077 400 L
+1076 402 L
+1075 402 L
+1074 403 L
+1073 404 L
+1073 406 L
+1072 407 L
+1071 410 L
+1071 410 L
+1071 412 L
+1071 415 L
+1071 417 L
+1071 420 L
+1071 420 L
+1072 422 L
+1072 425 L
+1073 425 L
+1074 428 L
+1074 429 L
+1075 430 L
+1076 431 L
+1077 433 L
+1077 433 L
+1078 435 L
+1079 435 L
+1080 437 L
+1081 438 L
+1081 438 L
+1083 439 L
+1084 440 L
+1085 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 414 M
+1108 412 L
+1108 412 L
+1107 410 L
+1106 410 L
+1105 408 L
+1104 407 L
+1104 406 L
+1102 404 L
+1102 404 L
+1101 403 L
+1100 402 L
+1099 401 L
+1098 400 L
+1096 399 L
+1096 399 L
+1095 398 L
+1093 398 L
+1092 397 L
+1090 397 L
+1089 397 L
+1087 397 L
+1086 398 L
+1084 398 L
+1083 399 L
+1082 399 L
+1081 400 L
+1080 401 L
+1079 402 L
+1078 402 L
+1077 404 L
+1076 404 L
+1076 406 L
+1075 407 L
+1074 409 L
+1074 410 L
+1073 412 L
+1073 415 L
+1073 417 L
+1074 420 L
+1074 422 L
+1074 422 L
+1075 425 L
+1076 426 L
+1076 428 L
+1077 429 L
+1078 430 L
+1078 431 L
+1079 433 L
+1080 434 L
+1081 435 L
+1082 435 L
+1083 437 L
+1084 438 L
+1085 438 L
+1086 439 L
+1087 440 L
+1089 440 L
+1089 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 416 M
+1108 415 L
+1108 415 L
+1107 413 L
+1106 412 L
+1105 411 L
+1104 410 L
+1104 409 L
+1102 407 L
+1102 407 L
+1101 406 L
+1099 404 L
+1099 404 L
+1098 403 L
+1096 402 L
+1096 402 L
+1095 401 L
+1093 400 L
+1092 400 L
+1090 399 L
+1089 399 L
+1087 400 L
+1086 400 L
+1084 401 L
+1083 402 L
+1083 402 L
+1081 403 L
+1080 404 L
+1080 404 L
+1078 406 L
+1078 407 L
+1077 408 L
+1076 410 L
+1076 412 L
+1076 415 L
+1076 417 L
+1076 420 L
+1077 422 L
+1077 423 L
+1078 425 L
+1078 426 L
+1079 428 L
+1080 429 L
+1081 430 L
+1081 431 L
+1082 433 L
+1083 433 L
+1084 435 L
+1085 435 L
+1086 436 L
+1087 437 L
+1089 438 L
+1089 438 L
+1090 439 L
+1092 440 L
+1093 440 L
+1094 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 419 M
+1108 418 L
+1108 417 L
+1107 416 L
+1106 415 L
+1105 414 L
+1104 412 L
+1104 412 L
+1102 410 L
+1101 410 L
+1101 409 L
+1099 407 L
+1099 407 L
+1098 406 L
+1096 405 L
+1096 404 L
+1095 404 L
+1093 403 L
+1092 403 L
+1090 402 L
+1089 402 L
+1087 403 L
+1086 403 L
+1084 404 L
+1084 404 L
+1083 405 L
+1081 406 L
+1081 407 L
+1080 409 L
+1080 410 L
+1079 412 L
+1078 414 L
+1078 415 L
+1078 416 L
+1079 417 L
+1079 420 L
+1080 422 L
+1080 423 L
+1081 425 L
+1081 426 L
+1082 428 L
+1083 429 L
+1084 430 L
+1084 431 L
+1086 433 L
+1086 433 L
+1087 434 L
+1089 435 L
+1089 435 L
+1090 436 L
+1092 437 L
+1093 438 L
+1093 438 L
+1095 439 L
+1096 439 L
+1098 440 L
+1099 441 L
+1099 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 423 M
+1109 422 L
+1108 421 L
+1107 420 L
+1107 419 L
+1105 418 L
+1105 417 L
+1104 416 L
+1103 415 L
+1102 414 L
+1101 412 L
+1100 412 L
+1099 411 L
+1098 410 L
+1098 409 L
+1096 408 L
+1095 407 L
+1094 407 L
+1093 406 L
+1092 406 L
+1090 406 L
+1089 406 L
+1087 406 L
+1086 407 L
+1086 407 L
+1084 408 L
+1083 410 L
+1083 411 L
+1082 412 L
+1082 415 L
+1082 417 L
+1082 420 L
+1083 421 L
+1083 422 L
+1084 425 L
+1084 425 L
+1086 428 L
+1086 428 L
+1087 430 L
+1088 430 L
+1089 431 L
+1090 433 L
+1090 433 L
+1092 434 L
+1093 435 L
+1094 435 L
+1095 436 L
+1096 437 L
+1098 437 L
+1099 438 L
+1099 438 L
+1101 438 L
+1102 439 L
+1104 439 L
+1105 439 L
+1107 439 L
+1108 439 L
+1109 438 L
+S
+/level 0 def
+/levelcolor 3 def
+1087 413 M
+1088 412 L
+1089 411 L
+1090 411 L
+1092 411 L
+1093 411 L
+1095 412 L
+1095 412 L
+1096 413 L
+1098 414 L
+1098 415 L
+1099 416 L
+1101 417 L
+1101 417 L
+1102 419 L
+1103 420 L
+1104 421 L
+1105 422 L
+1105 422 L
+1107 425 L
+1107 425 L
+1108 427 L
+1108 428 L
+1109 430 L
+1108 433 L
+1108 433 L
+1107 435 L
+1105 435 L
+1104 435 L
+1102 435 L
+1101 435 L
+1099 434 L
+1098 434 L
+1096 433 L
+1096 433 L
+1095 432 L
+1093 431 L
+1093 430 L
+1092 429 L
+1090 428 L
+1090 427 L
+1089 425 L
+1089 425 L
+1088 422 L
+1087 422 L
+1087 420 L
+1086 417 L
+1087 415 L
+1087 413 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 454 M
+1108 454 L
+1107 454 L
+1106 454 L
+1105 453 L
+1104 453 L
+1102 453 L
+1101 452 L
+1099 452 L
+1098 451 L
+1097 451 L
+1096 451 L
+1095 450 L
+1093 449 L
+1092 449 L
+1091 448 L
+1090 448 L
+1089 447 L
+1087 447 L
+1086 446 L
+1085 446 L
+1084 445 L
+1083 445 L
+1081 444 L
+1080 443 L
+1080 443 L
+1078 442 L
+1077 441 L
+1076 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 452 M
+1108 452 L
+1107 452 L
+1105 452 L
+1104 451 L
+1102 451 L
+1102 451 L
+1101 451 L
+1099 450 L
+1098 450 L
+1096 449 L
+1095 448 L
+1095 448 L
+1093 448 L
+1092 447 L
+1090 446 L
+1089 446 L
+1089 446 L
+1087 445 L
+1086 445 L
+1084 444 L
+1083 443 L
+1083 443 L
+1081 442 L
+1080 442 L
+1079 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 450 M
+1108 450 L
+1107 450 L
+1105 450 L
+1104 450 L
+1102 449 L
+1101 449 L
+1099 448 L
+1099 448 L
+1098 448 L
+1096 447 L
+1095 447 L
+1093 446 L
+1093 446 L
+1092 445 L
+1090 445 L
+1089 444 L
+1087 444 L
+1086 443 L
+1086 443 L
+1084 442 L
+1083 441 L
+1082 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 448 M
+1108 448 L
+1107 448 L
+1106 448 L
+1105 448 L
+1104 448 L
+1102 448 L
+1101 447 L
+1099 447 L
+1098 446 L
+1097 446 L
+1096 446 L
+1095 445 L
+1093 444 L
+1092 444 L
+1091 443 L
+1090 443 L
+1089 442 L
+1087 442 L
+1086 441 L
+1085 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 446 M
+1108 447 L
+1107 447 L
+1105 446 L
+1104 446 L
+1102 446 L
+1102 446 L
+1101 445 L
+1099 445 L
+1098 444 L
+1096 444 L
+1095 443 L
+1095 443 L
+1093 442 L
+1092 442 L
+1090 441 L
+1089 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 444 M
+1108 444 L
+1107 444 L
+1105 444 L
+1104 444 L
+1102 444 L
+1101 443 L
+1100 443 L
+1099 443 L
+1098 442 L
+1096 442 L
+1095 441 L
+1094 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 442 M
+1108 442 L
+1107 442 L
+1105 442 L
+1104 442 L
+1102 441 L
+1101 441 L
+1099 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 234 M
+1155 234 L
+1154 234 L
+1152 235 L
+1151 236 L
+1151 237 L
+1150 239 L
+1149 240 L
+1149 241 L
+1148 244 L
+1148 246 L
+1148 247 L
+1147 249 L
+1147 252 L
+1147 254 L
+1147 257 L
+1148 259 L
+1148 260 L
+1149 262 L
+1149 263 L
+1150 265 L
+1151 266 L
+1151 267 L
+1152 269 L
+1153 270 L
+1154 271 L
+1155 272 L
+1155 273 L
+1157 274 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 237 M
+1155 237 L
+1154 238 L
+1153 239 L
+1152 240 L
+1151 241 L
+1151 243 L
+1150 244 L
+1150 247 L
+1149 249 L
+1149 250 L
+1149 252 L
+1149 254 L
+1149 255 L
+1149 257 L
+1150 260 L
+1151 262 L
+1151 262 L
+1152 265 L
+1152 265 L
+1154 267 L
+1154 267 L
+1155 269 L
+1156 270 L
+1157 270 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 241 M
+1155 242 L
+1154 244 L
+1154 244 L
+1153 247 L
+1152 248 L
+1152 249 L
+1152 252 L
+1152 254 L
+1152 257 L
+1152 258 L
+1152 260 L
+1153 262 L
+1154 263 L
+1155 265 L
+1155 265 L
+1157 267 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 248 M
+1156 249 L
+1155 251 L
+1155 252 L
+1155 254 L
+1155 257 L
+1155 257 L
+1156 260 L
+1157 261 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 405 M
+1111 407 L
+1111 407 L
+1112 408 L
+1113 410 L
+1114 410 L
+1115 412 L
+1116 412 L
+1117 413 L
+1118 414 L
+1119 415 L
+1120 416 L
+1121 417 L
+1121 417 L
+1123 419 L
+1123 420 L
+1124 421 L
+1125 422 L
+1126 424 L
+1126 425 L
+1127 427 L
+1127 428 L
+1128 430 L
+1128 433 L
+1128 435 L
+1127 438 L
+1127 438 L
+1126 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 407 M
+1110 407 L
+1111 409 L
+1112 410 L
+1112 410 L
+1114 412 L
+1114 412 L
+1115 414 L
+1117 415 L
+1117 415 L
+1118 416 L
+1119 417 L
+1120 418 L
+1121 420 L
+1122 420 L
+1123 422 L
+1123 422 L
+1124 424 L
+1125 425 L
+1126 428 L
+1126 428 L
+1126 430 L
+1126 433 L
+1126 435 L
+1126 437 L
+1126 438 L
+1124 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 409 M
+1110 410 L
+1111 411 L
+1112 412 L
+1112 413 L
+1114 414 L
+1114 415 L
+1115 416 L
+1117 417 L
+1117 417 L
+1118 419 L
+1120 420 L
+1120 420 L
+1121 422 L
+1122 422 L
+1123 425 L
+1123 425 L
+1124 428 L
+1124 429 L
+1125 430 L
+1125 433 L
+1124 435 L
+1124 436 L
+1124 438 L
+1123 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 411 M
+1110 412 L
+1111 413 L
+1112 415 L
+1112 415 L
+1114 416 L
+1115 417 L
+1115 418 L
+1117 419 L
+1117 420 L
+1118 421 L
+1119 422 L
+1120 423 L
+1121 425 L
+1121 426 L
+1122 428 L
+1123 430 L
+1123 430 L
+1123 433 L
+1123 435 L
+1123 435 L
+1122 438 L
+1121 440 L
+1121 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 414 M
+1110 415 L
+1111 416 L
+1112 417 L
+1112 417 L
+1114 419 L
+1115 420 L
+1115 420 L
+1117 422 L
+1117 422 L
+1118 424 L
+1119 425 L
+1120 427 L
+1120 428 L
+1121 430 L
+1121 433 L
+1121 435 L
+1120 438 L
+1120 439 L
+1119 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 416 M
+1110 417 L
+1111 418 L
+1112 420 L
+1112 420 L
+1114 422 L
+1115 422 L
+1115 423 L
+1117 425 L
+1117 426 L
+1118 428 L
+1118 429 L
+1119 430 L
+1119 433 L
+1119 435 L
+1118 437 L
+1118 438 L
+1117 440 L
+1116 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 419 M
+1110 420 L
+1111 421 L
+1112 422 L
+1112 423 L
+1114 425 L
+1114 425 L
+1115 428 L
+1115 428 L
+1116 430 L
+1117 433 L
+1116 435 L
+1115 437 L
+1115 438 L
+1114 439 L
+1112 440 L
+1112 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 423 M
+1111 425 L
+1111 425 L
+1112 428 L
+1112 428 L
+1113 430 L
+1113 433 L
+1113 435 L
+1112 436 L
+1111 437 L
+1110 438 L
+1109 438 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 454 M
+1111 454 L
+1112 454 L
+1112 453 L
+1114 453 L
+1115 452 L
+1117 451 L
+1117 451 L
+1118 450 L
+1120 449 L
+1121 448 L
+1121 448 L
+1123 446 L
+1123 446 L
+1124 444 L
+1125 443 L
+1126 441 L
+1126 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 452 M
+1111 452 L
+1112 452 L
+1114 451 L
+1114 451 L
+1115 450 L
+1117 450 L
+1118 449 L
+1118 448 L
+1120 447 L
+1121 446 L
+1121 446 L
+1123 444 L
+1123 443 L
+1124 441 L
+1124 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 450 M
+1111 450 L
+1112 450 L
+1114 449 L
+1115 449 L
+1116 448 L
+1117 448 L
+1118 447 L
+1119 446 L
+1120 445 L
+1121 443 L
+1121 443 L
+1123 441 L
+1123 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 448 M
+1110 448 L
+1111 448 L
+1112 448 L
+1114 447 L
+1115 447 L
+1117 446 L
+1117 446 L
+1118 444 L
+1119 443 L
+1120 442 L
+1121 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 446 M
+1111 446 L
+1112 446 L
+1112 446 L
+1114 445 L
+1115 444 L
+1117 443 L
+1117 443 L
+1118 441 L
+1119 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 444 M
+1111 444 L
+1112 443 L
+1113 443 L
+1114 443 L
+1115 441 L
+1116 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1109 442 M
+1111 441 L
+1112 441 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 234 M
+1158 234 L
+1160 234 L
+1161 235 L
+1163 236 L
+1164 236 L
+1164 237 L
+1166 238 L
+1166 239 L
+1167 240 L
+1168 241 L
+1168 242 L
+1170 243 L
+1170 244 L
+1171 245 L
+1172 247 L
+1173 247 L
+1174 249 L
+1174 250 L
+1175 252 L
+1176 254 L
+1176 255 L
+1176 257 L
+1176 259 L
+1176 260 L
+1175 262 L
+1174 265 L
+1174 265 L
+1173 267 L
+1173 268 L
+1171 269 L
+1171 270 L
+1170 271 L
+1168 272 L
+1168 272 L
+1167 273 L
+1166 273 L
+1164 274 L
+1163 274 L
+1161 275 L
+1160 275 L
+1158 274 L
+1157 274 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 237 M
+1158 237 L
+1160 238 L
+1161 238 L
+1162 239 L
+1163 240 L
+1164 241 L
+1165 241 L
+1166 243 L
+1167 244 L
+1167 244 L
+1168 246 L
+1169 247 L
+1170 248 L
+1171 249 L
+1171 251 L
+1172 252 L
+1173 254 L
+1173 254 L
+1173 257 L
+1173 260 L
+1173 262 L
+1173 262 L
+1172 265 L
+1171 266 L
+1170 267 L
+1170 268 L
+1168 269 L
+1167 270 L
+1167 270 L
+1166 271 L
+1164 271 L
+1163 272 L
+1161 272 L
+1160 272 L
+1158 271 L
+1157 270 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 241 M
+1158 241 L
+1160 242 L
+1161 243 L
+1163 244 L
+1163 244 L
+1164 246 L
+1165 247 L
+1166 247 L
+1167 249 L
+1167 249 L
+1168 252 L
+1169 252 L
+1170 254 L
+1170 255 L
+1170 257 L
+1170 260 L
+1170 262 L
+1170 262 L
+1169 265 L
+1168 265 L
+1167 267 L
+1166 267 L
+1166 268 L
+1164 268 L
+1163 269 L
+1161 269 L
+1160 268 L
+1158 268 L
+1157 267 L
+1157 267 L
+S
+/level 0 def
+/levelcolor 3 def
+1157 248 M
+1158 248 L
+1160 248 L
+1161 249 L
+1162 249 L
+1163 250 L
+1164 252 L
+1164 252 L
+1166 254 L
+1166 254 L
+1166 257 L
+1166 260 L
+1166 262 L
+1166 262 L
+1164 263 L
+1163 264 L
+1161 264 L
+1160 264 L
+1158 263 L
+1157 262 L
+1157 261 L
+S
+/level 0 def
+/levelcolor 3 def
+1204 1358 M
+1204 1359 L
+1203 1361 L
+1203 1364 L
+1204 1367 L
+1204 1367 L
+S
+/level 0 def
+/levelcolor 3 def
+1226 293 M
+1227 291 L
+1228 290 L
+1229 288 L
+1229 288 L
+1230 287 L
+1232 287 L
+1233 287 L
+1235 286 L
+1236 286 L
+1238 286 L
+1239 286 L
+1241 286 L
+1242 287 L
+1243 288 L
+1244 288 L
+1245 291 L
+1245 291 L
+1246 293 L
+1246 296 L
+1245 297 L
+1245 298 L
+1244 300 L
+1243 301 L
+1242 301 L
+1241 302 L
+1239 303 L
+1238 304 L
+1238 304 L
+1236 304 L
+1235 304 L
+1234 304 L
+1233 303 L
+1232 303 L
+1230 302 L
+1230 301 L
+1229 300 L
+1228 298 L
+1227 298 L
+1226 296 L
+1226 293 L
+1226 293 L
+1226 293 L
+S
+/level 0 def
+/levelcolor 3 def
+1232 292 M
+1233 291 L
+1233 291 L
+1235 290 L
+1236 290 L
+1238 290 L
+1239 290 L
+1240 291 L
+1241 291 L
+1242 293 L
+1242 296 L
+1241 297 L
+1240 298 L
+1239 299 L
+1238 299 L
+1236 300 L
+1235 299 L
+1233 299 L
+1233 298 L
+1232 297 L
+1231 296 L
+1231 293 L
+1232 292 L
+S
+/level 0 def
+/levelcolor 3 def
+1204 1358 M
+1205 1356 L
+1205 1355 L
+1207 1354 L
+1207 1354 L
+1208 1353 L
+1210 1353 L
+1211 1353 L
+1213 1353 L
+1214 1353 L
+1215 1354 L
+1216 1354 L
+1217 1355 L
+1219 1356 L
+1219 1356 L
+1220 1357 L
+1222 1358 L
+1222 1359 L
+1223 1360 L
+1225 1361 L
+1225 1361 L
+1226 1363 L
+1227 1364 L
+1228 1366 L
+1228 1367 L
+1228 1369 L
+1228 1372 L
+1228 1374 L
+1227 1374 L
+1226 1377 L
+1226 1377 L
+1225 1378 L
+1223 1379 L
+1222 1380 L
+1222 1380 L
+1220 1380 L
+1219 1380 L
+1217 1380 L
+1217 1380 L
+1216 1379 L
+1214 1379 L
+1213 1378 L
+1211 1377 L
+1211 1377 L
+1210 1376 L
+1208 1375 L
+1208 1374 L
+1207 1373 L
+1206 1372 L
+1205 1371 L
+1205 1369 L
+1204 1367 L
+S
+/level 0 def
+/levelcolor 3 def
+1207 1360 M
+1207 1359 L
+1208 1358 L
+1210 1357 L
+1211 1357 L
+1213 1357 L
+1214 1357 L
+1216 1358 L
+1217 1359 L
+1217 1359 L
+1219 1360 L
+1220 1361 L
+1220 1362 L
+1222 1364 L
+1222 1364 L
+1223 1366 L
+1223 1367 L
+1224 1369 L
+1224 1372 L
+1223 1373 L
+1222 1374 L
+1222 1374 L
+1220 1375 L
+1219 1375 L
+1217 1375 L
+1216 1375 L
+1214 1375 L
+1213 1374 L
+1213 1374 L
+1211 1373 L
+1210 1372 L
+1209 1372 L
+1208 1370 L
+1208 1369 L
+1207 1368 L
+1207 1367 L
+1206 1364 L
+1206 1361 L
+1207 1360 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1753 M
+1297 1752 L
+1296 1752 L
+1295 1751 L
+1294 1751 L
+1292 1750 L
+1291 1750 L
+1289 1750 L
+1288 1749 L
+1287 1749 L
+1285 1749 L
+1285 1749 L
+1284 1749 L
+1282 1749 L
+1281 1749 L
+1279 1749 L
+1278 1749 L
+1276 1749 L
+1275 1749 L
+1274 1749 L
+1273 1750 L
+1272 1751 L
+1271 1752 L
+1270 1754 L
+1270 1755 L
+1270 1757 L
+1269 1760 L
+1270 1762 L
+1270 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1757 M
+1298 1757 L
+1297 1756 L
+1295 1755 L
+1294 1755 L
+1294 1754 L
+1292 1754 L
+1291 1753 L
+1289 1753 L
+1288 1753 L
+1287 1753 L
+1285 1753 L
+1284 1753 L
+1282 1753 L
+1281 1753 L
+1279 1753 L
+1278 1753 L
+1276 1753 L
+1275 1754 L
+1274 1755 L
+1273 1757 L
+1273 1757 L
+1273 1760 L
+1273 1762 L
+1273 1763 L
+1274 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1762 M
+1297 1760 L
+1296 1760 L
+1295 1759 L
+1294 1758 L
+1292 1758 L
+1291 1758 L
+1289 1757 L
+1288 1758 L
+1287 1758 L
+1285 1758 L
+1284 1758 L
+1282 1759 L
+1281 1759 L
+1279 1760 L
+1279 1760 L
+1278 1762 L
+1278 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1285 1765 M
+1285 1764 L
+1287 1763 L
+1288 1763 L
+1289 1762 L
+1290 1762 L
+1291 1762 L
+1292 1762 L
+1292 1762 L
+1294 1763 L
+1295 1764 L
+1297 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1793 M
+1298 1793 L
+1297 1794 L
+1295 1795 L
+1294 1796 L
+1293 1796 L
+1292 1796 L
+1291 1796 L
+1289 1796 L
+1288 1796 L
+1288 1796 L
+1287 1795 L
+1285 1794 L
+1284 1793 L
+1284 1793 L
+1282 1792 L
+1281 1791 L
+1281 1790 L
+1280 1788 L
+1279 1787 L
+1278 1786 L
+1278 1784 L
+1277 1783 L
+1276 1780 L
+1276 1780 L
+1275 1778 L
+1275 1777 L
+1274 1775 L
+1273 1773 L
+1273 1773 L
+1272 1770 L
+1272 1770 L
+1271 1768 L
+1270 1765 L
+1270 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1790 M
+1298 1791 L
+1297 1791 L
+1295 1792 L
+1294 1793 L
+1293 1793 L
+1292 1794 L
+1291 1794 L
+1289 1794 L
+1288 1793 L
+1288 1793 L
+1287 1793 L
+1285 1791 L
+1284 1791 L
+1284 1790 L
+1282 1788 L
+1282 1788 L
+1281 1786 L
+1281 1785 L
+1280 1783 L
+1279 1782 L
+1279 1780 L
+1278 1778 L
+1278 1777 L
+1277 1775 L
+1276 1773 L
+1276 1773 L
+1275 1770 L
+1275 1768 L
+1274 1768 L
+1274 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1787 M
+1297 1788 L
+1297 1788 L
+1295 1789 L
+1294 1790 L
+1292 1790 L
+1291 1791 L
+1289 1790 L
+1288 1790 L
+1287 1789 L
+1286 1788 L
+1285 1788 L
+1284 1786 L
+1284 1786 L
+1282 1783 L
+1282 1783 L
+1281 1780 L
+1281 1778 L
+1281 1778 L
+1280 1775 L
+1279 1773 L
+1279 1772 L
+1279 1770 L
+1278 1768 L
+1278 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1767 M
+1297 1765 L
+1297 1765 L
+S
+1298 1783 M
+1297 1784 L
+1295 1785 L
+1295 1786 L
+1294 1786 L
+1292 1786 L
+1291 1787 L
+1289 1786 L
+1288 1786 L
+1288 1786 L
+1287 1784 L
+1286 1783 L
+1285 1782 L
+1284 1780 L
+1284 1778 L
+1284 1778 L
+1283 1775 L
+1283 1773 L
+1283 1770 L
+1283 1768 L
+1284 1766 L
+1285 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1289 1770 M
+1290 1770 L
+1291 1770 L
+1292 1769 L
+1294 1770 L
+1294 1770 L
+1295 1772 L
+1296 1773 L
+1297 1775 L
+1296 1778 L
+1295 1778 L
+1294 1779 L
+1292 1780 L
+1291 1780 L
+1289 1779 L
+1289 1778 L
+1288 1775 L
+1288 1773 L
+1289 1770 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1753 M
+1300 1755 L
+1300 1755 L
+1301 1756 L
+1302 1757 L
+1303 1758 L
+1304 1760 L
+1304 1760 L
+1305 1762 L
+1306 1763 L
+1306 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1757 M
+1300 1759 L
+1301 1760 L
+1301 1761 L
+1302 1762 L
+1303 1763 L
+1304 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1762 M
+1299 1762 L
+1300 1763 L
+1301 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1793 M
+1300 1792 L
+1301 1791 L
+1302 1791 L
+1303 1791 L
+1304 1790 L
+1306 1789 L
+1307 1789 L
+1309 1788 L
+1310 1788 L
+1310 1788 L
+1312 1787 L
+1312 1788 L
+1313 1791 L
+1313 1791 L
+1314 1793 L
+1315 1794 L
+1316 1796 L
+1318 1796 L
+1319 1794 L
+1319 1793 L
+1319 1791 L
+1319 1790 L
+1318 1788 L
+1317 1788 L
+1316 1788 L
+1315 1788 L
+1313 1788 L
+1312 1786 L
+1312 1786 L
+1311 1783 L
+1310 1780 L
+1310 1780 L
+1310 1778 L
+1309 1775 L
+1309 1773 L
+1309 1773 L
+1308 1770 L
+1307 1768 L
+1307 1767 L
+1306 1765 L
+S
+1346 1809 M
+1345 1809 L
+1344 1807 L
+1343 1806 L
+1343 1806 L
+1341 1806 L
+1340 1806 L
+1339 1806 L
+1338 1807 L
+1337 1808 L
+1335 1809 L
+1335 1809 L
+1334 1810 L
+1332 1811 L
+1331 1811 L
+1331 1812 L
+1330 1814 L
+1329 1815 L
+1329 1817 L
+1329 1819 L
+1329 1820 L
+1330 1822 L
+1331 1823 L
+1332 1824 L
+1332 1825 L
+1334 1825 L
+1335 1824 L
+1335 1824 L
+1337 1824 L
+1338 1823 L
+1340 1822 L
+1340 1822 L
+1341 1821 L
+1343 1820 L
+1343 1819 L
+1344 1818 L
+1345 1817 L
+1346 1816 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1790 M
+1300 1789 L
+1301 1789 L
+1302 1788 L
+1303 1788 L
+1304 1787 L
+1305 1786 L
+1306 1785 L
+1307 1783 L
+1307 1783 L
+1308 1780 L
+1308 1778 L
+1307 1775 L
+1307 1775 L
+1307 1773 L
+1306 1770 L
+1306 1770 L
+1305 1768 L
+1304 1766 L
+1304 1765 L
+S
+1335 1816 M
+1337 1814 L
+1337 1814 L
+1338 1814 L
+1339 1814 L
+1338 1815 L
+1337 1817 L
+1337 1817 L
+1335 1817 L
+1335 1817 L
+1335 1816 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1787 M
+1300 1786 L
+1301 1786 L
+1301 1785 L
+1303 1784 L
+1303 1783 L
+1304 1781 L
+1305 1780 L
+1305 1778 L
+1305 1775 L
+1304 1773 L
+1304 1773 L
+1303 1770 L
+1303 1768 L
+1302 1768 L
+1301 1766 L
+1301 1765 L
+S
+/level 0 def
+/levelcolor 3 def
+1298 1767 M
+1299 1768 L
+1300 1769 L
+1300 1770 L
+1301 1773 L
+1301 1773 L
+1302 1775 L
+1302 1778 L
+1301 1779 L
+1301 1780 L
+1300 1782 L
+1299 1783 L
+1298 1783 L
+S
+/level 0 def
+/levelcolor 3 def
+1346 1809 M
+1346 1811 L
+1346 1814 L
+1346 1816 L
+S
+/level 0 def
+/levelcolor 3 def
+1499 1883 M
+1499 1881 L
+1500 1879 L
+1500 1879 L
+1502 1876 L
+1502 1876 L
+1503 1874 L
+1503 1874 L
+1505 1872 L
+1506 1871 L
+1506 1870 L
+1508 1870 L
+1509 1869 L
+1511 1869 L
+1512 1869 L
+1514 1870 L
+1515 1871 L
+1516 1871 L
+1517 1872 L
+1518 1873 L
+1518 1874 L
+1520 1875 L
+1521 1876 L
+1521 1876 L
+1523 1878 L
+1524 1879 L
+1524 1879 L
+1526 1880 L
+1527 1881 L
+1528 1881 L
+1528 1882 L
+1530 1884 L
+1530 1884 L
+1531 1887 L
+1531 1889 L
+1530 1891 L
+1529 1892 L
+1528 1893 L
+1527 1894 L
+1527 1894 L
+1526 1895 L
+1524 1896 L
+1523 1897 L
+1523 1897 L
+1521 1898 L
+1520 1899 L
+1518 1899 L
+1517 1899 L
+1517 1900 L
+1515 1900 L
+1514 1900 L
+1512 1900 L
+1511 1900 L
+1509 1899 L
+1509 1899 L
+1508 1899 L
+1506 1899 L
+1505 1898 L
+1503 1897 L
+1503 1897 L
+1502 1896 L
+1500 1895 L
+1500 1894 L
+1499 1892 L
+1499 1892 L
+1498 1889 L
+1498 1887 L
+1499 1884 L
+1499 1883 L
+S
+/level 0 def
+/levelcolor 3 def
+1502 1881 M
+1503 1879 L
+1503 1878 L
+1504 1876 L
+1505 1876 L
+1506 1874 L
+1507 1874 L
+1508 1873 L
+1509 1872 L
+1511 1872 L
+1512 1872 L
+1514 1873 L
+1515 1874 L
+1515 1874 L
+1517 1875 L
+1518 1876 L
+1518 1877 L
+1520 1879 L
+1520 1879 L
+1521 1880 L
+1522 1881 L
+1523 1882 L
+1524 1884 L
+1524 1884 L
+1526 1887 L
+1525 1889 L
+1524 1891 L
+1524 1892 L
+1523 1893 L
+1521 1894 L
+1521 1894 L
+1520 1895 L
+1518 1896 L
+1517 1896 L
+1515 1896 L
+1514 1896 L
+1512 1896 L
+1511 1896 L
+1509 1896 L
+1508 1895 L
+1506 1895 L
+1505 1894 L
+1505 1894 L
+1503 1893 L
+1502 1892 L
+1502 1892 L
+1501 1889 L
+1501 1887 L
+1501 1884 L
+1502 1881 L
+1502 1881 L
+S
+/level 0 def
+/levelcolor 3 def
+1505 1883 M
+1505 1881 L
+1506 1879 L
+1507 1879 L
+1508 1878 L
+1509 1877 L
+1511 1876 L
+1512 1877 L
+1514 1878 L
+1515 1879 L
+1515 1879 L
+1517 1881 L
+1517 1881 L
+1518 1884 L
+1518 1885 L
+1518 1887 L
+1518 1888 L
+1518 1889 L
+1517 1890 L
+1515 1891 L
+1514 1891 L
+1512 1891 L
+1511 1891 L
+1509 1891 L
+1508 1890 L
+1506 1889 L
+1506 1889 L
+1505 1887 L
+1505 1887 L
+1505 1884 L
+1505 1883 L
+S
+/level 0 def
+/levelcolor 3 def
+1629 279 M
+1628 280 L
+1627 281 L
+1626 283 L
+1626 284 L
+1625 285 L
+1625 288 L
+1626 290 L
+1626 291 L
+1627 292 L
+1629 293 L
+1629 293 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 263 M
+1675 262 L
+1675 262 L
+1673 261 L
+1672 260 L
+1671 260 L
+1670 259 L
+1669 259 L
+1667 258 L
+1666 258 L
+1664 257 L
+1663 257 L
+1663 257 L
+1661 256 L
+1660 256 L
+1658 255 L
+1657 255 L
+1656 254 L
+1655 254 L
+1654 253 L
+1652 254 L
+1652 254 L
+1651 255 L
+1650 257 L
+1649 258 L
+1648 260 L
+1648 260 L
+1647 261 L
+1645 262 L
+1645 262 L
+1644 263 L
+1642 264 L
+1641 265 L
+1641 265 L
+1639 266 L
+1638 267 L
+1638 268 L
+1636 269 L
+1636 270 L
+1635 271 L
+1634 272 L
+1633 273 L
+1632 275 L
+1632 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 266 M
+1675 265 L
+1674 265 L
+1673 264 L
+1672 263 L
+1670 263 L
+1669 262 L
+1669 262 L
+1667 262 L
+1666 261 L
+1664 261 L
+1663 261 L
+1661 261 L
+1660 261 L
+1658 261 L
+1657 261 L
+1655 261 L
+1654 262 L
+1653 262 L
+1652 262 L
+1651 263 L
+1649 263 L
+1648 264 L
+1647 264 L
+1646 265 L
+1645 265 L
+1644 266 L
+1642 266 L
+1641 267 L
+1641 268 L
+1639 269 L
+1638 270 L
+1638 270 L
+1636 272 L
+1636 272 L
+1635 274 L
+1634 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 269 M
+1675 268 L
+1673 267 L
+1673 267 L
+1672 266 L
+1670 266 L
+1669 265 L
+1667 265 L
+1667 265 L
+1666 264 L
+1664 264 L
+1663 264 L
+1661 264 L
+1660 264 L
+1658 264 L
+1657 265 L
+1657 265 L
+1655 265 L
+1654 265 L
+1652 266 L
+1651 266 L
+1649 267 L
+1648 267 L
+1647 267 L
+1647 267 L
+1645 268 L
+1644 268 L
+1642 269 L
+1641 270 L
+1641 270 L
+1639 272 L
+1638 272 L
+1638 273 L
+1637 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 272 M
+1675 271 L
+1673 270 L
+1672 270 L
+1672 270 L
+1670 269 L
+1669 268 L
+1667 268 L
+1666 267 L
+1665 267 L
+1664 267 L
+1663 267 L
+1661 267 L
+1660 267 L
+1659 267 L
+1658 267 L
+1657 268 L
+1655 268 L
+1654 268 L
+1652 269 L
+1651 269 L
+1649 270 L
+1649 270 L
+1648 270 L
+1647 270 L
+1645 271 L
+1644 272 L
+1642 272 L
+1642 273 L
+1641 274 L
+1640 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1644 275 M
+1645 275 L
+1647 274 L
+1648 273 L
+1649 273 L
+1650 272 L
+1651 272 L
+1652 272 L
+1654 271 L
+1655 271 L
+1657 270 L
+1658 270 L
+1660 270 L
+1660 270 L
+1661 270 L
+1663 270 L
+1664 270 L
+1664 270 L
+1666 270 L
+1667 271 L
+1669 271 L
+1670 272 L
+1671 272 L
+1672 273 L
+1673 274 L
+1675 274 L
+1676 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1652 275 M
+1652 275 L
+1654 274 L
+1655 274 L
+1657 273 L
+1658 273 L
+1660 273 L
+1661 273 L
+1663 273 L
+1664 273 L
+1666 273 L
+1667 274 L
+1669 275 L
+1670 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1629 279 M
+1630 278 L
+1630 277 L
+1632 275 L
+S
+1629 293 M
+1630 295 L
+1632 296 L
+1632 296 L
+1633 297 L
+1634 298 L
+1635 299 L
+1636 300 L
+1637 301 L
+1638 302 L
+1639 303 L
+1640 304 L
+1641 304 L
+1642 305 L
+1644 306 L
+1644 306 L
+1645 307 L
+1647 307 L
+1648 308 L
+1649 308 L
+1651 309 L
+1651 309 L
+1652 309 L
+1654 310 L
+1655 310 L
+1657 311 L
+1658 311 L
+1659 311 L
+1660 311 L
+1661 312 L
+1663 312 L
+1664 312 L
+1666 312 L
+1667 312 L
+1669 312 L
+1670 312 L
+1672 313 L
+1673 313 L
+1674 314 L
+1675 314 L
+1676 315 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 313 M
+1675 312 L
+1673 311 L
+1673 311 L
+1672 311 L
+1670 310 L
+1669 310 L
+1667 310 L
+1666 310 L
+1664 310 L
+1663 310 L
+1661 310 L
+1660 310 L
+1658 309 L
+1657 309 L
+1657 309 L
+1655 308 L
+1654 308 L
+1652 307 L
+1651 306 L
+1650 306 L
+1649 306 L
+1648 305 L
+1647 305 L
+1645 304 L
+1644 304 L
+1644 303 L
+1642 303 L
+1641 302 L
+1640 301 L
+1639 300 L
+1638 299 L
+1637 298 L
+1636 297 L
+1635 296 L
+1635 296 L
+1633 294 L
+1632 293 L
+1632 292 L
+1630 291 L
+1630 290 L
+1629 288 L
+1629 285 L
+1630 283 L
+1630 282 L
+1631 280 L
+1632 279 L
+1632 278 L
+1633 276 L
+1634 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 311 M
+1675 310 L
+1673 309 L
+1672 309 L
+1672 309 L
+1670 308 L
+1669 308 L
+1667 308 L
+1666 308 L
+1664 308 L
+1663 308 L
+1661 308 L
+1660 308 L
+1658 307 L
+1657 307 L
+1656 306 L
+1655 306 L
+1654 305 L
+1652 305 L
+1651 304 L
+1649 304 L
+1649 304 L
+1648 303 L
+1647 302 L
+1645 302 L
+1644 301 L
+1644 301 L
+1642 300 L
+1641 299 L
+1640 298 L
+1639 297 L
+1638 296 L
+1638 295 L
+1636 294 L
+1636 293 L
+1635 291 L
+1634 291 L
+1633 289 L
+1633 288 L
+1633 285 L
+1633 283 L
+1633 282 L
+1634 280 L
+1635 278 L
+1635 278 L
+1636 276 L
+1637 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 308 M
+1675 307 L
+1673 307 L
+1672 306 L
+1670 306 L
+1669 306 L
+1667 306 L
+1666 306 L
+1664 306 L
+1663 306 L
+1663 306 L
+1661 306 L
+1660 306 L
+1658 305 L
+1657 305 L
+1655 304 L
+1654 304 L
+1654 303 L
+1652 303 L
+1651 302 L
+1649 301 L
+1649 301 L
+1648 301 L
+1647 300 L
+1645 299 L
+1644 298 L
+1644 298 L
+1642 296 L
+1641 296 L
+1641 295 L
+1639 293 L
+1639 293 L
+1638 291 L
+1638 291 L
+1637 288 L
+1636 286 L
+1636 285 L
+1636 283 L
+1636 283 L
+1637 280 L
+1638 278 L
+1638 278 L
+1639 276 L
+1640 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 275 M
+1676 275 L
+S
+1676 306 M
+1675 305 L
+1673 304 L
+1672 304 L
+1670 304 L
+1669 304 L
+1667 304 L
+1666 304 L
+1664 304 L
+1663 304 L
+1661 304 L
+1661 304 L
+1660 303 L
+1658 303 L
+1657 302 L
+1655 302 L
+1654 301 L
+1654 301 L
+1652 300 L
+1651 300 L
+1649 299 L
+1649 298 L
+1648 298 L
+1647 297 L
+1645 296 L
+1645 295 L
+1644 294 L
+1643 293 L
+1642 292 L
+1641 291 L
+1641 289 L
+1640 288 L
+1640 285 L
+1640 283 L
+1640 280 L
+1641 280 L
+1642 278 L
+1642 277 L
+1644 276 L
+1644 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 279 M
+1675 278 L
+1674 278 L
+1673 277 L
+1672 276 L
+1670 275 L
+1670 275 L
+S
+1676 302 M
+1675 302 L
+1673 301 L
+1672 301 L
+1670 301 L
+1669 301 L
+1667 302 L
+1666 302 L
+1664 302 L
+1663 301 L
+1661 301 L
+1660 301 L
+1660 301 L
+1658 300 L
+1657 300 L
+1655 299 L
+1654 298 L
+1654 298 L
+1652 298 L
+1651 297 L
+1650 296 L
+1649 295 L
+1648 294 L
+1647 293 L
+1647 292 L
+1645 291 L
+1645 290 L
+1644 288 L
+1644 285 L
+1644 283 L
+1645 280 L
+1645 280 L
+1647 278 L
+1647 278 L
+1648 277 L
+1649 276 L
+1651 276 L
+1652 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 283 M
+1675 283 L
+1675 283 L
+1673 282 L
+1672 281 L
+1671 280 L
+1670 279 L
+1669 278 L
+1667 278 L
+1667 278 L
+1666 277 L
+1664 276 L
+1663 276 L
+1661 276 L
+1660 276 L
+1658 276 L
+1657 277 L
+1655 277 L
+1654 278 L
+1654 278 L
+1652 279 L
+1651 280 L
+1651 280 L
+1649 282 L
+1649 283 L
+1648 285 L
+1649 288 L
+1649 290 L
+1650 291 L
+1651 292 L
+1652 293 L
+1652 294 L
+1654 295 L
+1655 296 L
+1655 296 L
+1657 297 L
+1658 297 L
+1660 298 L
+1661 298 L
+1661 298 L
+1663 299 L
+1664 299 L
+1666 299 L
+1667 298 L
+1668 298 L
+1669 298 L
+1670 298 L
+1672 298 L
+1673 298 L
+1675 298 L
+1676 298 L
+S
+/level 0 def
+/levelcolor 3 def
+1654 284 M
+1655 283 L
+1655 282 L
+1657 281 L
+1658 280 L
+1659 280 L
+1660 280 L
+1661 280 L
+1663 280 L
+1663 280 L
+1664 281 L
+1666 282 L
+1667 283 L
+1667 283 L
+1669 284 L
+1669 285 L
+1670 287 L
+1671 288 L
+1671 291 L
+1670 291 L
+1669 293 L
+1668 293 L
+1667 294 L
+1666 294 L
+1664 294 L
+1663 294 L
+1661 294 L
+1660 294 L
+1658 293 L
+1658 293 L
+1657 292 L
+1655 291 L
+1655 291 L
+1654 289 L
+1654 288 L
+1653 285 L
+1654 284 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 263 M
+1678 264 L
+1678 265 L
+1679 265 L
+1680 266 L
+1682 267 L
+1683 267 L
+1683 268 L
+1685 268 L
+1686 268 L
+1688 268 L
+1689 268 L
+1691 268 L
+1692 268 L
+1694 268 L
+1695 269 L
+1697 270 L
+1697 270 L
+1698 271 L
+1700 272 L
+1700 272 L
+1701 273 L
+1703 275 L
+1703 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 266 M
+1678 267 L
+1678 267 L
+1679 268 L
+1680 269 L
+1682 269 L
+1683 270 L
+1683 270 L
+1685 270 L
+1686 270 L
+1688 270 L
+1689 270 L
+1691 270 L
+1692 270 L
+1694 271 L
+1695 271 L
+1697 272 L
+1697 272 L
+1698 273 L
+1700 275 L
+1700 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 269 M
+1677 270 L
+1678 270 L
+1679 271 L
+1680 271 L
+1682 272 L
+1683 272 L
+1685 272 L
+1685 272 L
+1686 273 L
+1688 273 L
+1689 273 L
+1691 273 L
+1692 273 L
+1694 273 L
+1695 274 L
+1697 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 272 M
+1677 272 L
+1678 273 L
+1679 274 L
+1680 274 L
+1682 275 L
+1683 275 L
+1685 275 L
+1686 275 L
+1688 275 L
+1688 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 315 M
+1677 316 L
+1678 317 L
+1679 318 L
+1680 318 L
+1682 319 L
+1683 319 L
+1685 319 L
+1686 319 L
+1688 318 L
+1689 318 L
+1691 318 L
+1692 317 L
+1694 317 L
+1694 316 L
+1695 316 L
+1697 315 L
+1698 314 L
+1698 314 L
+1700 313 L
+1701 311 L
+1701 311 L
+1703 310 L
+1704 309 L
+1704 308 L
+1706 307 L
+1706 306 L
+1707 305 L
+1708 304 L
+1709 303 L
+1710 302 L
+1711 301 L
+1711 300 L
+1713 299 L
+1713 298 L
+1714 296 L
+1714 293 L
+1713 291 L
+1713 290 L
+1712 288 L
+1711 286 L
+1711 285 L
+1710 284 L
+1709 283 L
+1709 281 L
+1708 280 L
+1707 280 L
+1706 278 L
+1705 278 L
+1704 276 L
+1703 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 313 M
+1677 314 L
+1678 314 L
+1679 315 L
+1680 316 L
+1682 316 L
+1682 316 L
+1683 317 L
+1685 317 L
+1686 316 L
+1686 316 L
+1688 316 L
+1689 316 L
+1691 315 L
+1692 315 L
+1694 314 L
+1694 314 L
+1695 313 L
+1697 313 L
+1698 312 L
+1699 311 L
+1700 311 L
+1701 309 L
+1702 309 L
+1703 308 L
+1704 306 L
+1704 306 L
+1706 304 L
+1706 304 L
+1707 302 L
+1708 301 L
+1709 301 L
+1710 298 L
+1710 298 L
+1711 296 L
+1711 293 L
+1711 291 L
+1710 288 L
+1710 288 L
+1709 285 L
+1709 285 L
+1707 283 L
+1707 283 L
+1706 281 L
+1705 280 L
+1704 279 L
+1703 278 L
+1703 278 L
+1701 276 L
+1700 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 311 M
+1677 311 L
+1678 312 L
+1679 313 L
+1680 314 L
+1681 314 L
+1682 314 L
+1683 314 L
+1685 314 L
+1686 314 L
+1688 314 L
+1688 314 L
+1689 313 L
+1691 313 L
+1692 312 L
+1694 312 L
+1695 311 L
+1695 311 L
+1697 310 L
+1698 309 L
+1699 309 L
+1700 308 L
+1701 307 L
+1702 306 L
+1703 305 L
+1704 304 L
+1704 303 L
+1706 301 L
+1706 301 L
+1707 299 L
+1707 298 L
+1708 296 L
+1709 295 L
+1709 293 L
+1709 291 L
+1708 291 L
+1708 288 L
+1707 287 L
+1706 285 L
+1706 284 L
+1704 283 L
+1704 282 L
+1703 281 L
+1702 280 L
+1701 279 L
+1700 278 L
+1700 278 L
+1698 276 L
+1697 275 L
+1697 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 308 M
+1677 309 L
+1678 309 L
+1679 310 L
+1680 311 L
+1681 311 L
+1682 312 L
+1683 312 L
+1685 312 L
+1686 312 L
+1688 311 L
+1689 311 L
+1689 311 L
+1691 311 L
+1692 310 L
+1694 310 L
+1695 309 L
+1695 309 L
+1697 308 L
+1698 307 L
+1699 306 L
+1700 306 L
+1701 304 L
+1702 304 L
+1703 302 L
+1703 301 L
+1704 300 L
+1705 298 L
+1706 296 L
+1706 296 L
+1706 293 L
+1706 291 L
+1706 290 L
+1705 288 L
+1704 286 L
+1703 285 L
+1703 284 L
+1701 283 L
+1701 282 L
+1700 281 L
+1699 280 L
+1698 279 L
+1697 278 L
+1696 278 L
+1695 277 L
+1694 276 L
+1692 276 L
+1691 275 L
+1689 275 L
+1688 275 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 275 M
+1678 276 L
+1679 277 L
+1680 277 L
+1682 277 L
+1683 277 L
+1685 278 L
+1686 278 L
+1686 278 L
+1688 278 L
+1689 278 L
+1691 278 L
+1692 279 L
+1694 279 L
+1695 280 L
+1695 280 L
+1697 281 L
+1698 283 L
+1698 283 L
+1700 284 L
+1700 285 L
+1701 287 L
+1702 288 L
+1703 289 L
+1703 291 L
+1703 293 L
+1703 296 L
+1703 297 L
+1702 298 L
+1701 300 L
+1701 301 L
+1700 302 L
+1699 304 L
+1698 304 L
+1697 305 L
+1695 306 L
+1695 306 L
+1694 307 L
+1692 308 L
+1691 308 L
+1689 309 L
+1689 309 L
+1688 309 L
+1686 309 L
+1685 309 L
+1683 309 L
+1682 309 L
+1682 309 L
+1680 308 L
+1679 307 L
+1678 306 L
+1677 306 L
+1676 306 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 279 M
+1678 279 L
+1679 280 L
+1680 280 L
+1680 280 L
+1682 280 L
+1683 281 L
+1685 281 L
+1686 281 L
+1688 281 L
+1689 281 L
+1691 281 L
+1692 282 L
+1694 283 L
+1694 283 L
+1695 284 L
+1697 285 L
+1697 285 L
+1698 287 L
+1699 288 L
+1700 290 L
+1700 291 L
+1700 293 L
+1700 296 L
+1700 297 L
+1699 298 L
+1698 300 L
+1698 301 L
+1697 302 L
+1695 303 L
+1695 304 L
+1694 304 L
+1692 305 L
+1691 305 L
+1689 306 L
+1688 306 L
+1688 306 L
+1686 306 L
+1685 306 L
+1684 306 L
+1683 306 L
+1682 306 L
+1680 305 L
+1679 304 L
+1678 304 L
+1678 303 L
+1676 302 L
+S
+/level 0 def
+/levelcolor 3 def
+1676 283 M
+1678 284 L
+1679 284 L
+1680 284 L
+1682 284 L
+1683 284 L
+1685 284 L
+1686 284 L
+1688 284 L
+1689 285 L
+1691 285 L
+1691 285 L
+1692 286 L
+1694 287 L
+1694 288 L
+1695 289 L
+1696 291 L
+1697 293 L
+1697 293 L
+1697 293 L
+1696 296 L
+1695 298 L
+1695 298 L
+1694 300 L
+1692 301 L
+1692 301 L
+1691 302 L
+1689 302 L
+1688 303 L
+1686 303 L
+1685 303 L
+1683 302 L
+1682 302 L
+1681 301 L
+1680 301 L
+1679 300 L
+1678 299 L
+1676 298 L
+1676 298 L
+S
+/level 0 def
+/levelcolor 3 def
+1683 292 M
+1685 291 L
+1686 291 L
+1688 291 L
+1689 292 L
+1690 293 L
+1689 295 L
+1689 296 L
+1688 296 L
+1686 296 L
+1685 296 L
+1685 296 L
+1683 294 L
+1683 293 L
+1683 292 L
+S
+grestore
+gsave
+0 0 WIDTH HEIGHT rectpath clip newpath
+gsave 0 setlinewidth 0 setgray
+gsave PEAKLINEWIDTH setlinewidth
+1 1 802 989 3 3 0 0 PP
+1 1 1660 286 3 3 0 0 PP
+1 1 1685 292 3 3 0 0 PP
+1 1 1235 322 3 3 0 0 PP
+1 1 1050 418 3 3 0 0 PP
+1 1 1095 422 3 3 0 0 PP
+1 1 977 735 3 3 0 0 PP
+1 1 1663 284 3 3 0 0 PP
+1 1 1096 418 3 3 0 0 PP
+1 1 782 984 3 3 0 0 PP
+1 1 1532 748 3 3 0 0 PP
+1 1 1533 756 3 3 0 0 PP
+1 1 1624 1937 3 3 0 0 PP
+1 1 963 265 3 3 0 0 PP
+1 1 801 71 3 3 0 0 PP
+1 1 1212 1365 3 3 0 0 PP
+1 1 1874 1677 3 3 0 0 PP
+1 1 1159 255 3 3 0 0 PP
+1 1 974 805 3 3 0 0 PP
+1 1 1291 1773 3 3 0 0 PP
+1 1 1315 1790 3 3 0 0 PP
+1 1 1336 1813 3 3 0 0 PP
+1 1 1510 1882 3 3 0 0 PP
+1 1 761 990 3 3 0 0 PP
+1 1 1846 685 3 3 0 0 PP
+1 1 1888 601 3 3 0 0 PP
+grestore
+gsave PEAKLINEWIDTH setlinewidth
+grestore
+/LineEndSizeX 5.173208 def
+/LineEndSizeY 0.323326 def
+LabelFont findfont setfont
+currentfont 469.906945 (Standard Width) stringwidth pop div scalefont setfont
+{gsave -184.606300 -16.782391 rmoveto 1 1 scale 0 setpixel (G7/G15C8-H8) show grestore} {0 0 824.377 1098.811 803.881 992.404 804.909 1098.811 PaintPointer} -1 -1 836 1132 369 56 PA
+{gsave -184.606300 -16.782391 rmoveto 1 1 scale 0 setpixel (C2/C10C6-H6) show grestore} {0 0 1647.229 177.246 1661.110 284.895 1627.761 177.246 PaintPointer} -1 -1 1591 144 369 56 PA
+{gsave -184.606300 -16.782391 rmoveto 1 1 scale 0 setpixel (C6/C14C6-H6) show grestore} {0 0 1664.093 382.388 1685.679 295.867 1644.625 382.388 PaintPointer} -1 -1 1576 416 369 56 PA
+{gsave -184.606300 -16.782391 rmoveto 1 1 scale 0 setpixel (T8/T16C6-H6) show grestore} {0 0 1023.388 866.129 979.127 739.101 1003.920 866.129 PaintPointer} -1 -1 1071 899 369 56 PA
+{gsave -167.823909 -16.782391 rmoveto 1 1 scale 0 setpixel (A1/A9C8-H8) show grestore} {0 0 1133.132 525.616 1097.855 421.289 1113.664 525.616 PaintPointer} -1 -1 1170 559 336 56 PA
+{gsave -117.476736 -16.782391 rmoveto 1 1 scale 0 setpixel (G3C8-H8) show grestore} {0 0 732.953 886.375 782.392 983.135 713.485 886.375 PaintPointer} -1 -1 647 853 235 56 PA
+{gsave -134.259127 -16.782391 rmoveto 1 1 scale 0 setpixel (T12C6-H6) show grestore} {0 0 1207.047 1406.787 1212.668 1368.292 1187.580 1406.787 PaintPointer} -1 -1 1137 1440 269 56 PA
+{gsave -117.476736 -16.782391 rmoveto 1 1 scale 0 setpixel (C4C6-H6) show grestore} {0 0 1133.652 221.625 1158.498 256.898 1133.652 241.093 PaintPointer} -1 -1 1011 231 235 56 PA
+{gsave -134.259127 -16.782391 rmoveto 1 1 scale 0 setpixel (T8H1'-H6) show grestore} {} -1 -1 2073 226 269 56 PA
+{gsave -134.259127 -16.782391 rmoveto 1 1 scale 0 setpixel (G11C8-H8) show grestore} {0 0 679.771 1019.007 760.477 991.892 679.771 1038.475 PaintPointer} -1 -1 540 1031 269 56 PA
+grestore
+grestore
+edgeview
+grestore
+gsave
+4.25 I 7.94 1.75 add I translate
+[
+[(Spectrum:  out:3)]
+[(User:  HenryXu     Date:  Sat Jul  4 21:48:08 2015)]
+[(Positive contours: low 1.50e+06  levels 30  factor 1.20)]
+[(Negative contours: low -1.03e+08  levels 30  factor 1.20)]
+] banner
+grestore
+showpage

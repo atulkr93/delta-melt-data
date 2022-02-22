@@ -1,0 +1,235 @@
+<sparky save file>
+<version 3.115>
+<user>
+set mode 0
+set saveprompt 0
+set saveinterval 0
+set resizeViews 0
+set keytimeout 3000
+set cachesize 4
+set contourgraying 1
+default print command lpr
+default print file /Users/HenryXu/Desktop/out:3.ps
+default print options 2 25 1.000000 1.000000
+<end user>
+<spectrum>
+name out:3
+pathname ../Henry-091716-CA-deazaG-Echin-pH5.3-25C/102/out.ucsf
+dimension 2
+shift 0.000000 0.000000
+points 2048 8192
+assignMultiAxisGuess 0
+assignGuessThreshold 0.000000
+assignRelation 1 4 
+assignRelation 2 4 
+assignRange 1 0.000000
+assignRange 2 0.000000
+assignFormat %a1-%a2
+listTool sortBy label
+listTool nameType assignment
+listTool sortAxis w1
+listTool showFlags frequency
+integrate.overlapped_sep 120.000 30.000
+integrate.methods 1 0 1
+integrate.allow_motion 1
+integrate.adjust_linewidths 1
+integrate.motion_range 0.040 0.010
+integrate.min_linewidth 0.0114 0.0029
+integrate.max_linewidth 1.1358 0.2856
+integrate.fit_baseline 0
+integrate.subtract_peaks 0
+integrate.contoured_data 1
+integrate.rectangle_data 0
+integrate.maxiterations 10000
+integrate.tolerance 0.001000
+peak.pick 0.000000 0.000000 0.000000 0.000000 0
+peak.pick-minimum-linewidth 0.000000 0.000000
+peak.pick-minimum-dropoff 0.00
+noise.sigma 287123.968750
+ornament.label.size 17.075940
+ornament.line.size 0.409823
+ornament.peak.size 6.010731
+ornament.grid.size 0.400000
+ornament.peakgroup.size 0.819645
+ornament.selectsize 0.500000
+ornament.pointersize 0.500000
+ornament.lineendsize 0.500000
+<attached data>
+<end attached data>
+<view>
+name out:3
+precision 0
+precision_by_units 0 0 0
+viewmode 0
+show 1 label line peak grid peakgroup
+axistype 2
+flags crosshair crosshair2
+contour.pos 30 2e+06 1.200000 0.000000 red
+contour.neg 1 -1.44e+09 1.400000 0.000000 green
+<params>
+orientation 1 0
+location 981 57
+size 710 644
+offset 1168.370704 2760.709959
+scale 1.000000 0.734943
+zoom 1.288506
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 981 57
+size 710 644
+offset 1168.370704 2760.709959
+scale 1.000000 0.734943
+zoom 1.288506
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 981 57
+size 710 644
+offset 1168.370704 2760.709959
+scale 1.000000 0.734943
+zoom 1.288506
+flags 0
+<end params>
+<end view>
+<ornament>
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 1
+pos 142.959 7.713
+height 0.000 14897199.000
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 2
+pos 142.850 6.796
+height 0.000 19044624.000
+rs |C2/C10|C6| |C2/C10|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 142.850 6.796
+label C2/C10C6-H6
+xy 142.850,6.686 6.842,143.480
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 3
+pos 142.784 6.766
+height 0.000 20956396.000
+rs |C6/C14|C6| |C6/C14|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 142.784 6.766
+label C6/C14C6-H6
+xy 142.784,6.656 6.766,142.344
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 4
+pos 142.118 7.546
+height 0.000 14732670.000
+rs |A1/A9|C8| |A1/A9|G8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 142.118 7.546
+label A1/A9C8-G8
+xy 142.118,7.436 7.546,141.678
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 5
+pos 142.991 7.462
+height 0.000 9419872.000
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 6
+pos 142.435 7.306
+height 0.000 952207.312
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 7
+pos 143.679 7.546
+height 0.000 1656106.500
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 8
+pos 140.196 7.273
+height 0.000 2605766.000
+rs |T12|C6| |T12|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 140.196 7.273
+label T12C6-H6
+xy 140.196,7.163 7.273,139.756
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 9
+pos 140.371 7.702
+height 0.000 10422656.000
+rs |T8/T16|C6| |T8/T16|H6|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 140.371 7.702
+label T8/T16C6-H6
+xy 140.371,7.592 7.983,140.749
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 10
+pos 139.094 7.939
+height 0.000 44445744.000
+rs |G7/G15|C8| |G7/G15|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 139.094 7.939
+label G7/G15C8-H8
+xy 139.094,7.829 7.673,138.959
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 11
+pos 139.094 8.013
+height 0.000 5559874.000
+rs |G3/G11|C8| |G3/G11|H8|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 139.094 8.013
+label G3/G11C8-H8
+xy 139.094,7.903 8.044,139.582
+]
+<end ornament>
+<end spectrum>

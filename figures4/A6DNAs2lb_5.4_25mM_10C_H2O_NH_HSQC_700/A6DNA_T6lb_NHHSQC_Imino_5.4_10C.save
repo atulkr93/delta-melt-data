@@ -1,0 +1,243 @@
+<sparky save file>
+<version 3.115>
+<user>
+set mode 0
+set saveprompt 0
+set saveinterval 0
+set resizeViews 0
+set keytimeout 3000
+set cachesize 4
+set contourgraying 1
+default print command lpr
+default print file 
+default print options 2 27 1.000000 1.000000
+<end user>
+<spectrum>
+name A6DNA_T6lb_NHHSQC_Imino_5.4_10C
+pathname ../A6DNAs2lb_5.4_25mM_10C_H2O_NH_HSQC_700/A6DNA_T6lb_NHHSQC_Imino_5.4_10C.ucsf
+dimension 2
+shift 0.000000 0.000000
+points 4096 2975
+assignMultiAxisGuess 0
+assignGuessThreshold 0.000000
+assignRelation 1 4 
+assignRelation 2 4 
+assignRange 1 0.000000
+assignRange 2 0.000000
+assignFormat %a1-%a2
+listTool sortBy label
+listTool nameType assignment
+listTool sortAxis w1
+listTool showFlags frequency
+integrate.overlapped_sep 300.000 30.000
+integrate.methods 1 0 1
+integrate.allow_motion 1
+integrate.adjust_linewidths 1
+integrate.motion_range 0.100 0.010
+integrate.min_linewidth 0.0282 0.0029
+integrate.max_linewidth 2.8185 0.2856
+integrate.fit_baseline 0
+integrate.subtract_peaks 0
+integrate.contoured_data 1
+integrate.rectangle_data 0
+integrate.maxiterations 10000
+integrate.tolerance 0.001000
+peak.pick 0.000000 0.000000 0.000000 0.000000 0
+peak.pick-minimum-linewidth 0.000000 0.000000
+peak.pick-minimum-dropoff 0.00
+noise.sigma 79045.023438
+ornament.label.size 31.517874
+ornament.line.size 0.472768
+ornament.peak.size 31.517874
+ornament.grid.size 0.400000
+ornament.peakgroup.size 0.787947
+ornament.selectsize 0.500000
+ornament.pointersize 0.500000
+ornament.lineendsize 0.500000
+<attached data>
+<end attached data>
+<view>
+name A6DNA_T6lb_NHHSQC_Imino_5.4_10C
+precision 0
+precision_by_units 0 0 0
+viewmode 0
+show 1 label line peak grid peakgroup
+axistype 2
+flags crosshair crosshair2
+contour.pos 15 1e+07 1.200000 0.000000 red
+contour.neg 0 -395000 1.400000 0.000000 green
+<params>
+orientation 1 0
+location 705 295
+size 500 500
+offset -140.388199 474.137541
+scale 1.000000 2.119940
+zoom 0.476910
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 705 295
+size 500 500
+offset -140.388199 474.137541
+scale 1.000000 2.119940
+zoom 0.476910
+flags 0
+<end params>
+<params>
+orientation 1 0
+location 705 295
+size 500 500
+offset -140.388199 474.137541
+scale 1.000000 2.119940
+zoom 0.476910
+flags 0
+<end params>
+<end view>
+<ornament>
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 1
+pos 159.320 13.810
+height 0.000 19677164.000
+rs |T8|N3| |T8|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 159.320 13.810
+label T8N3-H3
+xy 159.265,13.759 13.846,158.575
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 2
+pos 159.004 13.777
+height 0.000 21065036.000
+rs |T9|N3| |T9|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 159.004 13.777
+label T9N3-H3
+xy 159.004,13.677 13.793,158.230
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 3
+pos 159.265 13.859
+height 0.000 19933202.000
+rs |T4|N3| |T4|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 159.265 13.859
+label T4N3-H3
+xy 159.265,13.759 13.927,158.690
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 4
+pos 159.636 13.904
+height 0.000 18928288.000
+rs |T7|N3| |T7|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 159.636 13.904
+label T7N3-H3
+xy 159.636,13.804 13.942,158.982
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 5
+pos 159.992 14.098
+height 0.000 19894148.000
+rs |T6|N3| |T6|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 159.992 14.098
+label T6N3-H3
+xy 159.992,13.998 14.083,159.404
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 6
+pos 159.957 14.174
+height 0.000 18983488.000
+rs |T5|N3| |T5|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 159.957 14.174
+label T5N3-H3
+xy 159.957,14.074 14.186,159.303
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 7
+pos 147.284 13.091
+height 0.000 24901442.000
+rs |G11|N3| |G11|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 147.284 13.091
+label G11N3-H3
+xy 147.284,12.991 13.091,146.284
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 8
+pos 147.036 12.873
+height 0.000 20805366.000
+rs |G10|N3| |G10|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 147.036 12.873
+label G10N3-H3
+xy 147.036,12.773 12.931,146.448
+]
+type peak
+color 0 2 0 white
+flags 0 0 0 0
+id 9
+pos 147.142 12.849
+height 0.000 25159986.000
+rs |G2|N3| |G2|H3|
+[
+type label
+color 2 0 0 white
+flags 0 0 0 1
+mode 2
+pos 147.142 12.849
+label G2N3-H3
+xy 147.142,12.749 12.835,146.434
+]
+<end ornament>
+<end spectrum>

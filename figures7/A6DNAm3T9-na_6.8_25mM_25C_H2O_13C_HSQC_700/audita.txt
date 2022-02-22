@@ -1,0 +1,18 @@
+##TITLE= Audit trail, TOPSPIN		Version 3.1
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/topspin3.1/hashimi/hs_20180819_A6DNAm3T9_6.8_HHTOCSY/900/audita.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, PROCESS, VERSION, WHAT)
+(   1,<2018-08-19 23:51:04.935 -0400>,<hashimi>,<EP-10018760>,<go>,<TOPSPIN 3.1>,
+      <created by zg
+	started at 2018-08-19 19:00:41.825 -0400,
+	POWCHK enabled, PULCHK disabled,
+       configuration hash MD5:
+       3A D5 24 3A C1 05 84 08 1F A0 5B 10 9A 2A D5 FD
+       data hash MD5: 2K * 256
+       A2 E5 39 A5 A9 33 86 28 FC EA 29 26 62 EF 42 54>)
+##END=
+
+$$ hash MD5
+$$ 66 21 9E 87 A1 D9 99 89 92 BB 43 F4 0D E1 0E 69

@@ -1,0 +1,8 @@
+Fit #1
+G_C1p_Off Pars,Fit Value,Error
+pB (%),0.030,0.030
+dwB (ppm),5.99,0.79
+kexAB (s^-1),3638,1179
+R1 (s^-1),2.21,0.04
+R2 (s^-1),14.08,0.13
+Red. Chi-sq,0.31

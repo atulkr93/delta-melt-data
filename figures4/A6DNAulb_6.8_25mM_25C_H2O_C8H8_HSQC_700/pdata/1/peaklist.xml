@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2018-09-04T20:49:43">
+  <PeakList2D>
+    <PeakList2DHeader creator="hashimi@EP-10018760" date="2018-09-04T20:49:44" expNo="3" name="hs_20180904_A6-ulb-DNA_HSQC_6.8_25C" owner="hashimi" procNo="1" source="/opt/topspin3.1/hashimi">
+      <PeakPickDetails># Manually picked peaks
+</PeakPickDetails>
+    </PeakList2DHeader>
+    <Peak2D F1="138.7531" F2="8.0939" intensity="58474.66" type="0"/>
+    <Peak2D F1="151.5214" F2="7.1245" intensity="51369.93" type="0"/>
+  </PeakList2D>
+</PeakList>

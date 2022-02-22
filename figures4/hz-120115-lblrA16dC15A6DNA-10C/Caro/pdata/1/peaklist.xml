@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2015-12-01T23:37:56">
+  <PeakList2D>
+    <PeakList2DHeader creator="hashim@CZC3510JM8" date="2015-12-01T23:37:58" expNo="101" name="hz-120115-lblrA16dC15A6DNA-10C" owner="hashim" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails># Manually picked peaks
+</PeakPickDetails>
+    </PeakList2DHeader>
+    <Peak2D F1="138.0889" F2="8.0009" annotation="rA16C8H8" intensity="26793.16" type="0"/>
+    <Peak2D F1="140.2086" F2="7.0855" annotation="dC15C6H6" intensity="4868.28" type="0"/>
+  </PeakList2D>
+</PeakList>

@@ -1,0 +1,15 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2016-02-25 19:15:21.458 -0500  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/dk-hs-mc-A6DNA-RDCs-ul-25Feb16/3/pdata/1/used_from
+$$ process C:\Bruker\TopSpin3.2\prog\mod\proc1d.exe
+##$CUREXP= <ser>
+##$DATPATH= <C:/Bruker/TopSpin3.2/hashimi>
+##$EXPNO= 3
+##$NAME= <dk-hs-mc-A6DNA-RDCs-ul-25Feb16>
+##$PROCNO2= 1
+##END=

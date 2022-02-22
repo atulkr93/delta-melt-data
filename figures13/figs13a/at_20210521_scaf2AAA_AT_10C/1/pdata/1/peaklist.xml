@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2021-05-23T16:47:46">
+  <PeakList1D>
+    <PeakList1DHeader creator="hashim" date="2021-05-23T16:47:46" expNo="1" name="at_20210521_scaf2AAA_AT_10C" owner="" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails>F1=4.750936ppm, F2=4.665870ppm, MI=12.08cm, MAXI=16.78cm, PC=1.000
+      </PeakPickDetails>
+    </PeakList1DHeader>
+    <Peak1D F1="4.6924" intensity="15.00" type="0"/>
+  </PeakList1D>
+</PeakList>

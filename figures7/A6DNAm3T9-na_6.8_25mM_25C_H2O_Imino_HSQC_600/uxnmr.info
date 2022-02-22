@@ -1,0 +1,136 @@
+CONFIGURATION INFORMATION
+=========================
+
+Path         : C:/Bruker/TopSpin3.2/conf/instr/spect/uxnmr.info
+Date         : Thu Dec 21 09:50:55 2017
+Release      : TOPSPIN Version 3.2-pl6
+Installed in : C:/Bruker/TopSpin3.2
+Host         : CZC3510JM8
+OS           : Windows 7 (Vs 6.1) Service Pack 1
+CPU          : Intel(R) Xeon(R) CPU E5-1620 v2 @ 3.70GHz (8 cores at 3691 MHz with Hyperthreading)
+User         : nmrsu
+Description  : CABINET 600 HD X OB
+Location     : Duke University, Durham
+System       : Avance III NMR spectrometer
+1H-frequency : 599.66 MHz
+Order Number : 10144794
+Configured in: C:/Bruker/TopSpin3.2/conf/instr/spect
+
+IPSO: connected to spectrometer subnet
+- TCP/IP address = 149.236.99.253
+- Tctrl : 1
+- Fctrls: 4
+- Gctrl1: without digital preemphasis
+- Rctrl : none
+- FREDs : none
+- DPP : none
+
+DRU: AQS DRU-E Z102520/04049 ECL 07.00
+- TCP/IP address = 149.236.99.89
+- Firmware Version = 131205
+- DRU controls AQS-Rack and HPPR/2
+
+AQS: connected to 149.236.99.89:/dev/tty10
+  _Slot_ SBSB _____________________Board_____________________
+  Number Addr Type HW-VS FW-VS ID  ECL Name   Description
+  -----------------------------------------------------------
+     2   0x10 0x43   0x5    CD  R  0.2 REC-1  AQS RXAD/2 600 Z130588/1326 ECL 00.02
+     3   0x34 0xd6   0x1        X  4.1 REF-1  REF/3-600 Reference Board for AQS/3 Receiver
+     4   0x24 0x32     0        S  2.2 SGU-1  AQS SGU/3 600 (2CH) Z117129/01316 ECL 02.02 FPGA-Vs=20131031
+     5   0x26 0x32     0        S  2.2 SGU-2  AQS SGU/3 600 (2CH) Z117129/01317 ECL 02.02 FPGA-Vs=20131031
+    13   0xa0 0x93     0        V  0.1 PS-1   
+    14   0xa1 0x91     0        V  1.2 PS-2   AQS PSM-D Power Supply Module
+    --   0x20 0xd8     0        B  1.1 MASTER AQS/3+ Chassis
+     1   0x20  0x7     0        B      MASTER AQS Rack Master
+  Logical Receiver/SGU configuration:
+
+
+Router: none installed
+
+
+Transmitters at the spectrometer subnet:
+----------------------------------------
+BLA_W1345094_0138 W1345094/0138 ECL 11:
+- TCP/IP address = 149.236.99.251
+- Firmware VS    = 20120627
+- Amplifier      = BLA2X500 E 6-365MHZ INR: W1345094/0138 ECL 11
+- Router         = BLMMR32 RF AMPLIFIER MODULE: W1345204/2158 ECL 20
+- Controller     = BLA CONTROL BOARD 6 2CH: W1522050/8039 ECL 50
+BLA_W1345096_0893 W1345096/0893 ECL 30:
+- TCP/IP address = 149.236.99.250
+- Firmware VS    = 20120627
+- Amplifier      = BLAXH2H300/100/150 E 200-600MHZ INR: W1345096/0893 ECL 30
+- Router         = BLMMR32 RF AMPLIFIER MODULE: W1345204/1521 ECL 20
+- Controller     = BLA CONTROL BOARD 6 2CH: W1522050/6601 ECL 50
+LTRX Z109890/00702 ECL 03.01:
+- TCP/IP address = 149.236.99.20
+- Amplifier      = BSMS/2 LOCK TRANSCEIVER 600: Z109890/00702 ECL 03.01
+
+BSMS: BSMS/2 connected to ethernet
+- TCP/IP address = 149.236.99.20
+- ELCB firmware version = 20130627
+- GAB current limits = 0.0/X, 0.0/Y, 10.0/Z (in A)
+- SCB channels = 40
+- Shim System = BOSS3-SB
+- L-TRX = BSMS/2 LOCK TRANSCEIVER 600: Z109890/00702 ECL 03.01
+- Lock: on L-TRX board
+- VTU_SPB = BSMS/2 SPB SENSOR & PNEUMATIC BD: Z115191/02182 ECL 04.00
+- VTU_VPSB1 = BSMS/2 VARIABLE POWER SUPPLY BD: Z115193/02470 ECL 01.05
+
+VTU: in BSMS/2 connected to ethernet
+- TCP/IP address = 149.236.99.20
+
+Sample Changers at the spectrometer subnet:
+-------------------------------------------
+ - BACS2_H15200-01_416: at TCP/IP address 149.236.99.172
+
+
+Cryo Controller CRCO: device connected to 149.236.99.253:/dev/tty04
+
+Preamplifiers :
+HPPR: - HPPR/2 preamplifier connected to 149.236.99.89:/dev/tty10
+    Type      : HPPR/2
+    Controller: Application firmware = c.
+                no LED display for tuning and matching
+    Module  1 : HPLNA 19F1H (virtual 50 Ohm reference: 99.5%/0.2deg, reflection meter)
+                 PN=Z103205, SN=00512 from 20140402
+    Module  2 : 2H
+                 PN=Z003473, SN=01313 from 20140327
+    Module  3 : XBB19F 2HS
+                 PN=Z003506, SN=01515 from 20140312
+    Module  4 : 31P
+                 PN=Z102449, SN=00063 from 20131002
+    Module  5 : 13C
+                 PN=Z003524, SN=01003 from 20140304
+    Module  6 : 15N
+                 PN=Z003530, SN=00902 from 20140326
+
+
+Frequency generation:
+- F1: for SGU
+- F2: for SGU
+- F3: for SGU
+- F4: for SGU
+
+
+
+RF cable connections (detected by 'confamp')
+--------------------------------------------------------------------
+SGU1 NORM output -> input 1 of transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250)
+SGU1 AUX  output -> input 2 of transmitter 1 (BLA2X500 E 6-365MHZ INR W1345094/0138 at TCP/IP 149.236.99.251)
+SGU2 NORM output -> input 2 of transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250)
+SGU2 AUX  output -> TUNE signal input of HPPR
+SGU3 NORM output -> input 1 of transmitter 1 (BLA2X500 E 6-365MHZ INR W1345094/0138 at TCP/IP 149.236.99.251)
+SGU3 AUX  output -> input 3 of transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250)
+SGU4 NORM output -> input 4 of transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250)
+SGU4 AUX  output -> input 3 of transmitter 1 (BLA2X500 E 6-365MHZ INR W1345094/0138 at TCP/IP 149.236.99.251)
+
+Blanking cable connections (detected by 'confamp')
+--------------------------------------------------------------------
+transmitter 1 (BLA2X500 E 6-365MHZ INR W1345094/0138 at TCP/IP 149.236.99.251) amplifier X-500W uses blanking 4
+transmitter 1 (BLA2X500 E 6-365MHZ INR W1345094/0138 at TCP/IP 149.236.99.251) amplifier X-500W uses blanking 5
+transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250) amplifier 1H-100W uses blanking 2
+transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250) amplifier X-300W uses blanking 1
+transmitter 2 (BLAXH2H300/100/150 E 200-600MHZ W1345096/0893 at TCP/IP 149.236.99.250) amplifier 2H-150W uses blanking 7
+transmitter 3 (BSMS/2 LOCK TRANSCEIVER 600 Z109890/00702 at TCP/IP 149.236.99.20) amplifier 2H-5W needs no blanking
+

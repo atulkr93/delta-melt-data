@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PeakList modified="2020-07-02T20:29:32">
+  <PeakList2D>
+    <PeakList2DHeader creator="hashim@CZC3510JM8" date="2020-07-02T20:29:33" expNo="101" name="hs_20200702_A6DNAA16lb_high_5.4_HSQC_25C" owner="hashim" procNo="1" source="C:/Bruker/TopSpin3.2/hashimi">
+      <PeakPickDetails># Manually picked peaks
+</PeakPickDetails>
+    </PeakList2DHeader>
+    <Peak2D F1="81.8187" F2="5.6136" intensity="103872.56" type="0"/>
+  </PeakList2D>
+</PeakList>

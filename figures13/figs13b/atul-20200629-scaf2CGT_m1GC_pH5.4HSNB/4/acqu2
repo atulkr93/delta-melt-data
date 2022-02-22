@@ -1,0 +1,22 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.1
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 3	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ 2020-06-30 09:35:53.114 -0400  hashimi@EP-10018760
+$$ /opt/topspin3.1/hashimi/atul-20200629-scaf2CGT_m1GC_pH5.4HSNB/4/acqu2
+$$ process /opt/topspin3.1/prog/mod/dataserver
+##$ACQT0= 0
+##$BF1= 70.936735
+##$FnMODE= 5
+##$NUC1= <15N>
+##$NusJSP= 0
+##$NusT2= 1
+##$NusTD= 0
+##$O1= 337.162301448757
+##$SFO1= 70.9370721623014
+##$SW= 4.28351488304497
+##$SW_h= 303.860004366853
+##$TD= 1
+##END=

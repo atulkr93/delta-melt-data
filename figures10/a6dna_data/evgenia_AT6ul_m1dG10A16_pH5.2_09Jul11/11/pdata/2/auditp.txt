@@ -1,0 +1,29 @@
+##TITLE= Audit trail, XWIN-NMR		Version 3.6
+##JCAMPDX= 5.01
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashimi
+$$ /opt/xwinnmr/data/hashimi/nmr/evgenia_AT6ul_m1dG10A16_pH5.2_09Jul11/11/pdata/2/auditp.txt
+##AUDIT TRAIL=  $$ (NUMBER, WHEN, WHO, WHERE, WHAT)
+(   1,<2011-07-09 11:09:29.07 -0400>,<hashimi>,<bloch600>,
+      <acquisition in progress>)
+(   2,<2011-07-09 11:11:34.54 -0400>,<hashimi>,<bloch600>,
+      <Start of raw data processing
+       qsin BC_mod = 4 SSB = 2 SI = 2K 
+       data hash MD5: 2K
+       2F 5E 16 04 CA A3 27 6C 95 7F 0E BC 86 C5 82 AC>)
+(   3,<2011-07-09 11:11:34.62 -0400>,<hashimi>,<bloch600>,
+      <ft FT_mod = 6 PKNL = 1 SI = 2K 
+       data hash MD5: 2K
+       AD 29 DF 21 9D 9D 04 78 65 40 88 D8 B0 ED 98 18>)
+(   4,<2011-07-09 11:11:34.66 -0400>,<hashimi>,<bloch600>,
+      <pk PHC0 = -185.2 PHC1 = 0 
+       data hash MD5: 2K
+       CB 4E 13 0E C6 1B 36 EF F8 78 78 C5 39 89 76 95>)
+(   5,<2011-07-09 11:11:36.82 -0400>,<hashimi>,<bloch600>,
+      <apk0 
+       data hash MD5: 2K
+       DB DB 90 DA 15 25 9D 58 30 2F 9A FA FE 00 A2 25>)
+##END=
+
+$$ hash MD5
+$$ 1A 54 F9 99 12 D6 3B 5E 21 26 96 53 11 B6 F6 FD

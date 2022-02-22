@@ -1,0 +1,11 @@
+##TITLE= Parameter file, TOPSPIN		Version 3.2
+##JCAMPDX= 5.0
+##DATATYPE= Parameter Values
+##NPOINTS= 1	$$ modification sequence number
+##ORIGIN= Bruker BioSpin GmbH
+##OWNER= hashim
+$$ 2021-05-23 12:46:54.773 -0400  hashim@CZC3510JM8
+$$ C:/Bruker/TopSpin3.2/hashimi/at_20210521_scaf2AAA_m1A_10C/4/pdata/1/assocs
+$$ process C:\Bruker\TopSpin3.2\prog\mod\dataserver.exe
+##$MULTDISP= <C:/Bruker/TopSpin3.2/hashimi/at_20210521_scaf2AAA_m1A_10C/2/pdata/1>
+##END=

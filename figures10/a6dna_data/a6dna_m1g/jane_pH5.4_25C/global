@@ -1,0 +1,1815 @@
+maxpen 7 1 32767 0 1 0 1 0 1 64
+1 1 
+0 
+dga 2 2 1024 0 0 5 1 0 1 64
+1 "1:SPIN SYSTEM:spinsys,sminf:2,smaxf:2,sth:4,slw:3,niter:0,iterate,svs:3;2:CHEM SHIFTS:A:2,B:2;3:COUPLING CONSTANTS:JAB:2;"
+0 
+RFCOIL 2 2 8 0 0 2 1 0 1 64
+1 "main"
+0 
+PRcnt 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+CPbbx 2 2 8 0 0 2 1 0 1 64
+1 "open"
+0 
+BPdpwr3max 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 50 
+0 
+BPclassic 4 2 4 0 0 2 1 0 1 64
+1 "y"
+0 
+BP2Dplot 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+B 1 1 10000000000 -10000000000 0 5 1 1 1 64
+1 700 
+0 
+A 1 1 10000000000 -10000000000 0 5 1 1 1 64
+1 500 
+0 
+BP1Hspinlock 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 3995.0895986 
+0 
+BPautonoisecheck 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+BPBioNMR 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+BPbasic 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 1 
+0 
+BPdeuterated 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+BPdpwr2max 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 43 
+0 
+BPplot 2 2 8 0 0 2 1 0 1 64
+1 ""
+5 "plot" "on" "off" "file" "" 
+BPdpwrspinlock 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 8000 
+0 
+BPdpwrmax 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 47 
+0 
+BPdpwr4max 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 50 
+0 
+BPminpwC 6 1 13 13 13 2 1 8192 1 64
+1 12 
+0 
+BPinstall 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 1 
+0 
+BPspinlock 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 8000 
+0 
+BPpwrlimits 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 1 
+0 
+BPplotdir 2 2 8 0 0 2 1 0 1 64
+1 "/home/hashimi/vnmrsys/AutoTripRes"
+0 
+BPquick 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 0 
+0 
+BPtpwrmax 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 59 
+0 
+BPtpwrspinlock 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 3995.0895986 
+0 
+N 2 2 8 0 0 2 1 4 1 64
+1 "n"
+0 
+H1offset 1 1 1e+18 -1e+18 0 2 1 0 1 64
+1 0 
+0 
+FASTenv 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+FASTuser 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+JAB 1 1 10000000000 -10000000000 0 5 1 1 1 64
+1 5 
+0 
+PRbpa 4 2 4 0 0 2 1 256 1 64
+12 "y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+0 
+PDFpreview 4 2 4 0 0 2 1 0 1 64
+1 "y"
+0 
+PRskipF2 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+PRnexp 7 1 32767 0 0 2 1 0 1 64
+1 3 
+0 
+PRlp 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 0 
+0 
+PRdir 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+PRd1 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 256 1 64
+1 1 
+0 
+PRexp 2 2 8 0 0 2 1 256 1 64
+12 "gNhsqc"
+"ghn_co"
+"ghn_ca"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+"ghn_co"
+0 
+PRn 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 1 
+0 
+PRpos 4 2 4 0 0 2 1 256 1 64
+12 "y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+"y"
+0 
+PRnpeaks 7 1 32767 0 0 2 1 256 1 64
+12 100 100 100 100 100 100 100 100 100 100 100 100 
+0 
+PRni2 7 1 32767 0 0 2 1 256 1 64
+12 0 0 0 0 0 0 0 0 0 0 0 0 
+0 
+PRni 7 1 32767 0 0 2 1 256 1 64
+12 0 0 0 0 0 0 0 0 0 0 0 0 
+0 
+PRniTilt 7 1 32767 0 0 2 1 256 1 64
+12 0 0 0 0 0 0 0 0 0 0 0 0 
+0 
+PRnt 7 1 32767 0 0 2 1 256 1 64
+12 0 0 0 0 0 0 0 0 0 0 0 0 
+0 
+PRnpr 7 1 32767 0 0 2 1 256 1 64
+12 1 1 1 1 1 1 1 1 1 1 1 1 
+0 
+PRpage 7 1 32767 0 0 2 1 1 1 64
+1 1 
+0 
+PRrp 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 0 
+0 
+PRppeaks 7 1 32767 0 0 2 1 256 1 64
+1 0 
+0 
+PRsetlim 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+PRvarsw1 4 2 4 0 0 2 1 256 1 64
+12 "n"
+"n"
+"n"
+"n"
+"n"
+"n"
+"n"
+"n"
+"n"
+"n"
+"n"
+"n"
+0 
+PRsw1 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 256 1 64
+12 2500 2500 2500 2500 2500 2500 2500 2500 2500 2500 2500 2500 
+0 
+PRsw 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 256 1 64
+12 12500 12500 12500 12500 12500 12500 12500 12500 12500 12500 12500 12500 
+0 
+PRsp 5 1 1000000000 -1000000000 0 2 1 0 1 64
+1 4799.4496242 
+0 
+PRthr 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 256 1 64
+12 0 0 0 0 0 0 0 0 0 0 0 0 
+0 
+PRsw2 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 256 1 64
+12 2500 2500 2500 2500 2500 2500 2500 2500 2500 2500 2500 2500 
+0 
+ProbeAttr 2 2 8 0 0 2 1 256 1 64
+8 "/home/hashimi/vnmrsys/probes/HCN/HCN"
+""
+""
+"none"
+"HCN_lk_d2o"
+"/home/hashimi/vnmrsys"
+"edit"
+"nOprObEId"
+0 
+PRwp 5 1 1000000000 -1000000000 0 2 1 0 1 64
+1 4799.4496242 
+0 
+QSexp 2 2 8 0 0 2 1 256 1 64
+9 "PROTON"
+"CARBON"
+"gCOSY"
+"HSQCAD"
+"gHMBCAD"
+"H1COSY"
+"H1COSYQC"
+"H1COSYQCBC"
+"C13DEPT"
+0 
+QSpar 2 2 8 0 0 2 1 256 1 64
+24 "samplename "
+""
+"PROTON"
+"1"
+""
+"samplename"
+"random"
+""
+""
+""
+""
+""
+""
+""
+""
+"fgexp"
+""
+""
+"no"
+"hashimi"
+"hashimi"
+"None"
+"NewStudy"
+""
+0 
+auto 2 2 64 0 0 2 1 7 1 64
+1 "n"
+2 "n" "y" 
+acqmode 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+Y 2 2 8 0 0 2 1 4 1 64
+1 "y"
+0 
+SpecViewPref 2 2 8 0 0 2 1 256 1 64
+2 "ACPEQ"
+""
+0 
+ScoutViewPref 2 2 8 0 0 2 1 0 1 64
+1 "no"
+0 
+TrayClipBoard 2 2 8 0 0 2 1 256 1 64
+1 ""
+0 
+acqaddr 2 2 128 0 0 2 1 4 1 64
+1 "localhost.localdomain 47811 27349"
+0 
+addsubexp 7 1 9999 1 0 4 1 1 1 64
+1 5 
+0 
+activestudy 2 2 8 0 0 3 1 0 1 64
+1 ""
+0 
+activeid 2 2 8 0 0 2 1 0 1 64
+1 "null"
+0 
+activeviewport 1 1 32767 0 0 2 1 33040 1 64
+1 1 
+0 
+adaptiveNT 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+appmode 2 2 8 0 0 2 1 8 1 64
+1 "walkup"
+0 
+arraycolors 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 0 
+0 
+cla 7 1 4096 0 1 5 1 0 1 64
+4 1 4 2 3 
+0 
+automode 2 2 8 0 0 3 1 0 1 64
+1 "wait"
+0 
+autodir 2 2 256 0 0 2 1 3 1 64
+1 ""
+0 
+autodirtmplt 2 2 8 0 0 2 1 0 1 64
+1 "auto_%DATE%"
+0 
+autosave 1 1 32767 -32767 0 2 1 16 1 64
+1 1 
+0 
+autoname 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+autoraflag 4 2 4 0 0 2 1 0 1 64
+1 "y"
+0 
+buttonMode 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+bioref 4 2 4 0 0 2 1 0 1 64
+1 "y"
+2 "n" "y" 
+crmode 2 2 8 0 0 4 1 17 1 64
+1 "c"
+2 "b" "c" 
+copyid 2 2 8 0 0 3 1 33040 1 64
+2 "null"
+"null"
+0 
+cmdHis 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 0 
+0 
+clfreq 1 1 10000000000 -10000000000 0 5 1 0 1 64
+4 702.531006 697.531006 502.468994 497.468994 
+0 
+colorMode 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+colorName 2 2 8 0 0 3 1 65808 1 64
+51 "black"
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+""
+0 
+cpglobalauto 2 2 8 0 0 2 1 0 1 64
+1 "/home/hashimi/vnmrsys/Automation"
+0 
+cpautodir 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+copymode 2 2 8 0 0 2 1 0 1 64
+1 "false"
+0 
+cpsaveglobal 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+cpprefs 2 2 8 0 0 2 1 256 1 64
+70 "180"
+"60"
+"nolimit"
+"random"
+""
+"none"
+"daily"
+"pdf"
+"$userdir$/data"
+"$samplename$_%DATE%_"
+"$pslabel$_"
+"a"
+"e"
+"n"
+"current"
+"no"
+"plot"
+""
+""
+""
+""
+"std"
+""
+""
+""
+"auto_%DATE%"
+"/home/hashimi/vnmrsys/data"
+"Ethylindanone_20140115_01"
+"PROTON_01.fid"
+""
+""
+""
+"auto_20140115_01"
+"0.5"
+"n"
+"no"
+"n"
+"no"
+""
+"300"
+"n"
+"plotterprinter"
+"yes"
+"no"
+"none"
+"no"
+""
+""
+"no"
+"no"
+"no"
+"fgexp"
+"ACPEQ"
+""
+"no"
+"no"
+"no"
+"no"
+"no"
+"complex"
+"no"
+"fgbgauto"
+"no"
+"n"
+"n"
+"no"
+"no"
+"ampm"
+"Continue"
+"New"
+0 
+cpvjrev 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+curexp 2 2 128 0 0 0 1 32768 1 64
+1 "/home/hashimi/vnmrsys/exp2015"
+0 
+crosshair 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 1 
+0 
+curecc 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+department 2 2 128 0 0 2 1 32772 1 64
+1 "nmr"
+0 
+curwin 7 1 9999 0 1 4 1 33040 1 64
+3 1 1 1 
+0 
+cursqexp 2 2 8 0 0 2 1 0 1 64
+1 "/home/hashimi/vnmrsys/studies/exp2015"
+0 
+datapref 2 2 8 0 0 4 1 0 1 64
+9 "$userdir$/data"
+""
+""
+""
+"$userdir$/data"
+"$samplename$"
+"$pslabel$_%DATE%"
+""
+"y"
+0 
+dfmode 2 2 8 0 0 4 1 17 1 64
+1 "r"
+3 "r" "i" "z" 
+hdwshim 2 2 8 0 0 2 1 0 1 64
+1 "n"
+3 "n" "y" "p" 
+eventLogpar 2 2 8 0 0 2 1 256 1 64
+1 ""
+0 
+dsp 2 2 8 0 0 2 1 9 1 64
+1 "n"
+3 "i" "r" "n" 
+dofidsave 2 2 8 0 0 0 1 0 1 64
+1 "n"
+2 "y" "n" 
+dla 2 2 1024 0 0 5 1 0 1 64
+1 "1:LINE ASSIGNMENTS:[sla:4:0,slfreq:12:2];3:LINES CALCULATED:[cla:4:0,clfreq:12:2];"
+0 
+displayShow 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+doacqdone 2 2 8 0 0 0 1 16 1 64
+1 "y"
+2 "y" "n" 
+doprocess 2 2 8 0 0 0 1 256 1 64
+6 "y"
+"y"
+"y"
+"y"
+"y"
+"y"
+2 "y" "n" 
+doplotlogo 2 2 8 0 0 2 1 0 1 64
+1 "y"
+0 
+email 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+dxmirror 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+emailflag 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+force 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 0 
+0 
+fidarea 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 1.51261987424 
+0 
+expselnu 1 1 9.99999984307e+17 -9.99999984307e+17 0 4 1 0 1 64
+1 0 
+0 
+expselu 1 1 9.99999984307e+17 -9.99999984307e+17 0 4 1 0 1 64
+1 0 
+0 
+fidmirror 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+fidnorm 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 0 1 64
+1 0.001 
+0 
+gcflg 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+gcal 1 1 1 0 1e-10 2 1 0 1 64
+1 0 
+0 
+fsq 2 2 8 0 0 2 1 8 1 64
+1 "n"
+2 "y" "n" 
+globalenter 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+globalauto 2 2 8 0 0 3 1 0 1 64
+1 ""
+0 
+gmapname 2 2 8 0 0 2 1 0 1 64
+1 "HCN_H1_2016-01-21"
+0 
+lastmenu 2 2 8 0 0 4 1 32785 1 64
+1 ""
+0 
+jviewportlabel 2 2 8 0 0 2 1 65808 1 64
+9 "wgnoesy"
+"G5-PEG-enz_25c_1D_NOESY_11816_add_newparam_128"
+"sLA34-ann-env22-tino_25C_1DNOESY_101215"
+"ann-env22-tin-083115_25C_1D_NOESYSlice"
+"5"
+"6"
+"7"
+"8"
+"9"
+0 
+iterate 2 2 256 0 0 5 1 1 1 64
+1 ""
+0 
+intstyle 2 2 8 0 0 4 1 0 1 64
+1 ""
+0 
+institute 2 2 8 0 0 3 1 0 1 64
+1 ""
+0 
+investigator 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+jcurwin 1 1 9999 0 1 2 1 272 1 64
+9 2015 1 2 3 4 5 6 7 8 
+0 
+jviewport 1 1 16 0 1 2 1 33045 1 64
+1 1 
+0 
+jvpinfo 2 2 8 0 0 3 1 65808 1 64
+1 "none"
+0 
+jviewports 1 1 32767 -32767 0 2 1 65808 1 64
+13 1 0 1 2 9001 1 2 4 5 6 7 8 9 
+0 
+jviewportproperty 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+2 1 1 
+0 
+jvpcolors 2 2 8 0 0 2 1 65808 1 64
+18 "106,90,205"
+"0,0,0"
+"255,99,71"
+"red"
+"orange"
+"magenta"
+"goldenrod"
+"darkGreen"
+"coral"
+"blue"
+"0,100,0"
+"blue"
+"blue"
+"blue"
+"blue"
+"blue"
+"blue"
+"blue"
+0 
+jvpexps 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 65808 1 64
+18 1 1 1 1 1 1 1 1 1 1 2 3 4 5 6 7 8 9 
+0 
+lastlcpeak 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+jvplabels 2 2 8 0 0 2 1 65808 1 64
+9 "1"
+"2"
+"3"
+"4"
+"5"
+"6"
+"7"
+"8"
+"9"
+0 
+lastlk 2 2 0 0 0 0 1 0 1 64
+1 "CDCl3"
+0 
+lockphase 1 1 360 0 1 2 1 65552 1 64
+1 151 
+0 
+ll2dmode 4 2 4 0 0 4 1 17 1 64
+1 "yyyy"
+2 "y" "n" 
+lcpeak 7 1 32767 0 0 2 1 32768 1 64
+1 0 
+0 
+liqbear 7 1 65535 0 1 2 1 0 1 64
+1 0 
+0 
+lockgain 1 1 48 0 1 2 1 65552 1 64
+1 48 
+0 
+loc 7 1 12 12 12 2 1 8201 1 64
+1 0 
+0 
+masactivesetpoint 7 1 2 0 0 0 1 0 1 64
+1 0 
+0 
+loginBox 2 2 8 0 0 2 1 0 1 64
+1 "default"
+0 
+lockpower 1 1 68 0 1 2 1 65552 1 64
+1 39 
+0 
+mapwin 7 1 9999 0 1 4 1 33040 1 64
+16 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+0 
+masspeedlimit 7 1 100000 0 0 0 1 0 1 64
+1 0 
+0 
+masprofile 7 1 1 0 0 0 1 0 1 64
+1 0 
+0 
+masthinwall 2 2 0 0 0 0 1 0 1 64
+1 "thin"
+0 
+masvt 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+sminf 1 1 10000000000 -10000000000 0 5 1 1 1 64
+1 0 
+0 
+printformat 2 2 8 0 0 3 1 65808 1 64
+1 "pcl"
+0 
+parstyle 2 2 8 0 0 4 1 0 1 64
+1 "ppa"
+0 
+mstring 2 2 0 0 0 0 1 32784 1 64
+13 "ds(`toggle`)"
+"mfaction('mfzoom',0)"
+"mfaction('fullzoom')"
+"mfaction('mfzoom',1)"
+"mfaction('mfzoom',-1)"
+"setButtonMode(2) menu(`ds_1`)"
+"setButtonMode(3) menu(`ds_1`)"
+"intmod=`partial`"
+"if(mfShowAxis=1) then mfShowAxis=0 else mfShowAxis=1 endif repaint"
+"ds(`thresh`)"
+"ds(`phase`)"
+"ds"
+"menu(`display_1D`)"
+0 
+mfTextColor 2 2 8 0 0 3 1 32768 1 64
+1 "slateBlue"
+0 
+mfShowFields 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 1 
+0 
+mfShowAxis 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 1 
+0 
+mfResetCursor 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+mfMexp 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+mfShowCursor 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 1 
+0 
+mfText 2 2 8 0 0 3 1 32768 1 64
+1 ""
+0 
+mfShowPlotterbox 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+mf_contmult 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 1.3 
+0 
+mfTextStyle 2 2 8 0 0 3 1 32768 1 64
+1 "PlainText"
+0 
+mfTextLayout 2 2 8 0 0 3 1 32768 1 64
+1 "None"
+0 
+mfTextFontSize 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 14 
+0 
+mf_color_neg 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 0 
+0 
+mf_b_colors 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 1 
+0 
+mf_color_pos 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 0 
+0 
+micon 2 2 0 0 0 0 1 32784 1 64
+13 "1D2cur.gif"
+"1Dfull.gif"
+"FullScale.gif"
+"1Dexpand.gif"
+"1Dzoomout.gif"
+"ZoomMode.gif"
+"1Dspwp.gif"
+"1Dpartint.gif"
+"1Dscale.gif:on"
+"1Dth.gif"
+"1Dphase.gif"
+"recycle.gif"
+"return.gif"
+0 
+mf_numcont 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 32768 1 64
+1 40 
+0 
+mlabel 2 2 0 0 0 0 1 32784 1 64
+13 "Two Cursors"
+"Show Full Spectrum"
+"Reset to Full Display"
+"Zoom in"
+"Zoom out"
+"Zoom mode"
+"Pan & Stretch Mode"
+"Show Integral Regions"
+"Show/Hide Axis"
+"Show/Hide Threshhold"
+"Phase Mode"
+"Redraw"
+"Return"
+0 
+morespin 2 2 0 0 0 0 1 0 1 64
+1 "n"
+2 "y" "n" 
+operator 2 2 128 0 0 2 1 32772 1 64
+1 "hashimi"
+0 
+niter 7 1 9999 0 1 5 1 1 1 64
+1 0 
+0 
+n 2 2 8 0 0 2 1 4 1 64
+1 "n"
+0 
+opentray 2 2 8 0 0 2 1 256 1 64
+3 ""
+""
+""
+0 
+notebook 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+panellevel 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 50 
+0 
+owner 2 2 128 0 0 2 1 32772 1 64
+1 "hashimi"
+0 
+overlayMode 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+page 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+papersize 2 2 8 0 0 3 1 65808 1 64
+1 "letter"
+0 
+pldev 7 1 32767 0 1 0 1 0 1 64
+1 2 
+0 
+phasef 1 1 100 0.01 0 3 1 0 1 64
+1 8 
+0 
+personaType 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+pboxstr 2 2 8 0 0 2 1 256 1 64
+16 "excitation"
+"sinc"
+"H2Osinc_d"
+""
+"xy"
+"y"
+"pwpat"
+"tpwr"
+"tpwrf"
+"pw"
+"dmf"
+"dres"
+"a"
+"Select shape(s), click Add Waveform for each shape, then click Make It."
+"y"
+".RF"
+0 
+pboxreal 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 256 1 64
+5 0 0 0 0 0 
+0 
+pdfplotpar 2 2 8 0 0 2 1 256 1 64
+1 ""
+0 
+pfgon 2 2 8 0 0 2 1 0 1 64
+1 "nny"
+0 
+phasing 1 1 100 10 0 3 1 0 1 64
+1 100 
+0 
+pkpick 2 2 8 0 0 4 1 0 1 64
+1 ""
+0 
+plotter 2 2 0 0 0 0 1 8 1 64
+1 "LaserJet4000"
+0 
+plotmirror 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+plotlogox 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 48 
+0 
+plotlogo 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+plotlogoy 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 15 
+0 
+plotscalex 1 1 1e+16 -1e+16 0 0 1 0 1 64
+1 1 
+0 
+plotscaley 1 1 1e+16 -1e+16 0 0 1 0 1 64
+1 1 
+0 
+printer 2 2 0 0 0 0 1 65816 1 64
+1 "LaserJet4000"
+0 
+printdpi 2 2 600 60 1 3 1 65808 1 64
+1 "300"
+0 
+printcolor 2 2 0 0 0 3 1 65808 1 64
+1 "mono"
+0 
+printfile 2 2 8 0 0 3 1 65808 1 64
+1 ""
+0 
+pshr 7 1 32767 0 0 4 1 0 1 64
+1 1 
+0 
+printsize 2 2 8 0 0 2 1 65808 1 64
+1 "page"
+3 "page" "halfpage" "quarterpage" 
+printsavecolor 2 2 0 0 0 3 1 65808 1 64
+1 "color"
+0 
+printout 2 2 8 0 0 2 1 0 1 64
+1 "printer"
+0 
+printlw 2 2 12 1 1 3 1 65808 1 64
+1 "1"
+0 
+printlayout 2 2 8 0 0 2 1 65808 1 64
+1 "landscape"
+2 "landscape" "portrait" 
+printregion 2 2 8 0 0 2 1 65808 1 64
+1 "graphics"
+4 "graphics" "allframes" "frames" "vnmrj" 
+printsaveformat 2 2 8 0 0 3 1 65808 1 64
+1 "jpg"
+0 
+printsavedpi 2 2 600 60 1 3 1 65808 1 64
+1 "150"
+0 
+printsend 2 2 8 0 0 2 1 65808 1 64
+1 "print"
+2 "print" "file" 
+probedtmp 2 2 8 0 0 4 1 32768 1 64
+1 "/home/hashimi/vnmrsys/probes/HCN/HCN"
+0 
+probedNewNuc 2 2 8 0 0 4 1 32768 1 64
+1 ""
+0 
+probe_protection 2 2 8 0 0 2 1 0 1 64
+1 "y"
+2 "n" "y" 
+probe 2 2 8 0 0 2 1 8 1 64
+1 "HCN"
+0 
+probedNewAttr 2 2 8 0 0 4 1 33024 1 64
+3 ""
+""
+""
+0 
+probedattr 2 2 8 0 0 4 1 33040 1 64
+277 "NAME:"
+"NAME:"
+"NAME:"
+"Probe:"
+"Probegradient"
+"Probegcal"
+"Probelkmap"
+"ProbeH1map"
+"Probehsmap"
+"Probetuneflg"
+"Proberfsize"
+"Probebearing"
+"Probespintype"
+"Probespinmax"
+"Probedefaultshims"
+"Probeprobetype"
+"Probestyle"
+"Probewtune"
+"Probetunemethod"
+"Probevtc"
+"Probedate"
+"H1:"
+"H1pw90"
+"H1tpwr"
+"H1dmf"
+"H1dpwr"
+"H1pp"
+"H1pplvl"
+"H1tpwr_cf"
+"H1ddrtc"
+"H1dmm"
+"H1dseq"
+"H1dres"
+"H1gf"
+"H1gfs"
+"H1sb"
+"H1sbs"
+"H1lb"
+"H1ssfilter"
+"H1ssntaps"
+"H1sslsfrq"
+"H1ssorder"
+"H1rof1"
+"H1rof2"
+"H1alfa"
+"H1sw"
+"H1at"
+"H1ref_pw90"
+"H1ref_pwr"
+"H1wetpw"
+"H1BPd1"
+"H1wetpwr"
+"H1wetshape"
+"H1tpwrsf"
+"H1phincr_i"
+"H1phincr_t"
+"H1phincr_u"
+"H1phincr_d"
+"H1phincr_n"
+"H1tpwrsf_i"
+"H1tpwrsf_t"
+"H1tpwrsf_u"
+"H1tpwrsf_d"
+"H1tpwrsf_n"
+"H1pwHs"
+"H1pwHs2"
+"H1waltzB1"
+"H1tofH2O"
+"H1compH"
+"H1BPgain"
+"H1rna_gain"
+"H1BPtemp"
+"H1empty_noise"
+"H1sample_noise"
+"H1BPpwrlimits"
+"H1BPtpwrspinlock"
+"H1BP1Hspinlock"
+"H1BPtpwrmax"
+"H1maxattench1"
+"H1BPautonoisecheck"
+"H1probeConnect"
+"H1gradientshaping"
+"H1gradientdisable"
+"H1BPquick"
+"H1BPbasic"
+"H1qcomp"
+"H1tpwrsf_a"
+"H1finepwrf"
+"H1minrof2"
+"H1minalfa"
+"H1date"
+"F19:"
+"F19pw90"
+"F19tpwr"
+"F19dmf"
+"F19dpwr"
+"F19pp"
+"F19pplvl"
+"F19tpwr_cf"
+"F19dmm"
+"F19dseq"
+"F19dres"
+"F19minrof2"
+"F19minalfa"
+"F19date"
+"C13:"
+"C13pw90"
+"C13tpwr"
+"C13dmf"
+"C13dpwr"
+"C13pwx"
+"C13pwxlvl"
+"C13pwxlvl_cf"
+"C13gHratio"
+"C13dmm"
+"C13dseq"
+"C13dres"
+"C13dpwr2"
+"C13dmf2"
+"C13pwx2"
+"C13pwx2lvl"
+"C13pwx2lvl_cf"
+"C13dmm2"
+"C13dseq2"
+"C13dres2"
+"C13empty_noise"
+"C13sample_noise"
+"C13pwC"
+"C13pwC3db"
+"C13pwClvl"
+"C13compC"
+"C13compC3db"
+"C13dofCO"
+"C13swCO"
+"C13phi7cal"
+"C13phi7calP"
+"C13phi_CO"
+"C13phi_Ca"
+"C13phshift3"
+"C13CHgrad1_time"
+"C13CHgrad1_lvl"
+"C13CHgrad2_lvl"
+"C13CHgstab"
+"C13hcch_gtime"
+"C13hcch_gzlvl1"
+"C13hcch_gzlvl2"
+"C13spinlock"
+"C13dmf30"
+"C13dmf80"
+"C13dmf140"
+"C13rf30"
+"C13rf80"
+"C13rf140"
+"C13BPdpwrspinlock"
+"C13BPspinlock"
+"C13BPdpwrmax"
+"C13maxattench2"
+"C13minrof2"
+"C13minalfa"
+"C13date"
+"N15:"
+"N15pw90"
+"N15tpwr"
+"N15dmf"
+"N15dpwr"
+"N15pwx"
+"N15pwxlvl"
+"N15pwxlvl_cf"
+"N15gHratio"
+"N15dmm"
+"N15dseq"
+"N15dres"
+"N15dpwr2"
+"N15dmf2"
+"N15pwx2"
+"N15pwx2lvl"
+"N15pwx2lvl_cf"
+"N15dmm2"
+"N15dseq2"
+"N15dres2"
+"N15empty_noise"
+"N15sample_noise"
+"N15pwN"
+"N15pwNlvl"
+"N15compN"
+"N15dofN15"
+"N15swN"
+"N15dpwr2NH"
+"N15dmm2NH"
+"N15dseq2NH"
+"N15dres2NH"
+"N15dmf2NH"
+"N15JNH"
+"N15gt0"
+"N15gt5"
+"N15gzlvl5"
+"N15gzlvl0"
+"N15NHgrad1_time"
+"N15NHgrad1_lvl"
+"N15NHgrad2_lvl"
+"N15BPgzcal"
+"N15NHgstab"
+"N15mag_flg"
+"N15BPdpwr2max"
+"N15maxattench3"
+"N15minrof2"
+"N15minalfa"
+"N15date"
+"P31:"
+"P31pw90"
+"P31tpwr"
+"P31dmf"
+"P31dpwr"
+"P31pwx"
+"P31pwxlvl"
+"P31pwxlvl_cf"
+"P31gHratio"
+"P31dmm"
+"P31dseq"
+"P31dres"
+"P31dpwr2"
+"P31dmf2"
+"P31pwx2"
+"P31pwx2lvl"
+"P31pwx2lvl_cf"
+"P31dmm2"
+"P31dseq2"
+"P31minrof2"
+"P31minalfa"
+"P31dres2"
+"P31date"
+"H2:"
+"H2pw90"
+"H2tpwr"
+"H2dmf"
+"H2dpwr"
+"H2pwx"
+"H2pwxlvl"
+"H2pwxlvl_cf"
+"H2gHratio"
+"H2dmm"
+"H2dseq"
+"H2dres"
+"H2dres3D"
+"H2dpwr3D"
+"H2dmf3D"
+"H2dof3D"
+"H2dseq3D"
+"H2dmm3D"
+"H2BPdpwr3max"
+"H2maxattench4"
+"H2pwD"
+"H2pwDlvl"
+"H2BPdpwr4max"
+"H2date"
+"lk:"
+"lksolv"
+"lkz0"
+"lktof"
+"lktpwr"
+"lkpw90"
+"lkhzdac"
+"lkpwr_cdcl3"
+"lkpwr_dmso"
+"lkpwr_acetone"
+"lkpwr_d2o"
+"lkpwr_c6d6"
+"lkpwr_cd2cl2"
+"lkpwr_cd3od"
+"lkgn_cdcl3"
+"lkgn_dmso"
+"lkgn_acetone"
+"lkgn_d2o"
+"lkgn_c6d6"
+"lkgn_cd2cl2"
+"lkgn_cd3od"
+"lkdate"
+0 
+probeidattr 2 2 8 0 0 2 1 0 1 64
+8 "n"
+""
+""
+""
+""
+"offline"
+""
+"a"
+0 
+probedval 2 2 8 0 0 4 1 33040 1 64
+277 "HCN"
+"HCN"
+"HCN"
+"Parameters"
+"y"
+"0.001774"
+"n"
+"n"
+"n"
+"n"
+"16"
+"00000"
+"liquids"
+"39"
+"HCN_lk_d2o"
+"liquids"
+"db"
+"n"
+"n"
+"25"
+"15-Jun-2011"
+"Parameters"
+"5.9"
+"55"
+"19663"
+"35"
+"5.90"
+"55"
+"0.862"
+"30.1"
+"w"
+"waltz16"
+"90"
+"0.0340"
+"0.0000"
+"-0.0790"
+"-0.0790"
+"5.0000"
+"200"
+"200"
+"0.0000"
+"7"
+"10.00"
+"28.00"
+"5.50"
+"13020.8"
+"0.1573"
+"5.1"
+"55"
+"3100.0"
+"1.000"
+"14"
+"H2Osinc"
+"1627"
+"12.00"
+"9.00"
+"3.00"
+"0.00"
+"12.00"
+"1627.0"
+"1627.0"
+"1509.0"
+"1795.0"
+"1457.0"
+"1064.0"
+"1420.0"
+"4797"
+"-296.0"
+"0.862"
+"10"
+"10"
+"25.0"
+"0.0"
+"0.0"
+"1"
+"3995"
+"3995"
+"59"
+"59"
+"0"
+""
+"y"
+"n"
+"0"
+"1"
+"n"
+"2400"
+"2289.0"
+"25"
+"10"
+"15-Dec-2015-15:55:01"
+"Parameters"
+"00"
+"00"
+"200"
+"00"
+"00"
+"00"
+"1"
+"w"
+"waltz16"
+"90"
+"25"
+"10"
+"00-00-0000"
+"Parameters"
+"9.8"
+"60"
+"200"
+"00"
+"15.9"
+"63"
+"1.126"
+"4.0"
+"g"
+"garp1"
+"1"
+"0"
+"0"
+"0"
+"0"
+"1"
+"g"
+"garp1"
+"1"
+"0.0"
+"0.0"
+"9.8"
+"25.300"
+"60"
+"1.063"
+"0.983"
+"15399.5"
+"4020.0"
+"20.0"
+"60.0"
+"40.0"
+"0.0"
+"80.0"
+"0.002000"
+"18000"
+"18108"
+"0.000300"
+"0.000800"
+"18000"
+"18780"
+"8000.0"
+"1262.6"
+"896.1"
+"1462.0"
+"2065.8"
+"2768.1"
+"3407.7"
+"8000"
+"8000"
+"47"
+"63"
+"25"
+"10"
+"15-Dec-2015-15:55:01"
+"Parameters"
+"37.0"
+"60"
+"13423"
+"40"
+"38.0"
+"63"
+"0.921"
+"10.0"
+"ccp"
+"garp1"
+"9.0"
+"0"
+"0"
+"0"
+"0"
+"1"
+"g"
+"garp1"
+"1"
+"0.0"
+"0.0"
+"37.0"
+"60"
+"1.094"
+"1782.8"
+"3239.9"
+"40"
+"ccp"
+"wurst40N"
+"9.0"
+"13423"
+"93.0"
+"0.000500"
+"0.000500"
+"0"
+"0"
+"0.002000"
+"18000"
+"18300"
+"0.001774"
+"0.0003"
+"n"
+"43"
+"63"
+"25"
+"10"
+"15-Dec-2015-15:55:01"
+"Parameters"
+"00"
+"00"
+"200"
+"00"
+"00"
+"00"
+"1"
+"2.47"
+"g"
+"garp1"
+"1"
+"0"
+"0"
+"0"
+"0"
+"1"
+"g"
+"1"
+"25"
+"10"
+"1"
+"00-00-0000"
+"Parameters"
+"195.0"
+"60"
+"2116.4"
+"53"
+"195.0"
+"60"
+"1"
+"2.47"
+"g"
+"garp1"
+"1"
+"90.0"
+"50"
+"1772.0"
+"-236.9"
+"garp1"
+"cwc"
+"50"
+"53"
+"195.0"
+"60"
+"50"
+"15-Dec-2015-15:55:01"
+"Parameters"
+"D2O"
+"-2118"
+"-24.6"
+"45"
+"300.0"
+"-0.05120"
+"37"
+"27"
+"27"
+"31"
+"29"
+"31"
+"31"
+"46"
+"40"
+"40"
+"40"
+"38"
+"40"
+"40"
+"21-Sep-2004"
+0 
+probetype 2 2 8 0 0 2 1 0 1 64
+1 "liquids"
+0 
+psclipboard 2 2 8 0 0 2 1 33024 1 64
+7 "psstage:"
+"stage:"
+"errors:"
+"stat:0"
+"acqpause:0"
+"autoname:"
+"retValue:psDone"
+0 
+reqparlist 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+recordSave 1 1 9.99999984307e+17 -9.99999984307e+17 0 2 1 0 1 64
+1 0 
+0 
+pslw 7 1 100 0 0 4 1 0 1 64
+1 1 
+0 
+refstd 2 2 8 0 0 2 1 65808 1 64
+1 "Bio"
+0 
+reqparcheck 2 2 8 0 0 2 1 0 1 64
+1 "n"
+2 "y" "n" 
+showrfmon 1 1 100 -100 1 2 1 256 1 64
+1 0 
+0 
+screendpi 1 1 1200 0 1 2 1 0 1 64
+1 93 
+0 
+samplename_global 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+sampdirtmplt 2 2 8 0 0 2 1 0 1 64
+1 "$samplename$_%DATE%_"
+0 
+saveglobal 2 2 8 0 0 3 1 0 1 64
+25 "probe"
+"lcpeak"
+"loc"
+"lockpower"
+"lockgain"
+"lockphase"
+"lockfreq"
+"z0"
+"lkof"
+"vloc"
+"vrack"
+"vzone"
+"vproto"
+"pkpick"
+"parstyle"
+"operator"
+"studyid"
+"systemname"
+"probetype"
+"refstd"
+"investigator"
+"notebook"
+"page"
+"study"
+"samplename_global"
+0 
+sglduty 7 1 32767 0 0 2 1 0 1 64
+1 0 
+0 
+seqmanual 2 2 8 0 0 4 1 32768 1 64
+1 ""
+0 
+showprotunegui 2 2 8 0 0 2 1 1 1 64
+1 "yas"
+0 
+slfreq 1 1 10000000000 -10000000000 0 5 1 0 1 64
+1 0 
+0 
+sla 7 1 4096 0 1 5 1 0 1 64
+1 0 
+0 
+slw 1 1 1000000 0.01 0.01 5 1 1 1 64
+1 0.5 
+0 
+smaxf 1 1 10000000000 -10000000000 0 5 1 1 1 64
+1 6497.726563 
+0 
+trashnodepref 2 2 8 0 0 2 1 65808 1 64
+3 "Delete"
+"Delete"
+"Delete"
+0 
+svfdate 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+sqname 2 2 8 0 0 2 1 0 1 64
+1 "s_%DATE%_"
+0 
+sqattr 2 2 8 0 0 2 1 33040 1 64
+1 ""
+0 
+spintype 2 2 0 0 0 2 1 0 1 64
+1 "liquids"
+5 "liquids" "mas" "nano" "none" "tach" 
+spinsys 2 2 20 0 0 5 1 0 1 64
+1 "AB"
+0 
+spinmax 7 1 90000 0 1 4 1 0 1 64
+1 39 
+0 
+sporra 1 1 100 0 1 2 1 256 1 64
+1 0 
+0 
+spshift 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+sqdisplay 2 2 8 0 0 4 1 33040 1 64
+1 "sample"
+0 
+sqdir 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+sqmode 2 2 8 0 0 3 1 0 1 64
+1 "pause"
+0 
+sqflag 4 2 4 0 0 2 1 0 1 64
+1 "y"
+0 
+sqval 2 2 8 0 0 2 1 33040 1 64
+1 ""
+0 
+sqtval 2 2 8 0 0 2 1 33040 1 64
+1 ""
+0 
+sqsaveid 2 2 8 0 0 3 1 33040 1 64
+1 "null"
+0 
+studyid 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+sth 1 1 1 0 0.001 5 1 1 1 64
+1 0.01 
+0 
+study 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+submitopt 2 2 8 0 0 2 1 0 1 64
+1 "wkupauto"
+3 "wkupauto" "wkup" "auto" 
+svsname 2 2 8 0 0 2 1 0 1 64
+1 "jexp2006"
+0 
+svfname 2 2 8 0 0 2 1 0 1 64
+1 "fNH_10"
+0 
+svfdir 2 2 8 0 0 2 1 0 1 64
+1 "/home/hashimi/vnmrsys/data/Anisha/083115_ann-env22-tinoco"
+0 
+svfdir2 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+svs 1 1 10000000000 -10000000000 0 5 1 1 1 64
+1 150 
+0 
+tape 2 2 8 0 0 2 1 0 1 64
+1 "/dev/rmt/0mb"
+0 
+systemdir 2 2 128 0 0 0 1 0 1 64
+1 "/vnmr"
+0 
+systemname 2 2 8 0 0 2 1 0 1 64
+1 "wormhole-vnmrs800"
+0 
+trackAxis 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+2 1 1 
+0 
+testacquire 2 2 8 0 0 2 1 65552 1 64
+1 "y"
+0 
+timeformat 2 2 8 0 0 2 1 0 1 64
+1 "ampm"
+0 
+trackCursor 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 1 
+0 
+vloc 2 2 8 0 0 2 1 8 1 64
+1 "A0"
+0 
+tunecriterion 2 2 8 0 0 3 1 0 1 64
+3 "H1"
+"Fine"
+""
+0 
+tugain 1 1 60 0 2 2 1 0 1 64
+1 50 
+0 
+traydisplay 4 2 4 0 0 2 1 0 1 64
+1 "y"
+0 
+useButton3 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 1 
+0 
+useButton2 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 1 
+0 
+userdir 2 2 128 0 0 0 1 0 1 64
+1 "/home/hashimi/vnmrsys"
+0 
+userremembrance 4 2 4 0 0 2 1 0 1 64
+1 "n"
+0 
+vzone 7 1 15 1 0 2 1 0 1 64
+1 1 
+0 
+vproto 2 2 8 0 0 2 1 0 1 64
+1 ""
+0 
+vnmraddr 2 2 128 0 0 2 1 4 1 64
+1 "localhost.localdomain 39096 9551"
+0 
+vrack 7 1 5 1 0 2 1 0 1 64
+1 1 
+0 
+vpshift 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0 
+0 
+vtairflow 7 1 25 0 1 2 1 0 1 64
+1 15 
+0 
+y 2 2 8 0 0 2 1 4 1 64
+1 "y"
+0 
+wcmax 1 1 1e+30 -1e+30 0 0 1 0 1 64
+1 250 
+0 
+wc2max 1 1 1e+30 -1e+30 1e-07 0 1 0 1 64
+1 167 
+0 
+waltz 4 2 4 0 0 4 1 0 1 64
+1 "y"
+0 
+wysiwyg 2 2 8 0 0 4 1 0 1 64
+1 "n"
+2 "n" "y" 
+wqdialogflag 4 2 4 0 0 2 1 0 1 64
+1 "y"
+0 
+x0 1 1 1e+30 -1e+30 0 0 1 0 1 64
+1 0 
+0 
+z0 1 1 19 19 19 2 1 73744 1 64
+1 -229 
+0 
+y0 1 1 1e+30 -1e+30 0 0 1 0 1 64
+1 0 
+0 
+zoomSlope 1 1 9.99999984307e+17 -9.99999984307e+17 0 3 1 65808 1 64
+1 0.5 
+0 
